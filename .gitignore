@@ -1,6 +1,7 @@
 build
 .gradle
 .idea
+obj
 gradle.properties
 local.properties
 *.iml
