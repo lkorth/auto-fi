@@ -1,8 +1,11 @@
-build
+/build
 .gradle
 .idea
-obj
 gradle.properties
 local.properties
 *.iml
 .DS_Store
+
+app/libs
+app/obj
+app/build
