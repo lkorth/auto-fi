@@ -23,7 +23,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Serializable;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -42,14 +41,12 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-public class VpnProfile implements Serializable, Cloneable {
+public class VpnProfile {
 
     public static final String INLINE_TAG = "[[INLINE]]";
     public static final String DISPLAYNAME_TAG = "[[NAME]]";
 
-    private static final long serialVersionUID = 7085688938959334563L;
     public static final int MAXLOGLEVEL = 4;
-    public static final int CURRENT_PROFILE_VERSION = 6;
     public static final int DEFAULT_MSSFIX_SIZE = 1450;
     public static String DEFAULT_DNS1 = "8.8.8.8";
     public static String DEFAULT_DNS2 = "8.8.4.4";
@@ -147,8 +144,6 @@ public class VpnProfile implements Serializable, Cloneable {
     }
 
     public VpnProfile() {
-        mProfileVersion = CURRENT_PROFILE_VERSION;
-
         mConnections = new Connection[1];
         mConnections[0] = new Connection();
     }
@@ -182,43 +177,7 @@ public class VpnProfile implements Serializable, Cloneable {
         mMssFix = 0;
     }
 
-    public void upgradeProfile() {
-        if (mProfileVersion < 2) {
-            /* default to the behaviour the OS used */
-            mAllowLocalLAN = Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT;
-        }
-
-        if (mProfileVersion < 4) {
-            moveOptionsToConnection();
-        }
-        if (mConnections == null)
-            mConnections = new Connection[0];
-
-        if (mProfileVersion < 6) {
-            if (TextUtils.isEmpty(mProfileCreator))
-                mUserEditable = true;
-        }
-
-
-        mProfileVersion = CURRENT_PROFILE_VERSION;
-
-    }
-
-    private void moveOptionsToConnection() {
-        mConnections = new Connection[1];
-        Connection conn = new Connection();
-
-        conn.mServerName = mServerName;
-        conn.mServerPort = mServerPort;
-        conn.mUseUdp = mUseUdp;
-        conn.mCustomConfiguration = "";
-
-        mConnections[0] = conn;
-
-    }
-
     public String getConfigFile(Context context, boolean configForOvpn3) {
-
         File cacheDir = context.getCacheDir();
         String cfg = "";
 
@@ -664,27 +623,6 @@ public class VpnProfile implements Serializable, Cloneable {
             }).start();
         }
     }
-
-    @Override
-    protected VpnProfile clone() throws CloneNotSupportedException {
-        VpnProfile copy = (VpnProfile) super.clone();
-        copy.mConnections = new Connection[mConnections.length];
-        int i = 0;
-        for (Connection conn : mConnections) {
-            copy.mConnections[i++] = conn.clone();
-        }
-        return copy;
-    }
-
-    public VpnProfile copy() {
-        try {
-            return clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
 
     class NoCertReturnedException extends Exception {
         public NoCertReturnedException(String msg) {
