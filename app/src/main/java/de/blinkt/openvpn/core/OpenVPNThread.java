@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import de.blinkt.openvpn.core.VpnStatus.LogItem;
 
 public class OpenVPNThread implements Runnable {
+
     private static final String DUMP_PATH_STRING = "Dump path: ";
     @SuppressLint("SdCardPath")
     private static final String BROKEN_PIE_SUPPORT = "/data/data/de.blinkt.openvpn/cache/pievpn";

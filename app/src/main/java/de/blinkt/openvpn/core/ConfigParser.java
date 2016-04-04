@@ -19,7 +19,6 @@ public class ConfigParser {
     private String auth_user_pass_file;
 
     public void parseConfig(Reader reader) throws IOException, ConfigParseError {
-
         HashMap<String, String> optionAliases = new HashMap<>();
         optionAliases.put("server-poll-timeout", "timeout-connect");
 
@@ -884,7 +883,3 @@ public class ConfigParser {
     }
 
 }
-
-
-
-
