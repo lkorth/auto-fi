@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.VpnService;
@@ -645,9 +644,6 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
         VpnStatus.logInfo(R.string.routes_info_incl, TextUtils.join(", ", mRoutes.getNetworks(true)), TextUtils.join(", ", mRoutesv6.getNetworks(true)));
         VpnStatus.logInfo(R.string.routes_info_excl, TextUtils.join(", ", mRoutes.getNetworks(false)), TextUtils.join(", ", mRoutesv6.getNetworks(false)));
         VpnStatus.logDebug(R.string.routes_debug, TextUtils.join(", ", positiveIPv4Routes), TextUtils.join(", ", positiveIPv6Routes));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            setAllowedVpnPackages(builder);
-        }
 
         String session = "";
         if (mLocalIP != null && mLocalIPv6 != null)
@@ -723,40 +719,6 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
 
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && mProfile.mAllowLocalLAN)
                 mRoutes.addIP(new CIDRIP(ipAddr, netMask), false);
-        }
-    }
-
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void setAllowedVpnPackages(Builder builder) {
-        boolean atLeastOneAllowedApp = false;
-        for (String pkg : mProfile.mAllowedAppsVpn) {
-            try {
-                if (mProfile.mAllowedAppsVpnAreDisallowed) {
-                    builder.addDisallowedApplication(pkg);
-                } else {
-                    builder.addAllowedApplication(pkg);
-                    atLeastOneAllowedApp = true;
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                mProfile.mAllowedAppsVpn.remove(pkg);
-                VpnStatus.logInfo(R.string.app_no_longer_exists, pkg);
-            }
-        }
-
-        if (!mProfile.mAllowedAppsVpnAreDisallowed && !atLeastOneAllowedApp) {
-            VpnStatus.logDebug(R.string.no_allowed_app, getPackageName());
-            try {
-                builder.addAllowedApplication(getPackageName());
-            } catch (PackageManager.NameNotFoundException e) {
-                VpnStatus.logError("This should not happen: " + e.getLocalizedMessage());
-            }
-        }
-
-        if (mProfile.mAllowedAppsVpnAreDisallowed) {
-            VpnStatus.logDebug(R.string.disallowed_vpn_apps_info, TextUtils.join(", ", mProfile.mAllowedAppsVpn));
-        } else {
-            VpnStatus.logDebug(R.string.allowed_vpn_apps_info, TextUtils.join(", ", mProfile.mAllowedAppsVpn));
         }
     }
 

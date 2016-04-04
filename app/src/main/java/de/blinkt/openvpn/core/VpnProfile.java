@@ -34,7 +34,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Vector;
 
@@ -124,8 +123,6 @@ public class VpnProfile implements Serializable, Cloneable {
     public int mMssFix = 0; // -1 is default,
     public Connection[] mConnections = new Connection[0];
     public boolean mRemoteRandom = false;
-    public HashSet<String> mAllowedAppsVpn = new HashSet<>();
-    public boolean mAllowedAppsVpnAreDisallowed = true;
 
     public String mCrlFilename;
     public String mProfileCreator;
@@ -193,10 +190,7 @@ public class VpnProfile implements Serializable, Cloneable {
 
         if (mProfileVersion < 4) {
             moveOptionsToConnection();
-            mAllowedAppsVpnAreDisallowed = true;
         }
-        if (mAllowedAppsVpn == null)
-            mAllowedAppsVpn = new HashSet<>();
         if (mConnections == null)
             mConnections = new Connection[0];
 
@@ -679,7 +673,6 @@ public class VpnProfile implements Serializable, Cloneable {
         for (Connection conn : mConnections) {
             copy.mConnections[i++] = conn.clone();
         }
-        copy.mAllowedAppsVpn = (HashSet<String>) mAllowedAppsVpn.clone();
         return copy;
     }
 
