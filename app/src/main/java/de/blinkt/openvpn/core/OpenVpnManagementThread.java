@@ -520,22 +520,16 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
         }
 
         String pw = null;
-
         if (needed.equals("Private Key")) {
             pw = mProfile.getPasswordPrivateKey();
-        } else if (needed.equals("Auth")) {
-            String usercmd = String.format("username '%s' %s\n",
-                    needed, VpnProfile.openVpnEscape(mProfile.mUsername));
-            managmentCommand(usercmd);
-            pw = mProfile.getPasswordAuth();
         }
+
         if (pw != null) {
             String cmd = String.format("password '%s' %s\n", needed, VpnProfile.openVpnEscape(pw));
             managmentCommand(cmd);
         } else {
             VpnStatus.logError(String.format("Openvpn requires Authentication type '%s' but no password/key information available", needed));
         }
-
     }
 
 

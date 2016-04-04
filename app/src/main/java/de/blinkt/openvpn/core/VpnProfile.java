@@ -18,8 +18,6 @@ import org.spongycastle.util.io.pem.PemObject;
 import org.spongycastle.util.io.pem.PemWriter;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -51,7 +49,6 @@ public class VpnProfile {
     public static String DEFAULT_DNS1 = "8.8.8.8";
     public static String DEFAULT_DNS2 = "8.8.4.4";
 
-    public transient String mTransientPW = null;
     public transient String mTransientPCKS12PW = null;
 
     public static final int TYPE_CERTIFICATES = 0;
@@ -91,8 +88,6 @@ public class VpnProfile {
     public boolean mCheckRemoteCN = true;
     public boolean mExpectTLSCert = false;
     public String mRemoteCN = "";
-    public String mPassword = "";
-    public String mUsername = "";
     public boolean mRoutenopull = false;
     public boolean mUseRandomHostname = false;
     public boolean mUseFloat = false;
@@ -107,7 +102,6 @@ public class VpnProfile {
     public boolean mPersistTun = false;
     public String mConnectRetryMax = "5";
     public String mConnectRetry = "5";
-    public boolean mUserEditable = true;
     public String mAuth = "";
     public int mX509AuthType = X509_VERIFY_TLSREMOTE_RDN;
     private transient PrivateKey mPrivateKey;
@@ -122,7 +116,6 @@ public class VpnProfile {
     public boolean mRemoteRandom = false;
 
     public String mCrlFilename;
-    public String mProfileCreator;
 
     public boolean mPushPeerInfo = false;
     public static final boolean mIsOpenVPN22 = false;
@@ -586,12 +579,6 @@ public class VpnProfile {
         return getKeyStoreCertificates(context, 5);
     }
 
-    public static String getDisplayName(String embeddedFile) {
-        int start = DISPLAYNAME_TAG.length();
-        int end = embeddedFile.indexOf(INLINE_TAG);
-        return embeddedFile.substring(start, end);
-    }
-
     public static String getEmbeddedContent(String data) {
         if (!data.contains(INLINE_TAG))
             return data;
@@ -726,53 +713,7 @@ public class VpnProfile {
 
     }
 
-    //! Return an error if something is wrong
-//    public int checkProfile(Context context) {
-//        if (mAuthenticationType == TYPE_KEYSTORE || mAuthenticationType == TYPE_USERPASS_KEYSTORE) {
-//            if (mAlias == null)
-//                return R.string.no_keystore_cert_selected;
-//        }
-//
-//        if (!mUsePull || mAuthenticationType == TYPE_STATICKEYS) {
-//            if (mIPv4Address == null || cidrToIPAndNetmask(mIPv4Address) == null)
-//                return R.string.ipv4_format_error;
-//        }
-//        if (!mUseDefaultRoute) {
-//            if (!TextUtils.isEmpty(mCustomRoutes) && getCustomRoutes(mCustomRoutes).size() == 0)
-//                return R.string.custom_route_format_error;
-//
-//            if (!TextUtils.isEmpty(mExcludedRoutes) && getCustomRoutes(mExcludedRoutes).size() == 0)
-//                return R.string.custom_route_format_error;
-//
-//        }
-//
-//        if (mUseTLSAuth && TextUtils.isEmpty(mTLSAuthFilename))
-//            return R.string.missing_tlsauth;
-//
-//        if ((mAuthenticationType == TYPE_USERPASS_CERTIFICATES || mAuthenticationType == TYPE_CERTIFICATES)
-//                && (TextUtils.isEmpty(mClientCertFilename) || TextUtils.isEmpty(mClientKeyFilename)))
-//            return R.string.missing_certificates;
-//
-//        if ((mAuthenticationType == TYPE_CERTIFICATES || mAuthenticationType == TYPE_USERPASS_CERTIFICATES)
-//                && TextUtils.isEmpty(mCaFilename))
-//            return R.string.missing_ca_certificate;
-//
-//
-//        boolean noRemoteEnabled = true;
-//        for (Connection c : mConnections)
-//            if (c.mEnabled)
-//                noRemoteEnabled = false;
-//
-//        if (noRemoteEnabled)
-//            return R.string.remote_no_server_selected;
-//
-//        // Everything okay
-//        return R.string.no_error_found;
-//
-//    }
-
-    //! Openvpn asks for a "Private Key", this should be pkcs12 key
-    //
+    // Openvpn asks for a "Private Key", this should be pkcs12 key
     public String getPasswordPrivateKey() {
         if (mTransientPCKS12PW != null) {
             String pwcopy = mTransientPCKS12PW;
@@ -792,63 +733,6 @@ public class VpnProfile {
             case TYPE_STATICKEYS:
             default:
                 return null;
-        }
-    }
-
-    public boolean isUserPWAuth() {
-        switch (mAuthenticationType) {
-            case TYPE_USERPASS:
-            case TYPE_USERPASS_CERTIFICATES:
-            case TYPE_USERPASS_KEYSTORE:
-            case TYPE_USERPASS_PKCS12:
-                return true;
-            default:
-                return false;
-
-        }
-    }
-
-    public boolean requireTLSKeyPassword() {
-        if (TextUtils.isEmpty(mClientKeyFilename))
-            return false;
-
-        String data = "";
-        if (isEmbedded(mClientKeyFilename))
-            data = mClientKeyFilename;
-        else {
-            char[] buf = new char[2048];
-            FileReader fr;
-            try {
-                fr = new FileReader(mClientKeyFilename);
-                int len = fr.read(buf);
-                while (len > 0) {
-                    data += new String(buf, 0, len);
-                    len = fr.read(buf);
-                }
-                fr.close();
-            } catch (FileNotFoundException e) {
-                return false;
-            } catch (IOException e) {
-                return false;
-            }
-
-        }
-
-        if (data.contains("Proc-Type: 4,ENCRYPTED"))
-            return true;
-        else if (data.contains("-----BEGIN ENCRYPTED PRIVATE KEY-----"))
-            return true;
-        else
-            return false;
-    }
-
-    public String getPasswordAuth() {
-        if (mTransientPW != null) {
-            String pwcopy = mTransientPW;
-            mTransientPW = null;
-            return pwcopy;
-        } else {
-            return mPassword;
         }
     }
 

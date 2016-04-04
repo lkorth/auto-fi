@@ -589,12 +589,6 @@ public class ConfigParser {
             } else if (np.mAuthenticationType == VpnProfile.TYPE_KEYSTORE) {
                 np.mAuthenticationType = VpnProfile.TYPE_USERPASS_KEYSTORE;
             }
-            if (authuser.size() > 1) {
-                if (!authuser.get(1).startsWith(VpnProfile.INLINE_TAG))
-                    auth_user_pass_file = authuser.get(1);
-                np.mUsername = null;
-                useEmbbedUserAuth(np, authuser.get(1));
-            }
         }
 
         Vector<String> crlfile = getOption("crl-verify", 1, 2);
@@ -650,10 +644,6 @@ public class ConfigParser {
                 if (conn.mUseUdp == disableUDP)
                     conn.mEnabled = false;
         }
-
-        Vector<String> ocusername = meta.get("USERNAME");
-        if (ocusername != null && ocusername.size() > 1)
-            np.mUsername = ocusername.get(1);
 
         checkIgnoreAndInvalidOptions(np);
         fixup(np);
@@ -776,15 +766,6 @@ public class ConfigParser {
         else
             throw new ConfigParseError("Unsupported option to --proto " + proto);
         return isudp;
-    }
-
-    static public void useEmbbedUserAuth(VpnProfile np, String inlinedata) {
-        String data = VpnProfile.getEmbeddedContent(inlinedata);
-        String[] parts = data.split("\n");
-        if (parts.length >= 2) {
-            np.mUsername = parts[0];
-            np.mPassword = parts[1];
-        }
     }
 
     private void checkIgnoreAndInvalidOptions(VpnProfile np) throws ConfigParseError {
