@@ -5,12 +5,10 @@ import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.VpnService;
 import android.os.Binder;
@@ -40,7 +38,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Vector;
 
-import de.blinkt.openvpn.core.VpnStatus.ByteCountListener;
 import de.blinkt.openvpn.core.VpnStatus.ConnectionStatus;
 import de.blinkt.openvpn.core.VpnStatus.StateListener;
 
@@ -48,14 +45,12 @@ import static de.blinkt.openvpn.core.NetworkSpace.ipAddress;
 import static de.blinkt.openvpn.core.VpnStatus.ConnectionStatus.LEVEL_CONNECTED;
 import static de.blinkt.openvpn.core.VpnStatus.ConnectionStatus.LEVEL_WAITING_FOR_USER_INPUT;
 
-public class OpenVPNService extends VpnService implements StateListener, Callback, ByteCountListener {
+public class OpenVPNService extends VpnService implements StateListener, Callback {
 
     public static final String START_SERVICE = "de.blinkt.openvpn.START_SERVICE";
     public static final String START_SERVICE_STICKY = "de.blinkt.openvpn.START_SERVICE_STICKY";
     public static final String ALWAYS_SHOW_NOTIFICATION = "de.blinkt.openvpn.NOTIFICATION_ALWAYS_VISIBLE";
     public static final String DISCONNECT_VPN = "de.blinkt.openvpn.DISCONNECT_VPN";
-    private static final String PAUSE_VPN = "de.blinkt.openvpn.PAUSE_VPN";
-    private static final String RESUME_VPN = "de.blinkt.openvpn.RESUME_VPN";
     private static final int OPENVPN_STATUS = 1;
     private static boolean mNotificationAlwaysVisible = false;
     private final Vector<String> mDnslist = new Vector<>();
@@ -69,7 +64,6 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
     private int mMtu;
     private String mLocalIPv6 = null;
     private DeviceStateReceiver mDeviceStateReceiver;
-    private boolean mDisplayBytecount = false;
     private boolean mStarting = false;
     private long mConnecttime;
     private boolean mOvpn3 = false;
@@ -122,7 +116,6 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
         synchronized (mProcessLock) {
             mProcessThread = null;
         }
-        VpnStatus.removeByteCountListener(this);
         unregisterDeviceStateReceiver();
         mOpenVPNThread = null;
         if (!mStarting) {
@@ -177,13 +170,10 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
         mNotificationManager.notify(OPENVPN_STATUS, notification);
         startForeground(OPENVPN_STATUS, notification);
 
-        // Check if running on a TV
-        if (runningOnAndroidTV() && !lowpriority)
+        if (!lowpriority)
             guiHandler.post(new Runnable() {
-
                 @Override
                 public void run() {
-
                     if (mlastToast != null)
                         mlastToast.cancel();
                     String toastText = String.format(Locale.getDefault(), "%s", msg);
@@ -198,11 +188,6 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
         nbuilder.setCategory(Notification.CATEGORY_SERVICE);
         nbuilder.setLocalOnly(true);
 
-    }
-
-    private boolean runningOnAndroidTV() {
-        UiModeManager uiModeManager = (UiModeManager) getSystemService(UI_MODE_SERVICE);
-        return uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
     }
 
     private int getIconByConnectionStatus(ConnectionStatus level) {
@@ -250,21 +235,6 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
             nbuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel,
                     getString(R.string.cancel_connection), pendingIntent);
 
-            Intent pauseVPN = new Intent(this, OpenVPNService.class);
-            if (mDeviceStateReceiver == null || !mDeviceStateReceiver.isUserPaused()) {
-                pauseVPN.setAction(PAUSE_VPN);
-                PendingIntent pauseVPNPending = PendingIntent.getService(this, 0, pauseVPN, 0);
-                nbuilder.addAction(android.R.drawable.ic_media_pause,
-                        getString(R.string.pauseVPN), pauseVPNPending);
-
-            } else {
-                pauseVPN.setAction(RESUME_VPN);
-                PendingIntent resumeVPNPending = PendingIntent.getService(this, 0, pauseVPN, 0);
-                nbuilder.addAction(android.R.drawable.ic_media_play,
-                        getString(R.string.resumevpn), resumeVPNPending);
-            }
-
-
             //ignore exception
         } catch (NoSuchMethodException | IllegalArgumentException |
                 InvocationTargetException | IllegalAccessException e) {
@@ -290,7 +260,6 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
         filter.addAction(Intent.ACTION_SCREEN_ON);
         mDeviceStateReceiver = new DeviceStateReceiver(magnagement);
         registerReceiver(mDeviceStateReceiver, filter);
-        VpnStatus.addByteCountListener(mDeviceStateReceiver);
 
         /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             addLollipopCMListener(); */
@@ -299,8 +268,7 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
     synchronized void unregisterDeviceStateReceiver() {
         if (mDeviceStateReceiver != null)
             try {
-                VpnStatus.removeByteCountListener(mDeviceStateReceiver);
-                this.unregisterReceiver(mDeviceStateReceiver);
+                unregisterReceiver(mDeviceStateReceiver);
             } catch (IllegalArgumentException iae) {
                 // I don't know why  this happens:
                 // java.lang.IllegalArgumentException: Receiver not registered: de.blinkt.openvpn.NetworkSateReceiver@41a61a10
@@ -308,41 +276,16 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
                 iae.printStackTrace();
             }
         mDeviceStateReceiver = null;
-
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-            removeLollipopCMListener();*/
-
-    }
-
-    public void userPause(boolean shouldBePaused) {
-        if (mDeviceStateReceiver != null)
-            mDeviceStateReceiver.userPause(shouldBePaused);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         if (intent != null && intent.getBooleanExtra(ALWAYS_SHOW_NOTIFICATION, false))
             mNotificationAlwaysVisible = true;
 
         VpnStatus.addStateListener(this);
-        VpnStatus.addByteCountListener(this);
 
         guiHandler = new Handler(getMainLooper());
-
-
-        if (intent != null && PAUSE_VPN.equals(intent.getAction())) {
-            if (mDeviceStateReceiver != null)
-                mDeviceStateReceiver.userPause(true);
-            return START_NOT_STICKY;
-        }
-
-        if (intent != null && RESUME_VPN.equals(intent.getAction())) {
-            if (mDeviceStateReceiver != null)
-                mDeviceStateReceiver.userPause(false);
-            return START_NOT_STICKY;
-        }
-
 
         if (intent != null && START_SERVICE.equals(intent.getAction()))
             return START_NOT_STICKY;
@@ -867,12 +810,8 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
                 // with a notifcation
                 return;
             } else if (level == LEVEL_CONNECTED) {
-                mDisplayBytecount = true;
                 mConnecttime = System.currentTimeMillis();
-                if (!runningOnAndroidTV())
-                    lowpriority = true;
-            } else {
-                mDisplayBytecount = false;
+                lowpriority = true;
             }
 
             // Other notifications are shown,
@@ -892,21 +831,6 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
         vpnstatus.putExtra("status", level.toString());
         vpnstatus.putExtra("detailstatus", state);
         sendBroadcast(vpnstatus, permission.ACCESS_NETWORK_STATE);
-    }
-
-    @Override
-    public void updateByteCount(long in, long out, long diffIn, long diffOut) {
-        if (mDisplayBytecount) {
-            String netstat = String.format(getString(R.string.statusline_bytecount),
-                    humanReadableByteCount(in, false),
-                    humanReadableByteCount(diffIn / OpenVPNManagement.mBytecountInterval, true),
-                    humanReadableByteCount(out, false),
-                    humanReadableByteCount(diffOut / OpenVPNManagement.mBytecountInterval, true));
-
-            boolean lowpriority = !mNotificationAlwaysVisible;
-            showNotification(netstat, null, lowpriority, mConnecttime, LEVEL_CONNECTED);
-        }
-
     }
 
     @Override

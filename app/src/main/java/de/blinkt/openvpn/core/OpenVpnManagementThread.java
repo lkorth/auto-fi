@@ -42,7 +42,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
     private static final Vector<OpenVpnManagementThread> active = new Vector<>();
     private LocalSocket mServerSocketLocal;
 
-    private pauseReason lastPauseReason = pauseReason.noNetwork;
+    private PauseReason lastPauseReason = PauseReason.NO_NETWORK;
     private PausedStateCallback mPauseCallback;
     private boolean mShuttingDown;
 
@@ -195,12 +195,10 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
     private void processCommand(String command) {
         //Log.i(TAG, "Line from managment" + command);
 
-
         if (command.startsWith(">") && command.contains(":")) {
             String[] parts = command.split(":", 2);
             String cmd = parts[0].substring(1);
             String argument = parts[1];
-
 
             switch (cmd) {
                 case "INFO":
@@ -214,9 +212,6 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
                     break;
                 case "NEED-OK":
                     processNeedCommand(argument);
-                    break;
-                case "BYTECOUNT":
-                    processByteCount(argument);
                     break;
                 case "STATE":
                     if (!mShuttingDown)
@@ -368,18 +363,6 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
         else
             VpnStatus.updateStateString(currentstate, args[2]);
     }
-
-
-    private void processByteCount(String argument) {
-        //   >BYTECOUNT:{BYTES_IN},{BYTES_OUT}
-        int comma = argument.indexOf(',');
-        long in = Long.parseLong(argument.substring(0, comma));
-        long out = Long.parseLong(argument.substring(comma + 1));
-
-        VpnStatus.updateByteCount(in, out);
-
-    }
-
 
     private void processNeedCommand(String argument) {
         int p1 = argument.indexOf('\'');
@@ -599,7 +582,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
     }
 
     @Override
-    public void pause(pauseReason reason) {
+    public void pause(PauseReason reason) {
         lastPauseReason = reason;
         signalusr1();
     }
@@ -608,7 +591,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
     public void resume() {
         releaseHold();
         /* Reset the reason why we are disconnected */
-        lastPauseReason = pauseReason.noNetwork;
+        lastPauseReason = PauseReason.NO_NETWORK;
     }
 
     @Override

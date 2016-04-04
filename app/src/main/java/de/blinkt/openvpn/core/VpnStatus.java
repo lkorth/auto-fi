@@ -45,7 +45,6 @@ public class VpnStatus {
 
     private static Vector<LogListener> logListener;
     private static Vector<StateListener> stateListener;
-    private static Vector<ByteCountListener> byteCountListener;
 
     private static String mLaststatemsg = "";
 
@@ -190,7 +189,6 @@ public class VpnStatus {
         logbuffer = new LinkedList<>();
         logListener = new Vector<>();
         stateListener = new Vector<>();
-        byteCountListener = new Vector<>();
 
         HandlerThread mHandlerThread = new HandlerThread("LogFileWriter", Thread.MIN_PRIORITY);
         mHandlerThread.start();
@@ -390,43 +388,10 @@ public class VpnStatus {
         void updateState(String state, String logmessage, int localizedResId, ConnectionStatus level);
     }
 
-    public interface ByteCountListener {
-        void updateByteCount(long in, long out, long diffIn, long diffOut);
-    }
-
-    public synchronized static void logMessage(LogLevel level, String prefix, String message) {
-        newLogItem(new LogItem(level, prefix + message));
-
-    }
-
-    public synchronized static void clearLog() {
-        logbuffer.clear();
-        logInformation();
-        mLogFileHandler.sendEmptyMessage(LogFileHandler.TRIM_LOG_FILE);
-    }
-
     private static void logInformation() {
         logInfo(R.string.mobile_info, Build.MODEL, Build.BOARD, Build.BRAND, Build.VERSION.SDK_INT,
                 NativeUtils.getNativeAPI(), Build.VERSION.RELEASE, Build.ID, Build.FINGERPRINT, "", "");
     }
-
-    public synchronized static void addLogListener(LogListener ll) {
-        logListener.add(ll);
-    }
-
-    public synchronized static void removeLogListener(LogListener ll) {
-        logListener.remove(ll);
-    }
-
-    public synchronized static void addByteCountListener(ByteCountListener bcl) {
-        bcl.updateByteCount(mlastByteCount[0], mlastByteCount[1], mlastByteCount[2], mlastByteCount[3]);
-        byteCountListener.add(bcl);
-    }
-
-    public synchronized static void removeByteCountListener(ByteCountListener bcl) {
-        byteCountListener.remove(bcl);
-    }
-
 
     public synchronized static void addStateListener(StateListener sl) {
         if (!stateListener.contains(sl)) {
@@ -468,19 +433,12 @@ public class VpnStatus {
 
     }
 
-    public static void updateStatePause(OpenVPNManagement.pauseReason pauseReason) {
+    public static void updateStatePause(OpenVPNManagement.PauseReason pauseReason) {
         switch (pauseReason) {
-            case noNetwork:
+            case NO_NETWORK:
                 VpnStatus.updateStateString("NONETWORK", "", R.string.state_nonetwork, ConnectionStatus.LEVEL_NONETWORK);
                 break;
-            case screenOff:
-                VpnStatus.updateStateString("SCREENOFF", "", R.string.state_screenoff, ConnectionStatus.LEVEL_VPNPAUSED);
-                break;
-            case userPause:
-                VpnStatus.updateStateString("USERPAUSE", "", R.string.state_userpause, ConnectionStatus.LEVEL_VPNPAUSED);
-                break;
         }
-
     }
 
     private static ConnectionStatus getLevel(String state) {
@@ -554,10 +512,6 @@ public class VpnStatus {
         newLogItem(new LogItem(LogLevel.INFO, message));
     }
 
-    public static void logDebug(String message) {
-        newLogItem(new LogItem(LogLevel.DEBUG, message));
-    }
-
     public static void logInfo(int resourceId, Object... args) {
         newLogItem(new LogItem(LogLevel.INFO, resourceId, args));
     }
@@ -596,7 +550,6 @@ public class VpnStatus {
         }
     }
 
-
     public static void logError(String msg) {
         newLogItem(new LogItem(LogLevel.ERROR, msg));
 
@@ -610,7 +563,6 @@ public class VpnStatus {
         newLogItem(new LogItem(LogLevel.WARNING, msg));
     }
 
-
     public static void logError(int resourceId) {
         newLogItem(new LogItem(LogLevel.ERROR, resourceId));
     }
@@ -623,20 +575,4 @@ public class VpnStatus {
         newLogItem(new LogItem(level, ovpnlevel, message));
 
     }
-
-
-    public static synchronized void updateByteCount(long in, long out) {
-        long lastIn = mlastByteCount[0];
-        long lastOut = mlastByteCount[1];
-        long diffIn = mlastByteCount[2] = Math.max(0, in - lastIn);
-        long diffOut = mlastByteCount[3] = Math.max(0, out - lastOut);
-
-
-        mlastByteCount = new long[]{in, out, diffIn, diffOut};
-        for (ByteCountListener bcl : byteCountListener) {
-            bcl.updateByteCount(in, out, diffIn, diffOut);
-        }
-    }
-
-
 }
