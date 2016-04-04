@@ -128,7 +128,7 @@ public class VPNLaunchHelper {
     }
 	
 	public static void startOpenVpn(Context context) {
-        VpnProfile profile = ProfileManager.getProfile(context);
+        VpnProfile profile = VpnProfile.getProfile(context);
 
         if (profile != null) {
             Intent startVPN = profile.prepareStartService(context);

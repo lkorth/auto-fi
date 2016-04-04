@@ -353,7 +353,7 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
 
         /* The intent is null when the service has been restarted */
         if (intent == null) {
-            mProfile = ProfileManager.getProfile(this);
+            mProfile = VpnProfile.getProfile(this);
             VpnStatus.logInfo(R.string.service_restarted);
 
             /* Got no profile, just stop */
@@ -370,7 +370,7 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
 
         } else {
             String profileUUID = intent.getStringExtra(getPackageName() + ".profileUUID");
-            mProfile = ProfileManager.getProfile(this);
+            mProfile = VpnProfile.getProfile(this);
         }
 
         /* start the OpenVPN process itself in a background thread */
@@ -380,9 +380,6 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
                 startOpenVPN();
             }
         }).start();
-
-
-        ProfileManager.setConnectedVpnProfile(this, mProfile);
 
         return START_STICKY;
     }

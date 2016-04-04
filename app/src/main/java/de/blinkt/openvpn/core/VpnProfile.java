@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -35,7 +36,6 @@ import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.Vector;
 
 import javax.crypto.BadPaddingException;
@@ -117,7 +117,6 @@ public class VpnProfile implements Serializable, Cloneable {
     private transient PrivateKey mPrivateKey;
     // Public attributes, since I got mad with getter/setter
     // set members to default values
-    private UUID mUuid;
     public boolean mAllowLocalLAN;
     private int mProfileVersion;
     public String mExcludedRoutes;
@@ -139,8 +138,18 @@ public class VpnProfile implements Serializable, Cloneable {
     public String mServerPort = "1194";
     public boolean mUseUdp = true;
 
+    public static VpnProfile getProfile(Context context) {
+        try {
+            ConfigParser configParser = new ConfigParser();
+            configParser.parseConfig(new InputStreamReader(context.getAssets().open("client.ovpn")));
+            return configParser.convertProfile();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public VpnProfile() {
-        mUuid = UUID.randomUUID();
         mProfileVersion = CURRENT_PROFILE_VERSION;
 
         mConnections = new Connection[1];
@@ -174,11 +183,6 @@ public class VpnProfile implements Serializable, Cloneable {
         mAllowLocalLAN = true;
         mPushPeerInfo = false;
         mMssFix = 0;
-    }
-
-    public UUID getUUID() {
-        return mUuid;
-
     }
 
     public void upgradeProfile() {
@@ -621,7 +625,6 @@ public class VpnProfile implements Serializable, Cloneable {
         String prefix = context.getPackageName();
 
         Intent intent = new Intent(context, OpenVPNService.class);
-        intent.putExtra(prefix + ".profileUUID", mUuid.toString());
 
         return intent;
     }
@@ -671,7 +674,6 @@ public class VpnProfile implements Serializable, Cloneable {
     @Override
     protected VpnProfile clone() throws CloneNotSupportedException {
         VpnProfile copy = (VpnProfile) super.clone();
-        copy.mUuid = UUID.randomUUID();
         copy.mConnections = new Connection[mConnections.length];
         int i = 0;
         for (Connection conn : mConnections) {
@@ -917,10 +919,6 @@ public class VpnProfile implements Serializable, Cloneable {
         } else {
             return mPassword;
         }
-    }
-
-    public String getUUIDString() {
-        return mUuid.toString();
     }
 
     public PrivateKey getKeystoreKey() {
