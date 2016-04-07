@@ -1,4 +1,4 @@
-package de.blinkt.openvpn.core;
+package com.lukekorth.auto_fi.openvpn;
 
 import android.os.Build;
 import android.support.annotation.NonNull;

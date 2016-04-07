@@ -1,4 +1,4 @@
-package de.blinkt.openvpn.core;
+package com.lukekorth.auto_fi.openvpn;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Build;
 
 import com.lukekorth.auto_fi.R;
-import com.lukekorth.auto_fi.openvpn.ConfigurationGenerator;
 
 import java.io.File;
 import java.io.FileOutputStream;

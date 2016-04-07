@@ -3,7 +3,7 @@
  * Distributed under the GNU GPL v2 with additional terms. For full terms see the file doc/LICENSE.txt
  */
 
-package de.blinkt.openvpn.core;
+package com.lukekorth.auto_fi.openvpn;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -195,7 +195,6 @@ public class VpnStatus {
         mLogFileHandler = new LogFileHandler(mHandlerThread.getLooper());
 
         logInformation();
-
     }
 
 

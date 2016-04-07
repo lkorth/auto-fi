@@ -1,4 +1,4 @@
-package de.blinkt.openvpn.core;
+package com.lukekorth.auto_fi.openvpn;
 
 import android.annotation.SuppressLint;
 import android.util.Log;
@@ -20,8 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import de.blinkt.openvpn.core.VpnStatus.LogItem;
 
 public class OpenVPNThread implements Runnable {
 
@@ -104,7 +102,7 @@ public class OpenVPNThread implements Runnable {
                 try {
                     BufferedWriter logout = new BufferedWriter(new FileWriter(mDumpPath + ".log"));
                     SimpleDateFormat timeformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.GERMAN);
-                    for (LogItem li : VpnStatus.getlogbuffer()) {
+                    for (VpnStatus.LogItem li : VpnStatus.getlogbuffer()) {
                         String time = timeformat.format(new Date(li.getLogtime()));
                         logout.write(time + " " + li.getString(mService) + "\n");
                     }

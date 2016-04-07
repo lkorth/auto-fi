@@ -1,4 +1,4 @@
-package de.blinkt.openvpn.core;
+package com.lukekorth.auto_fi.openvpn;
 
 import android.content.Context;
 import android.net.LocalServerSocket;

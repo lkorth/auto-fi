@@ -1,4 +1,4 @@
-package de.blinkt.openvpn.core;
+package com.lukekorth.auto_fi.openvpn;
 
 import com.lukekorth.auto_fi.BuildConfig;
 import com.lukekorth.auto_fi.R;

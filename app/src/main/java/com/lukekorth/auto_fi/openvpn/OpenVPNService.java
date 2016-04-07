@@ -1,4 +1,4 @@
-package de.blinkt.openvpn.core;
+package com.lukekorth.auto_fi.openvpn;
 
 import android.Manifest.permission;
 import android.annotation.TargetApi;
@@ -32,12 +32,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Vector;
 
-import de.blinkt.openvpn.core.VpnStatus.ConnectionStatus;
-import de.blinkt.openvpn.core.VpnStatus.StateListener;
+import static com.lukekorth.auto_fi.openvpn.NetworkSpace.ipAddress;
 
-import static de.blinkt.openvpn.core.NetworkSpace.ipAddress;
-
-public class OpenVPNService extends VpnService implements StateListener, Callback {
+public class OpenVPNService extends VpnService implements VpnStatus.StateListener, Callback {
 
     public static final String DISCONNECT_VPN = "de.blinkt.openvpn.DISCONNECT_VPN";
     private static final int OPENVPN_STATUS = 1;
@@ -601,7 +598,7 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
     }
 
     @Override
-    public void updateState(String state, String logmessage, int resid, ConnectionStatus level) {
+    public void updateState(String state, String logmessage, int resid, VpnStatus.ConnectionStatus level) {
         // If the process is not running, ignore any state,
         // Notification should be invisible in this state
 
@@ -617,7 +614,7 @@ public class OpenVPNService extends VpnService implements StateListener, Callbac
         showNotification(msg);
     }
 
-    private void doSendBroadcast(String state, ConnectionStatus level) {
+    private void doSendBroadcast(String state, VpnStatus.ConnectionStatus level) {
         Intent vpnstatus = new Intent();
         vpnstatus.setAction("de.blinkt.openvpn.VPN_STATUS");
         vpnstatus.putExtra("status", level.toString());

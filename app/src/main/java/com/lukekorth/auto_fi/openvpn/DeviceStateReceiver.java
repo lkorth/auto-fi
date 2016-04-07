@@ -1,4 +1,4 @@
-package de.blinkt.openvpn.core;
+package com.lukekorth.auto_fi.openvpn;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -11,8 +11,6 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 
 import com.lukekorth.auto_fi.R;
-
-import static de.blinkt.openvpn.core.OpenVPNManagement.PauseReason;
 
 public class DeviceStateReceiver extends BroadcastReceiver implements OpenVPNManagement.PausedStateCallback {
 
@@ -39,7 +37,7 @@ public class DeviceStateReceiver extends BroadcastReceiver implements OpenVPNMan
             }
 
             network = ConnectState.DISCONNECTED;
-            mManagement.pause(PauseReason.NO_NETWORK);
+            mManagement.pause(OpenVPNManagement.PauseReason.NO_NETWORK);
         }
     };
     private NetworkInfo lastConnectedNetwork;

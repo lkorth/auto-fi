@@ -1,4 +1,4 @@
-package de.blinkt.openvpn.core;
+package com.lukekorth.auto_fi.openvpn;
 
 import android.os.Build;
 
@@ -16,7 +16,8 @@ public class NativeUtils {
 
     static {
         System.loadLibrary("opvpnutil");
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN)
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN) {
             System.loadLibrary("jbcrypto");
+        }
     }
 }

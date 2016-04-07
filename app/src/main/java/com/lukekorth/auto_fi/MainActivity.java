@@ -13,7 +13,7 @@ import com.lukekorth.auto_fi.openvpn.ConfigurationGenerator;
 
 import java.io.IOException;
 
-import de.blinkt.openvpn.core.VPNLaunchHelper;
+import com.lukekorth.auto_fi.openvpn.VPNLaunchHelper;
 
 public class MainActivity extends AppCompatActivity {
 
