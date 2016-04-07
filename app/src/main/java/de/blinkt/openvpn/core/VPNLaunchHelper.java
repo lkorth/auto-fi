@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2012-2016 Arne Schwabe
- * Distributed under the GNU GPL v2 with additional terms. For full terms see the file doc/LICENSE.txt
- */
-
 package de.blinkt.openvpn.core;
 
 import android.annotation.TargetApi;
@@ -11,6 +6,7 @@ import android.content.Intent;
 import android.os.Build;
 
 import com.lukekorth.auto_fi.R;
+import com.lukekorth.auto_fi.openvpn.ConfigurationGenerator;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,15 +19,15 @@ public class VPNLaunchHelper {
 
     private static final String MININONPIEVPN = "nopie_openvpn";
     private static final String MINIPIEVPN = "pie_openvpn";
-    private static final String OVPNCONFIGFILE = "android.conf";
 
+    @SuppressWarnings("deprecation")
     private static String writeMiniVPN(Context context) {
         String[] abis;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             abis = getSupportedABIsLollipop();
-        else
-            //noinspection deprecation
-            abis = new String[]{Build.CPU_ABI, Build.CPU_ABI2};
+        } else {
+            abis = new String[]{ Build.CPU_ABI, Build.CPU_ABI2 };
+        }
 
         String nativeAPI = NativeUtils.getNativeAPI();
         if (!nativeAPI.equals(abis[0])) {
@@ -54,28 +50,23 @@ public class VPNLaunchHelper {
         return Build.SUPPORTED_ABIS;
     }
 
-    private static String getMiniVPNExecutableName()
-    {
-        if (Build.VERSION.SDK_INT  >= Build.VERSION_CODES.JELLY_BEAN)
+    private static String getMiniVPNExecutableName() {
+        if (Build.VERSION.SDK_INT  >= Build.VERSION_CODES.JELLY_BEAN) {
             return MINIPIEVPN;
-        else
+        } else {
             return MININONPIEVPN;
+        }
     }
 
-
-    public static String[] replacePieWithNoPie(String[] mArgv)
-    {
+    public static String[] replacePieWithNoPie(String[] mArgv) {
         mArgv[0] = mArgv[0].replace(MINIPIEVPN, MININONPIEVPN);
         return mArgv;
     }
-
 
     static String[] buildOpenvpnArgv(Context c) {
         Vector<String> args = new Vector<>();
 
         String binaryName = writeMiniVPN(c);
-        // Add fixed paramenters
-        //args.add("/data/data/de.blinkt.openvpn/lib/openvpn");
         if(binaryName==null) {
             VpnStatus.logError("Error writing minivpn binary");
             return null;
@@ -84,7 +75,7 @@ public class VPNLaunchHelper {
         args.add(binaryName);
 
         args.add("--config");
-        args.add(getConfigFilePath(c));
+        args.add(ConfigurationGenerator.getConfigurationFilePath(c));
 
         return args.toArray(new String[args.size()]);
     }
@@ -95,12 +86,10 @@ public class VPNLaunchHelper {
 
             try {
                 mvpn = context.getAssets().open(getMiniVPNExecutableName() + "." + abi);
-            }
-            catch (IOException errabi) {
+            } catch (IOException errabi) {
                 VpnStatus.logInfo("Failed getting assets for archicture " + abi);
                 return false;
             }
-
 
             FileOutputStream fout = new FileOutputStream(mvpnout);
 
@@ -118,27 +107,14 @@ public class VPNLaunchHelper {
                 return false;
             }
 
-
             return true;
         } catch (IOException e) {
             VpnStatus.logException(e);
             return false;
         }
-
     }
 	
 	public static void startOpenVpn(Context context) {
-        VpnProfile profile = VpnProfile.getProfile(context);
-
-        if (profile != null) {
-            Intent startVPN = profile.prepareStartService(context);
-            if (startVPN != null) {
-                context.startService(startVPN);
-            }
-        }
+        context.startService(new Intent(context, OpenVPNService.class));
 	}
-
-    public static String getConfigFilePath(Context context) {
-        return context.getCacheDir().getAbsolutePath() + "/" + OVPNCONFIGFILE;
-    }
 }

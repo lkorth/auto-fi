@@ -1,9 +1,7 @@
-/*
- * Copyright (c) 2012-2016 Arne Schwabe
- * Distributed under the GNU GPL v2 with additional terms. For full terms see the file doc/LICENSE.txt
- */
-
 package de.blinkt.openvpn.core;
+
+import com.lukekorth.auto_fi.BuildConfig;
+import com.lukekorth.auto_fi.R;
 
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -15,43 +13,43 @@ import java.net.URL;
 import java.util.List;
 
 public class ProxyDetection {
-	static SocketAddress detectProxy(VpnProfile vp) {
-		// Construct a new url with https as protocol
+
+	public static SocketAddress detectProxy() {
 		try {
-			URL url = new URL(String.format("https://%s:%s",vp.mServerName,vp.mServerPort));
+			URL url = new URL(String.format("https://" + BuildConfig.SERVER_ADDRESS + ":" + BuildConfig.SERVER_PORT));
 			Proxy proxy = getFirstProxy(url);
 
-			if(proxy==null)
+			if(proxy == null) {
 				return null;
+			}
+
 			SocketAddress addr = proxy.address();
 			if (addr instanceof InetSocketAddress) {
 				return addr; 
 			}
-			
 		} catch (MalformedURLException e) {
-//			VpnStatus.logError(R.string.getproxy_error, e.getLocalizedMessage());
+			VpnStatus.logError(R.string.getproxy_error, e.getLocalizedMessage());
 		} catch (URISyntaxException e) {
-//			VpnStatus.logError(R.string.getproxy_error, e.getLocalizedMessage());
+			VpnStatus.logError(R.string.getproxy_error, e.getLocalizedMessage());
 		}
+
 		return null;
 	}
 
-	static Proxy getFirstProxy(URL url) throws URISyntaxException {
+	private static Proxy getFirstProxy(URL url) throws URISyntaxException {
 		System.setProperty("java.net.useSystemProxies", "true");
 
 		List<Proxy> proxylist = ProxySelector.getDefault().select(url.toURI());
-
-
 		if (proxylist != null) {
 			for (Proxy proxy: proxylist) {
 				SocketAddress addr = proxy.address();
-
 				if (addr != null) {
 					return proxy;
 				}
 			}
 
 		}
+
 		return null;
 	}
 }

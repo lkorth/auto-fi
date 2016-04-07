@@ -34,8 +34,9 @@ public class DeviceStateReceiver extends BroadcastReceiver implements OpenVPNMan
     private java.lang.Runnable mDelayDisconnectRunnable = new Runnable() {
         @Override
         public void run() {
-            if (!(network == ConnectState.PENDING_DISCONNECT))
+            if (!(network == ConnectState.PENDING_DISCONNECT)) {
                 return;
+            }
 
             network = ConnectState.DISCONNECTED;
             mManagement.pause(PauseReason.NO_NETWORK);
@@ -71,17 +72,18 @@ public class DeviceStateReceiver extends BroadcastReceiver implements OpenVPNMan
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         boolean sendusr1 = prefs.getBoolean("netchangereconnect", true);
 
-
         String netstatestring;
         if (networkInfo == null) {
             netstatestring = "not connected";
         } else {
             String subtype = networkInfo.getSubtypeName();
-            if (subtype == null)
+            if (subtype == null) {
                 subtype = "";
+            }
             String extrainfo = networkInfo.getExtraInfo();
-            if (extrainfo == null)
+            if (extrainfo == null) {
                 extrainfo = "";
+            }
 
 			/*
             if(networkInfo.getType()==android.net.ConnectivityManager.TYPE_WIFI) {
@@ -92,25 +94,21 @@ public class DeviceStateReceiver extends BroadcastReceiver implements OpenVPNMan
 				subtype += wifiinfo.getNetworkId();
 			}*/
 
-
             netstatestring = String.format("%2$s %4$s to %1$s %3$s", networkInfo.getTypeName(),
                     networkInfo.getDetailedState(), extrainfo, subtype);
         }
 
         if (networkInfo != null && networkInfo.getState() == State.CONNECTED) {
-            int newnet = networkInfo.getType();
-
             boolean pendingDisconnect = (network == ConnectState.PENDING_DISCONNECT);
             network = ConnectState.SHOULD_BE_CONNECTED;
 
             boolean sameNetwork;
-            if (lastConnectedNetwork == null
-                    || lastConnectedNetwork.getType() != networkInfo.getType()
-                    || !equalsObj(lastConnectedNetwork.getExtraInfo(), networkInfo.getExtraInfo())
-                    )
+            if (lastConnectedNetwork == null || lastConnectedNetwork.getType() != networkInfo.getType()
+                    || !equalsObj(lastConnectedNetwork.getExtraInfo(), networkInfo.getExtraInfo())) {
                 sameNetwork = false;
-            else
+            } else {
                 sameNetwork = true;
+            }
 
             /* Same network, connection still 'established' */
             if (pendingDisconnect && sameNetwork) {
@@ -122,10 +120,11 @@ public class DeviceStateReceiver extends BroadcastReceiver implements OpenVPNMan
                 if (shouldBeConnected()) {
                     mDisconnectHandler.removeCallbacks(mDelayDisconnectRunnable);
 
-                    if (pendingDisconnect || !sameNetwork)
+                    if (pendingDisconnect || !sameNetwork) {
                         mManagement.networkChange(sameNetwork);
-                    else
+                    } else {
                         mManagement.resume();
+                    }
                 }
 
                 lastConnectedNetwork = networkInfo;
@@ -138,8 +137,9 @@ public class DeviceStateReceiver extends BroadcastReceiver implements OpenVPNMan
             }
         }
 
-        if (!netstatestring.equals(lastStateMsg))
+        if (!netstatestring.equals(lastStateMsg)) {
             VpnStatus.logInfo(R.string.netstatus, netstatestring);
+        }
         lastStateMsg = netstatestring;
     }
 
@@ -148,9 +148,7 @@ public class DeviceStateReceiver extends BroadcastReceiver implements OpenVPNMan
     }
 
     private NetworkInfo getCurrentNetworkInfo(Context context) {
-        ConnectivityManager conn = (ConnectivityManager)
-                context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
+        ConnectivityManager conn = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         return conn.getActiveNetworkInfo();
     }
 }

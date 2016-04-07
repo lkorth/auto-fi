@@ -54,9 +54,8 @@ public class OpenVPNThread implements Runnable {
         mProcess.destroy();
     }
 
-    void setReplaceConnection()
-    {
-        mNoProcessExitStatus=true;
+    void setReplaceConnection() {
+        mNoProcessExitStatus = true;
     }
 
     @Override
@@ -71,13 +70,15 @@ public class OpenVPNThread implements Runnable {
         } finally {
             int exitvalue = 0;
             try {
-                if (mProcess != null)
+                if (mProcess != null) {
                     exitvalue = mProcess.waitFor();
+                }
             } catch (IllegalThreadStateException ite) {
                 VpnStatus.logError("Illegal Thread state: " + ite.getLocalizedMessage());
             } catch (InterruptedException ie) {
                 VpnStatus.logError("InterruptedException: " + ie.getLocalizedMessage());
             }
+
             if (exitvalue != 0) {
                 VpnStatus.logError("Process exited with exit value " + exitvalue);
                 if (mBrokenPie) {
@@ -91,13 +92,13 @@ public class OpenVPNThread implements Runnable {
                         run();
                         return;
                     }
-
                 }
-
             }
 
-            if (!mNoProcessExitStatus)
-//                VpnStatus.updateStateString("NOPROCESS", "No process running.", R.string.state_noprocess, ConnectionStatus.LEVEL_NOTCONNECTED);
+            if (!mNoProcessExitStatus) {
+                VpnStatus.updateStateString("NOPROCESS", "No process running.", R.string.state_noprocess,
+                        VpnStatus.ConnectionStatus.LEVEL_NOTCONNECTED);
+            }
 
             if (mDumpPath != null) {
                 try {
@@ -114,7 +115,7 @@ public class OpenVPNThread implements Runnable {
                 }
             }
 
-            mService.processDied();
+            mService.stopVpnService();
             Log.i(TAG, "Exiting");
         }
     }
@@ -125,7 +126,6 @@ public class OpenVPNThread implements Runnable {
         Collections.addAll(argvlist, argv);
 
         ProcessBuilder pb = new ProcessBuilder(argvlist);
-        // Hack O rama
 
         String lbpath = genLibraryPath(argv, pb);
 
@@ -145,18 +145,19 @@ public class OpenVPNThread implements Runnable {
 
             while (true) {
                 String logline = br.readLine();
-                if (logline == null)
+                if (logline == null) {
                     return;
+                }
 
-                if (logline.startsWith(DUMP_PATH_STRING))
+                if (logline.startsWith(DUMP_PATH_STRING)) {
                     mDumpPath = logline.substring(DUMP_PATH_STRING.length());
+                }
 
-                if (logline.startsWith(BROKEN_PIE_SUPPORT) || logline.contains(BROKEN_PIE_SUPPORT2))
+                if (logline.startsWith(BROKEN_PIE_SUPPORT) || logline.contains(BROKEN_PIE_SUPPORT2)) {
                     mBrokenPie = true;
-
+                }
 
                 // 1380308330.240114 18000002 Send to HTTP proxy: 'X-Online-Host: bla.blabla.com'
-
                 Pattern p = Pattern.compile("(\\d+).(\\d+) ([0-9a-f])+ (.*)");
                 Matcher m = p.matcher(logline);
                 if (m.matches()) {
@@ -166,32 +167,29 @@ public class OpenVPNThread implements Runnable {
 
                     VpnStatus.LogLevel logStatus = VpnStatus.LogLevel.INFO;
 
-                    if ((flags & M_FATAL) != 0)
+                    if ((flags & M_FATAL) != 0) {
                         logStatus = VpnStatus.LogLevel.ERROR;
-                    else if ((flags & M_NONFATAL) != 0)
+                    } else if ((flags & M_NONFATAL) != 0) {
                         logStatus = VpnStatus.LogLevel.WARNING;
-                    else if ((flags & M_WARN) != 0)
+                    } else if ((flags & M_WARN) != 0) {
                         logStatus = VpnStatus.LogLevel.WARNING;
-                    else if ((flags & M_DEBUG) != 0)
+                    } else if ((flags & M_DEBUG) != 0) {
                         logStatus = VpnStatus.LogLevel.VERBOSE;
+                    }
 
-                    if (msg.startsWith("MANAGEMENT: CMD"))
+                    if (msg.startsWith("MANAGEMENT: CMD")) {
                         logLevel = Math.max(4, logLevel);
-
+                    }
 
                     VpnStatus.logMessageOpenVPN(logStatus, logLevel, msg);
                 } else {
                     VpnStatus.logInfo("P:" + logline);
                 }
             }
-
-
         } catch (IOException e) {
             VpnStatus.logException("Error reading from output of OpenVPN process", e);
             stopProcess();
         }
-
-
     }
 
     private String genLibraryPath(String[] argv, ProcessBuilder pb) {
@@ -199,14 +197,16 @@ public class OpenVPNThread implements Runnable {
         String applibpath = argv[0].replaceFirst("/cache/.*$", "/lib");
 
         String lbpath = pb.environment().get("LD_LIBRARY_PATH");
-        if (lbpath == null)
+        if (lbpath == null) {
             lbpath = applibpath;
-        else
+        } else {
             lbpath = applibpath + ":" + lbpath;
+        }
 
         if (!applibpath.equals(mNativeDir)) {
             lbpath = mNativeDir + ":" + lbpath;
         }
+
         return lbpath;
     }
 }

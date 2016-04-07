@@ -20,6 +20,11 @@ android {
     }
 }
 
+android.buildTypes.each { type ->
+    type.buildConfigField 'String', 'SERVER_ADDRESS', '"vpn.ofkorth.net"'
+    type.buildConfigField 'String', 'SERVER_PORT', '"1194"'
+}
+
 dependencies {
     compile 'com.android.support:appcompat-v7:23.2.1'
 }
