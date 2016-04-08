@@ -10,10 +10,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.lukekorth.auto_fi.openvpn.ConfigurationGenerator;
+import com.lukekorth.auto_fi.utilities.VpnHelper;
 
 import java.io.IOException;
-
-import com.lukekorth.auto_fi.openvpn.VPNLaunchHelper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == START_VPN) {
             if (resultCode == Activity.RESULT_OK) {
-                VPNLaunchHelper.startOpenVpn(getApplicationContext());
+                VpnHelper.startVpn(getApplicationContext());
             } else {
                 // user did not consent to VPN
             }

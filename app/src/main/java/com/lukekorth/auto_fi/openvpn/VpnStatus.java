@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2012-2016 Arne Schwabe
- * Distributed under the GNU GPL v2 with additional terms. For full terms see the file doc/LICENSE.txt
- */
-
 package com.lukekorth.auto_fi.openvpn;
 
 import android.annotation.SuppressLint;
@@ -39,7 +34,6 @@ import java.util.UnknownFormatConversionException;
 import java.util.Vector;
 
 public class VpnStatus {
-
 
     public static LinkedList<LogItem> logbuffer;
 

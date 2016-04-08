@@ -35,13 +35,13 @@ public class OpenVPNThread implements Runnable {
     private String[] mArgv;
     private Process mProcess;
     private String mNativeDir;
-    private OpenVPNService mService;
+    private OpenVpn mService;
     private String mDumpPath;
     private Map<String, String> mProcessEnv;
     private boolean mBrokenPie = false;
     private boolean mNoProcessExitStatus = false;
 
-    public OpenVPNThread(OpenVPNService service, String[] argv, Map<String, String> processEnv, String nativelibdir) {
+    public OpenVPNThread(OpenVpn service, String[] argv, Map<String, String> processEnv, String nativelibdir) {
         mArgv = argv;
         mNativeDir = nativelibdir;
         mService = service;
@@ -81,7 +81,7 @@ public class OpenVPNThread implements Runnable {
                 VpnStatus.logError("Process exited with exit value " + exitvalue);
                 if (mBrokenPie) {
                     /* This will probably fail since the NoPIE binary is probably not written */
-                    String[] noPieArgv = VPNLaunchHelper.replacePieWithNoPie(mArgv);
+                    String[] noPieArgv = OpenVpnSetup.replacePieWithNoPie(mArgv);
 
                     // We are already noPIE, nothing to gain
                     if (!noPieArgv.equals(mArgv)) {
@@ -104,7 +104,7 @@ public class OpenVPNThread implements Runnable {
                     SimpleDateFormat timeformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.GERMAN);
                     for (VpnStatus.LogItem li : VpnStatus.getlogbuffer()) {
                         String time = timeformat.format(new Date(li.getLogtime()));
-                        logout.write(time + " " + li.getString(mService) + "\n");
+                        logout.write(time + " " + li.getString(mService.getContext()) + "\n");
                     }
                     logout.close();
                     VpnStatus.logError(R.string.minidump_generated);
@@ -113,7 +113,7 @@ public class OpenVPNThread implements Runnable {
                 }
             }
 
-            mService.stopVpnService();
+            mService.getVpnService().shutdown();
             Log.i(TAG, "Exiting");
         }
     }

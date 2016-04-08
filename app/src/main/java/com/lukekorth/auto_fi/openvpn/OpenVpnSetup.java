@@ -2,7 +2,6 @@ package com.lukekorth.auto_fi.openvpn;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 
 import com.lukekorth.auto_fi.R;
@@ -14,7 +13,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Vector;
 
-public class VPNLaunchHelper {
+public class OpenVpnSetup {
 
     private static final String MININONPIEVPN = "nopie_openvpn";
     private static final String MINIPIEVPN = "pie_openvpn";
@@ -112,8 +111,4 @@ public class VPNLaunchHelper {
             return false;
         }
     }
-	
-	public static void startOpenVpn(Context context) {
-        context.startService(new Intent(context, OpenVPNService.class));
-	}
 }

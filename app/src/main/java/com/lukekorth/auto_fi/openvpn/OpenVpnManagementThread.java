@@ -29,7 +29,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
 
     private static final String TAG = "openvpn";
     private LocalSocket mSocket;
-    private OpenVPNService mOpenVPNService;
+    private OpenVpn mOpenVpn;
     private LinkedList<FileDescriptor> mFDList = new LinkedList<>();
     private LocalServerSocket mServerSocket;
     private boolean mWaitingForRelease = false;
@@ -41,8 +41,8 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
     private PausedStateCallback mPauseCallback;
     private boolean mShuttingDown;
 
-    public OpenVpnManagementThread(OpenVPNService openVPNService) {
-        mOpenVPNService = openVPNService;
+    public OpenVpnManagementThread(OpenVpn openVpn) {
+        mOpenVpn = openVpn;
     }
 
     public boolean openManagementInterface(Context context) {
@@ -133,7 +133,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
             Method getInt = FileDescriptor.class.getDeclaredMethod("getInt$");
             int fdint = (Integer) getInt.invoke(fd);
 
-            boolean result = mOpenVPNService.protect(fdint);
+            boolean result = mOpenVpn.getVpnService().protect(fdint);
             if (!result) {
                 VpnStatus.logWarning("Could not protect VPN socket");
             }
@@ -334,19 +334,19 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
                 protectFileDescriptor(fdtoprotect);
                 break;
             case "DNSSERVER":
-                mOpenVPNService.addDNS(extra);
+                mOpenVpn.addDNS(extra);
                 break;
             case "DNSDOMAIN":
-                mOpenVPNService.setDomain(extra);
+                mOpenVpn.setDomain(extra);
                 break;
             case "ROUTE":
                 String[] routeparts = extra.split(" ");
 
                 if (routeparts.length == 5) {
                     if (BuildConfig.DEBUG) Assert.assertEquals("dev", routeparts[3]);
-                    mOpenVPNService.addRoute(routeparts[0], routeparts[1], routeparts[2], routeparts[4]);
+                    mOpenVpn.addRoute(routeparts[0], routeparts[1], routeparts[2], routeparts[4]);
                 } else if (routeparts.length >= 3) {
-                    mOpenVPNService.addRoute(routeparts[0], routeparts[1], routeparts[2], null);
+                    mOpenVpn.addRoute(routeparts[0], routeparts[1], routeparts[2], null);
                 } else {
                     VpnStatus.logError("Unrecognized ROUTE cmd:" + Arrays.toString(routeparts) + " | " + argument);
                 }
@@ -354,18 +354,18 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
                 break;
             case "ROUTE6":
                 String[] routeparts6 = extra.split(" ");
-                mOpenVPNService.addRoutev6(routeparts6[0], routeparts6[1]);
+                mOpenVpn.addRoutev6(routeparts6[0], routeparts6[1]);
                 break;
             case "IFCONFIG":
                 String[] ifconfigparts = extra.split(" ");
                 int mtu = Integer.parseInt(ifconfigparts[2]);
-                mOpenVPNService.setLocalIP(ifconfigparts[0], ifconfigparts[1], mtu, ifconfigparts[3]);
+                mOpenVpn.setLocalIP(ifconfigparts[0], ifconfigparts[1], mtu, ifconfigparts[3]);
                 break;
             case "IFCONFIG6":
-                mOpenVPNService.setLocalIPv6(extra);
+                mOpenVpn.setLocalIPv6(extra);
                 break;
             case "PERSIST_TUN_ACTION":
-                status = mOpenVPNService.getTunReopenStatus();
+                status = mOpenVpn.getTunReopenStatus();
                 break;
             case "OPENTUN":
                 if (sendTunFD(needed, extra)) {
@@ -389,7 +389,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
             return false;
         }
 
-        ParcelFileDescriptor pfd = mOpenVPNService.openTun();
+        ParcelFileDescriptor pfd = mOpenVpn.openTun();
         if (pfd == null) {
             return false;
         }

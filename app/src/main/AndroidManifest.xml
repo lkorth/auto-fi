@@ -20,7 +20,7 @@
         </activity>
 
         <service
-            android:name=".openvpn.OpenVPNService"
+            android:name=".services.VpnService"
             android:permission="android.permission.BIND_VPN_SERVICE" >
             <intent-filter>
                 <action android:name="android.net.VpnService" />
