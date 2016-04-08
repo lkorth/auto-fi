@@ -1,6 +1,5 @@
 package com.lukekorth.auto_fi.openvpn;
 
-import android.Manifest.permission;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
@@ -515,20 +514,11 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
         // If the process is not running, ignore any state,
         // Notification should be invisible in this state
 
-        doSendBroadcast(state, level);
         if (mProcessThread == null) {
             return;
         }
 
         mVpnService.setNotificationMessage(mContext.getString(resid));
-    }
-
-    private void doSendBroadcast(String state, VpnStatus.ConnectionStatus level) {
-        Intent vpnstatus = new Intent();
-        vpnstatus.setAction("de.blinkt.openvpn.VPN_STATUS");
-        vpnstatus.putExtra("status", level.toString());
-        vpnstatus.putExtra("detailstatus", state);
-        mContext.sendBroadcast(vpnstatus, permission.ACCESS_NETWORK_STATE);
     }
 
     @Override
