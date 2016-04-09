@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.MainThread;
 import android.system.OsConstants;
 import android.text.TextUtils;
 
@@ -53,6 +54,7 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
         mVpnService = vpnServiceInterface;
     }
 
+    @MainThread
     @Override
     public void start() {
         VpnStatus.addStateListener(this);
@@ -65,6 +67,7 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
         }).start();
     }
 
+    @MainThread
     @Override
     public void stop() {
         mManagement.stopVPN(false);
