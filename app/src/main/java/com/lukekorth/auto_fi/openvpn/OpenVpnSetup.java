@@ -4,7 +4,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 
-import com.lukekorth.auto_fi.R;
+import com.lukekorth.auto_fi.utilities.Logger;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,7 +29,8 @@ public class OpenVpnSetup {
 
         String nativeAPI = NativeUtils.getNativeAPI();
         if (!nativeAPI.equals(abis[0])) {
-            VpnStatus.logWarning(R.string.abi_mismatch, Arrays.toString(abis), nativeAPI);
+            Logger.warn("Preferred native ABI precedence of this device (" + Arrays.toString(abis) + ") and ABI " +
+                    "reported by native libraries (" + nativeAPI + ") mismatch");
             abis = new String[] {nativeAPI};
         }
 
@@ -66,7 +67,7 @@ public class OpenVpnSetup {
 
         String binaryName = writeMiniVPN(c);
         if(binaryName==null) {
-            VpnStatus.logError("Error writing minivpn binary");
+            Logger.error("Error writing minivpn binary");
             return null;
         }
 
@@ -85,7 +86,7 @@ public class OpenVpnSetup {
             try {
                 mvpn = context.getAssets().open(getMiniVPNExecutableName() + "." + abi);
             } catch (IOException errabi) {
-                VpnStatus.logInfo("Failed getting assets for archicture " + abi);
+                Logger.error("Failed getting assets for architecture " + abi);
                 return false;
             }
 
@@ -101,13 +102,13 @@ public class OpenVpnSetup {
             fout.close();
 
             if(!mvpnout.setExecutable(true)) {
-                VpnStatus.logError("Failed to make OpenVPN executable");
+                Logger.error("Failed to make OpenVPN executable");
                 return false;
             }
 
             return true;
         } catch (IOException e) {
-            VpnStatus.logException(e);
+            Logger.error(e);
             return false;
         }
     }

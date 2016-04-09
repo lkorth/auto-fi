@@ -1,7 +1,7 @@
 package com.lukekorth.auto_fi.openvpn;
 
 import com.lukekorth.auto_fi.BuildConfig;
-import com.lukekorth.auto_fi.R;
+import com.lukekorth.auto_fi.utilities.Logger;
 
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -27,10 +27,8 @@ public class ProxyDetection {
 			if (addr instanceof InetSocketAddress) {
 				return addr; 
 			}
-		} catch (MalformedURLException e) {
-			VpnStatus.logError(R.string.getproxy_error, e.getLocalizedMessage());
-		} catch (URISyntaxException e) {
-			VpnStatus.logError(R.string.getproxy_error, e.getLocalizedMessage());
+		} catch (MalformedURLException | URISyntaxException e) {
+			Logger.error("Error getting proxy settings: " + e.getMessage());
 		}
 
 		return null;

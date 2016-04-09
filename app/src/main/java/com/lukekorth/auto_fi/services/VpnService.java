@@ -14,7 +14,7 @@ import com.lukekorth.auto_fi.R;
 import com.lukekorth.auto_fi.interfaces.Vpn;
 import com.lukekorth.auto_fi.interfaces.VpnServiceInterface;
 import com.lukekorth.auto_fi.openvpn.OpenVpn;
-import com.lukekorth.auto_fi.openvpn.VpnStatus;
+import com.lukekorth.auto_fi.utilities.Logger;
 
 public class VpnService extends android.net.VpnService implements VpnServiceInterface {
 
@@ -28,7 +28,7 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
     public int onStartCommand(Intent intent, int flags, int startId) {
         // the intent is null when the service has been restarted
         if (intent == null) {
-            VpnStatus.logInfo(R.string.service_restarted);
+            Logger.info("Restarting OpenVPN Service after crash or being killed");
         }
 
         registerDisconnectReceiver();
@@ -52,7 +52,7 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
 
     @Override
     public void onRevoke() {
-        VpnStatus.logInfo(R.string.permission_revoked);
+        Logger.info("VPN permission revoked by OS, stopping");
         stopVpn();
     }
 

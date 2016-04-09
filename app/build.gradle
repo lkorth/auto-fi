@@ -27,4 +27,5 @@ android.buildTypes.each { type ->
 
 dependencies {
     compile 'com.android.support:appcompat-v7:23.2.1'
+    compile 'com.lukekorth:mailable_log:0.1.3'
 }

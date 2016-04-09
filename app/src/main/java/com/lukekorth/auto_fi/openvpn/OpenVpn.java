@@ -18,18 +18,18 @@ import android.text.TextUtils;
 import com.lukekorth.auto_fi.R;
 import com.lukekorth.auto_fi.interfaces.Vpn;
 import com.lukekorth.auto_fi.interfaces.VpnServiceInterface;
+import com.lukekorth.auto_fi.utilities.Logger;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Vector;
 
 import static com.lukekorth.auto_fi.openvpn.NetworkSpace.ipAddress;
 
-public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
+public class OpenVpn implements Vpn, Callback {
 
     private final Vector<String> mDnslist = new Vector<>();
     private final NetworkSpace mRoutes = new NetworkSpace();
@@ -57,8 +57,6 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
     @MainThread
     @Override
     public void start() {
-        VpnStatus.addStateListener(this);
-
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -82,12 +80,6 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
         unregisterDeviceStateReceiver();
 
         mOpenVPNThread = null;
-
-        if (!mStarting) {
-            VpnStatus.removeStateListener(this);
-        }
-
-        VpnStatus.flushLog();
     }
 
     Context getContext() {
@@ -116,8 +108,8 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
     }
 
     private void startOpenVPN() {
-        VpnStatus.logInfo(R.string.building_configration);
-        VpnStatus.updateStateString("VPN_GENERATE_CONFIG", "", R.string.building_configration, VpnStatus.ConnectionStatus.LEVEL_START);
+        Logger.info("Building configuration");
+        updateNotification(R.string.building_configuration);
 
         String nativeLibraryDirectory = mContext.getApplicationInfo().nativeLibraryDir;
 
@@ -138,7 +130,7 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
             Thread mSocketManagerThread = new Thread(ovpnManagementThread, "OpenVPNManagementThread");
             mSocketManagerThread.start();
             mManagement = ovpnManagementThread;
-            VpnStatus.logInfo("started Socket Thread");
+            Logger.info("started Socket Thread");
         } else {
             stop();
             return;
@@ -213,14 +205,14 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
     public ParcelFileDescriptor openTun() {
         VpnService.Builder builder = mVpnService.getBuilder();
 
-        VpnStatus.logInfo(R.string.last_openvpn_tun_config);
+        Logger.info("Opening tun interface");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             allowAllAFFamilies(builder);
         }
 
         if (mLocalIP == null && mLocalIPv6 == null) {
-            VpnStatus.logError(mContext.getString(R.string.opentun_no_ipaddr));
+            Logger.error("Refusing to open tun device without IP information");
             return null;
         }
 
@@ -229,7 +221,7 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
             try {
                 builder.addAddress(mLocalIP.getIp(), mLocalIP.getLength());
             } catch (IllegalArgumentException iae) {
-                VpnStatus.logError(R.string.dns_add_error, mLocalIP, iae.getLocalizedMessage());
+                Logger.error("Could not add DNS Server " + mLocalIP + ", rejected by the system: " + iae.getMessage());
                 return null;
             }
         }
@@ -239,7 +231,7 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
             try {
                 builder.addAddress(ipv6parts[0], Integer.parseInt(ipv6parts[1]));
             } catch (IllegalArgumentException iae) {
-                VpnStatus.logError(R.string.ip_add_error, mLocalIPv6, iae.getLocalizedMessage());
+                Logger.error("Could not configure IP Address " + mLocalIPv6 + ", rejected by the system: " + iae.getMessage());
                 return null;
             }
         }
@@ -248,7 +240,7 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
             try {
                 builder.addDnsServer(dns);
             } catch (IllegalArgumentException iae) {
-                VpnStatus.logError(R.string.dns_add_error, dns, iae.getLocalizedMessage());
+                Logger.error("Could not add DNS Server " + dns + ", rejected by the system: " + iae.getMessage());
             }
         }
 
@@ -256,7 +248,7 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
         if ((Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT && !release.startsWith("4.4.3")
                 && !release.startsWith("4.4.4") && !release.startsWith("4.4.5") && !release.startsWith("4.4.6"))
                 && mMtu < 1280) {
-            VpnStatus.logInfo(String.format(Locale.US, "Forcing MTU to 1280 instead of %d to workaround Android Bug #70916", mMtu));
+            Logger.info("Forcing MTU to 1280 instead of " + mMtu + " to workaround Android Bug #70916");
             builder.setMtu(1280);
         } else {
             builder.setMtu(mMtu);
@@ -276,12 +268,11 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
                     }
                 }
                 if (!dnsIncluded) {
-                    String samsungwarning = String.format("Warning Samsung Android 5.0+ devices ignore DNS servers outside the VPN range. To enable DNS resolution a route to your DNS Server (%s) has been added.", mDnslist.get(0));
-                    VpnStatus.logWarning(samsungwarning);
+                    Logger.warn("Warning Samsung Android 5.0+ devices ignore DNS servers outside the VPN range. To enable DNS resolution a route to your DNS Server " + mDnslist.get(0) + " has been added");
                     positiveIPv4Routes.add(dnsServer);
                 }
             } catch (Exception e) {
-                VpnStatus.logError("Error parsing DNS Server IP: " + mDnslist.get(0));
+                Logger.error("Error parsing DNS Server IP: " + mDnslist.get(0));
             }
         }
 
@@ -291,12 +282,12 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
             try {
 
                 if (multicastRange.containsNet(route)) {
-                    VpnStatus.logDebug(R.string.ignore_multicast_route, route.toString());
+                    Logger.debug("Ignoring multicast route: " + route.toString());
                 } else {
                     builder.addRoute(route.getIPv4Address(), route.networkMask);
                 }
             } catch (IllegalArgumentException ia) {
-                VpnStatus.logError(mContext.getString(R.string.route_rejected) + route + " " + ia.getLocalizedMessage());
+                Logger.error("Route rejected by Android: " + route + " " + ia.getMessage());
             }
         }
 
@@ -304,7 +295,7 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
             try {
                 builder.addRoute(route6.getIPv6Address(), route6.networkMask);
             } catch (IllegalArgumentException ia) {
-                VpnStatus.logError(mContext.getString(R.string.route_rejected) + route6 + " " + ia.getLocalizedMessage());
+                Logger.error("Route rejected by Android: " + route6 + " " + ia.getMessage());
             }
         }
 
@@ -312,11 +303,11 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
             builder.addSearchDomain(mDomain);
         }
 
-        VpnStatus.logInfo(R.string.local_ip_info, mLocalIP.getIp(), mLocalIP.getLength(), mLocalIPv6, mMtu);
-        VpnStatus.logInfo(R.string.dns_server_info, TextUtils.join(", ", mDnslist), mDomain);
-        VpnStatus.logInfo(R.string.routes_info_incl, TextUtils.join(", ", mRoutes.getNetworks(true)), TextUtils.join(", ", mRoutesv6.getNetworks(true)));
-        VpnStatus.logInfo(R.string.routes_info_excl, TextUtils.join(", ", mRoutes.getNetworks(false)), TextUtils.join(", ", mRoutesv6.getNetworks(false)));
-        VpnStatus.logDebug(R.string.routes_debug, TextUtils.join(", ", positiveIPv4Routes), TextUtils.join(", ", positiveIPv6Routes));
+        Logger.info("Local IPv4: " + mLocalIP.getIp() + "/" + mLocalIP.getLength() + " IPv6: " + mLocalIPv6 + " MTU: " + mMtu);
+        Logger.info("DNS Server: " + TextUtils.join(", ", mDnslist) + ", Domain: " + mDomain);
+        Logger.info("Routes: " + TextUtils.join(", ", mRoutes.getNetworks(true)) + " " + TextUtils.join(", ", mRoutesv6.getNetworks(true)));
+        Logger.info("Routes excluded: " + TextUtils.join(", ", mRoutes.getNetworks(false)) + " " + TextUtils.join(", ", mRoutesv6.getNetworks(false)));
+        Logger.debug("VpnService routes installed: " + TextUtils.join(", ", positiveIPv4Routes) + " " + TextUtils.join(", ", positiveIPv6Routes));
 
         String session = "";
         if (mLocalIP != null && mLocalIPv6 != null) {
@@ -327,9 +318,10 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
 
         builder.setSession(session);
 
-        // No DNS Server, log a warning
         if (mDnslist.size() == 0) {
-            VpnStatus.logInfo(R.string.warn_no_dns);
+            Logger.info("No DNS servers being used. Name resolution may not work. Consider setting custom DNS " +
+                    "Servers. Please also note that Android will keep using your proxy settings specified for your " +
+                    "mobile/Wi-Fi connection when no DNS servers are set.");
         }
 
         mLastTunCfg = getTunConfigString();
@@ -349,10 +341,11 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
             }
             return tun;
         } catch (Exception e) {
-            VpnStatus.logError(R.string.tun_open_error);
-            VpnStatus.logError(mContext.getString(R.string.error) + e.getLocalizedMessage());
+            Logger.error("Failed to open the tun interface. " + e.getMessage());
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                VpnStatus.logError(R.string.tun_error_helpful);
+                Logger.error("On some custom ICS images the permission on /dev/tun might be wrong, or the tun " +
+                        "module might be missing completely. For CM9 images try the fix ownership option under " +
+                        "general settings");
             }
             return null;
         }
@@ -379,7 +372,7 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
             }
 
             if (ipAddr == null || netMask == null) {
-                VpnStatus.logError("Local routes are broken?! (Report to author) " + TextUtils.join("|", localRoutes));
+                Logger.error("Local routes are broken. " + TextUtils.join("|", localRoutes));
                 continue;
             }
 
@@ -417,7 +410,7 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
         NetworkSpace.ipAddress gatewayIP = new NetworkSpace.ipAddress(new CIDRIP(gateway, 32), false);
 
         if (mLocalIP == null) {
-            VpnStatus.logError("Local IP address unset but adding route?! This is broken! Please contact author with log");
+            Logger.error("Local IP address unset but adding route. This is broken.");
             return;
         }
 
@@ -431,11 +424,13 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
         }
 
         if (route.getLength() == 32 && !mask.equals("255.255.255.255")) {
-            VpnStatus.logWarning(R.string.route_not_cidr, dest, mask);
+            Logger.warn("Cannot make sense of " + dest + " and " + mask + " as IP route with CIDR netmask, " +
+                    "using /32 as netmask.");
         }
 
         if (route.normalize()) {
-            VpnStatus.logWarning(R.string.route_not_netip, dest, route.getLength(), route.getLength());
+            Logger.warn("Corrected route " + dest + "/" + route.getLength() + " to " + route.getLength() + "/" +
+                    route.getLength());
         }
 
         mRoutes.addIP(route, include);
@@ -450,9 +445,8 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
             Inet6Address ip = (Inet6Address) InetAddress.getAllByName(v6parts[0])[0];
             int mask = Integer.parseInt(v6parts[1]);
             mRoutesv6.addIPv6(ip, mask, included);
-
         } catch (UnknownHostException e) {
-            VpnStatus.logException(e);
+            Logger.error(e);
         }
     }
 
@@ -489,12 +483,16 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
                 mLocalIP.setLength(masklen);
             } else {
                 mLocalIP.setLength(32);
-                if (!"p2p".equals(mode))
-                    VpnStatus.logWarning(R.string.ip_not_cidr, local, netmask, mode);
+                if (!"p2p".equals(mode)) {
+                    Logger.warn("Got interface information " + local + " and " + netmask + ", assuming second " +
+                            "address is peer address of remote. Using /32 netmask for local IP. Mode given by " +
+                            "OpenVPN is " + mode);
+                }
             }
         }
         if (("p2p".equals(mode) && mLocalIP.getLength() < 32) || ("net30".equals(mode) && mLocalIP.getLength() < 30)) {
-            VpnStatus.logWarning(R.string.ip_looks_like_subnet, local, netmask, mode);
+            Logger.warn("Vpn topology " + mode + " specified but ifconfig " + local + " " + netmask + " looks more " +
+                    "like an IP address with a network mask. Assuming \"subnet\" topology.");
         }
 
         /* Workaround for Lollipop, it  does not route traffic to the VPNs own network mask */
@@ -512,16 +510,8 @@ public class OpenVpn implements Vpn, VpnStatus.StateListener, Callback {
         mLocalIPv6 = ipv6addr;
     }
 
-    @Override
-    public void updateState(String state, String logmessage, int resid, VpnStatus.ConnectionStatus level) {
-        // If the process is not running, ignore any state,
-        // Notification should be invisible in this state
-
-        if (mProcessThread == null) {
-            return;
-        }
-
-        mVpnService.setNotificationMessage(mContext.getString(resid));
+    public void updateNotification(int stringId) {
+        mVpnService.setNotificationMessage(mContext.getString(stringId));
     }
 
     @Override

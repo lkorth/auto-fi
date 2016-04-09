@@ -1,31 +1,8 @@
 <resources>
     <string name="app_name">Auto Fi</string>
     <string name="start_vpn">Start VPN</string>
-
-    <string name="route_rejected">Route rejected by Android</string>
     <string name="cancel_connection">Disconnect</string>
-    <string name="tun_error_helpful">On some custom ICS images the permission on /dev/tun might be wrong, or the tun module might be missing completely. For CM9 images try the fix ownership option under general settings</string>
-    <string name="tun_open_error">Failed to open the tun interface</string>
-    <string name="error">"Error: "</string>
-    <string name="last_openvpn_tun_config">Opening tun interface:</string>
-    <string name="local_ip_info">Local IPv4: %1$s/%2$d IPv6: %3$s MTU: %4$d</string>
-    <string name="dns_server_info">DNS Server: %1$s, Domain: %2$s</string>
-    <string name="routes_info_incl">Routes: %1$s %2$s</string>
-    <string name="routes_info_excl">Routes excluded: %1$s %2$s</string>
-    <string name="routes_debug">VpnService routes installed: %1$s %2$s</string>
-    <string name="ip_not_cidr">Got interface information %1$s and %2$s, assuming second address is peer address of remote. Using /32 netmask for local IP. Mode given by OpenVPN is \"%3$s\".</string>
-    <string name="route_not_cidr">Cannot make sense of %1$s and %2$s as IP route with CIDR netmask, using /32 as netmask.</string>
-    <string name="route_not_netip">Corrected route %1$s/%2$s to %3$s/%2$s</string>
-    <string name="opentun_no_ipaddr">Refusing to open tun device without IP information</string>
-    <string name="building_configration">Building configuration…</string>
-    <string name="netstatus">Network Status: %s</string>
-    <string name="mobile_info">%10$s %9$s running on %3$s %1$s (%2$s), Android %6$s (%7$s) API %4$d, ABI %5$s, (%8$s)</string>
-    <string name="warn_no_dns">No DNS servers being used. Name resolution may not work. Consider setting custom DNS Servers. Please also note that Android will keep using your proxy settings specified for your mobile/Wi-Fi connection when no DNS servers are set.</string>
-    <string name="getproxy_error">Error getting proxy settings: %s</string>
-    <string name="dns_add_error">Could not add DNS Server \"%1$s\", rejected by the system: %2$s</string>
-    <string name="ip_add_error">Could not configure IP Address \"%1$s\", rejected by the system: %2$s</string>
-    <string name="using_proxy">Using proxy %1$s %2$d</string>
-    <string name="minidump_generated">OpenVPN crashed unexpectedly. Please consider using the send Minidump option in the main menu</string>
+    <string name="building_configuration">Building configuration</string>
     <string name="session_ipv4string">%1$s</string>
     <string name="session_ipv6string">%2$s, %1$s</string>
     <string name="state_connecting">Connecting</string>
@@ -42,16 +19,5 @@
     <string name="state_resolve">Resolving host names</string>
     <string name="state_tcp_connect">Connecting (TCP)</string>
     <string name="state_nonetwork">Waiting for usable network</string>
-    <string name="built_by">built by %s</string>
-    <string name="debug_build">debug build</string>
-    <string name="official_build">official build</string>
-    <string name="unhandled_exception">Unhandled exception: %1$s\n\n%2$s</string>
-    <string name="unhandled_exception_context">%3$s: %1$s\n\n%2$s</string>
-    <string name="ip_looks_like_subnet">Vpn topology \"%3$s\" specified but ifconfig %1$s %2$s looks more like an IP address with a network mask. Assuming \"subnet\" topology.</string>
-    <string name="ignore_multicast_route">Ignoring multicast route: %s</string>
-    <string name="service_restarted">Restarting OpenVPN Service (App crashed probably crashed or killed for memory pressure)</string>
-    <string name="abi_mismatch">Preferred native ABI precedence of this device (%1$s) and ABI reported by native libraries (%2$s) mismatch</string>
-    <string name="permission_revoked">VPN permission revoked by OS (e.g. other VPN program started), stopping VPN</string>
-    <string name="reread_log">Reread (%d) log items from log cache file</string>
     <string name="unknown_state">Unknown state</string>
 </resources>

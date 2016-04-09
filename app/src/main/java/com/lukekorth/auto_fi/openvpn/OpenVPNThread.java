@@ -4,18 +4,14 @@ import android.annotation.SuppressLint;
 import android.util.Log;
 
 import com.lukekorth.auto_fi.R;
+import com.lukekorth.auto_fi.utilities.Logger;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -63,8 +59,7 @@ public class OpenVPNThread implements Runnable {
             startOpenVPNThreadArgs(mArgv, mProcessEnv);
             Log.i(TAG, "OpenVPN process exited");
         } catch (Exception e) {
-            VpnStatus.logException("Starting OpenVPN Thread", e);
-            Log.e(TAG, "OpenVPNThread Got " + e.toString());
+            Logger.error("Starting OpenVPN Thread " + e.getMessage());
         } finally {
             int exitvalue = 0;
             try {
@@ -72,13 +67,13 @@ public class OpenVPNThread implements Runnable {
                     exitvalue = mProcess.waitFor();
                 }
             } catch (IllegalThreadStateException ite) {
-                VpnStatus.logError("Illegal Thread state: " + ite.getLocalizedMessage());
+                Logger.error("Illegal Thread state: " + ite.getMessage());
             } catch (InterruptedException ie) {
-                VpnStatus.logError("InterruptedException: " + ie.getLocalizedMessage());
+                Logger.error("InterruptedException: " + ie.getMessage());
             }
 
             if (exitvalue != 0) {
-                VpnStatus.logError("Process exited with exit value " + exitvalue);
+                Logger.error("Process exited with exit value " + exitvalue);
                 if (mBrokenPie) {
                     /* This will probably fail since the NoPIE binary is probably not written */
                     String[] noPieArgv = OpenVpnSetup.replacePieWithNoPie(mArgv);
@@ -86,7 +81,7 @@ public class OpenVPNThread implements Runnable {
                     // We are already noPIE, nothing to gain
                     if (!noPieArgv.equals(mArgv)) {
                         mArgv = noPieArgv;
-                        VpnStatus.logInfo("PIE Version could not be executed. Trying no PIE version");
+                        Logger.info("PIE Version could not be executed. Trying no PIE version");
                         run();
                         return;
                     }
@@ -94,23 +89,11 @@ public class OpenVPNThread implements Runnable {
             }
 
             if (!mNoProcessExitStatus) {
-                VpnStatus.updateStateString("NOPROCESS", "No process running.", R.string.state_noprocess,
-                        VpnStatus.ConnectionStatus.LEVEL_NOTCONNECTED);
+                mService.updateNotification(R.string.state_noprocess);
             }
 
             if (mDumpPath != null) {
-                try {
-                    BufferedWriter logout = new BufferedWriter(new FileWriter(mDumpPath + ".log"));
-                    SimpleDateFormat timeformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.GERMAN);
-                    for (VpnStatus.LogItem li : VpnStatus.getlogbuffer()) {
-                        String time = timeformat.format(new Date(li.getLogtime()));
-                        logout.write(time + " " + li.getString(mService.getContext()) + "\n");
-                    }
-                    logout.close();
-                    VpnStatus.logError(R.string.minidump_generated);
-                } catch (IOException e) {
-                    VpnStatus.logError("Writing minidump log: " + e.getLocalizedMessage());
-                }
+                Logger.error("OpenVPN crashed unexpectedly.");
             }
 
             mService.getVpnService().shutdown();
@@ -163,29 +146,23 @@ public class OpenVPNThread implements Runnable {
                     String msg = m.group(4);
                     int logLevel = flags & 0x0F;
 
-                    VpnStatus.LogLevel logStatus = VpnStatus.LogLevel.INFO;
-
                     if ((flags & M_FATAL) != 0) {
-                        logStatus = VpnStatus.LogLevel.ERROR;
+                        Logger.error(msg);
                     } else if ((flags & M_NONFATAL) != 0) {
-                        logStatus = VpnStatus.LogLevel.WARNING;
+                        Logger.warn(msg);
                     } else if ((flags & M_WARN) != 0) {
-                        logStatus = VpnStatus.LogLevel.WARNING;
+                        Logger.warn(msg);
                     } else if ((flags & M_DEBUG) != 0) {
-                        logStatus = VpnStatus.LogLevel.VERBOSE;
+                        Logger.debug(msg);
+                    } else {
+                        Logger.info(msg);
                     }
-
-                    if (msg.startsWith("MANAGEMENT: CMD")) {
-                        logLevel = Math.max(4, logLevel);
-                    }
-
-                    VpnStatus.logMessageOpenVPN(logStatus, logLevel, msg);
                 } else {
-                    VpnStatus.logInfo("P:" + logline);
+                    Logger.info("P:" + logline);
                 }
             }
         } catch (IOException e) {
-            VpnStatus.logException("Error reading from output of OpenVPN process", e);
+            Logger.error("Error reading from output of OpenVPN process. " + e.getMessage());
             stopProcess();
         }
     }

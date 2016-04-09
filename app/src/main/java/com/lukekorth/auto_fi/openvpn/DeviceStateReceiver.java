@@ -10,7 +10,7 @@ import android.net.NetworkInfo.State;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 
-import com.lukekorth.auto_fi.R;
+import com.lukekorth.auto_fi.utilities.Logger;
 
 public class DeviceStateReceiver extends BroadcastReceiver implements OpenVPNManagement.PausedStateCallback {
 
@@ -136,7 +136,7 @@ public class DeviceStateReceiver extends BroadcastReceiver implements OpenVPNMan
         }
 
         if (!netstatestring.equals(lastStateMsg)) {
-            VpnStatus.logInfo(R.string.netstatus, netstatestring);
+            Logger.info("Network Status: " + netstatestring);
         }
         lastStateMsg = netstatestring;
     }

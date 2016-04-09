@@ -5,10 +5,10 @@ import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
 
 import com.lukekorth.auto_fi.BuildConfig;
 import com.lukekorth.auto_fi.R;
+import com.lukekorth.auto_fi.utilities.Logger;
 
 import junit.framework.Assert;
 
@@ -27,7 +27,6 @@ import java.util.Vector;
 
 public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
 
-    private static final String TAG = "openvpn";
     private LocalSocket mSocket;
     private OpenVpn mOpenVpn;
     private LinkedList<FileDescriptor> mFDList = new LinkedList<>();
@@ -66,7 +65,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
             mServerSocket = new LocalServerSocket(serverSocketLocal.getFileDescriptor());
             return true;
         } catch (IOException e) {
-            VpnStatus.logException(e);
+            Logger.error(e);
         }
 
         return false;
@@ -105,7 +104,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
                 try {
                     fds = mSocket.getAncillaryFileDescriptors();
                 } catch (IOException e) {
-                    VpnStatus.logException("Error reading fds from socket", e);
+                    Logger.error("Error reading fds from socket." + e.getMessage());
                 }
 
                 if (fds != null) {
@@ -119,7 +118,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
             }
         } catch (IOException e) {
             if (!e.getMessage().equals("socket closed") && !e.getMessage().equals("Connection reset by peer")) {
-                VpnStatus.logException(e);
+                Logger.error(e);
             }
         }
 
@@ -135,16 +134,14 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
 
             boolean result = mOpenVpn.getVpnService().protect(fdint);
             if (!result) {
-                VpnStatus.logWarning("Could not protect VPN socket");
+                Logger.warn("Could not protect VPN socket");
             }
 
             NativeUtils.jniclose(fdint);
-            return;
-        } catch (NoSuchMethodException | IllegalArgumentException | InvocationTargetException | IllegalAccessException | NullPointerException e) {
-            VpnStatus.logException("Failed to retrieve fd from socket (" + fd + ")", e);
+        } catch (NoSuchMethodException | IllegalArgumentException | InvocationTargetException | IllegalAccessException |
+                NullPointerException e) {
+            Logger.error("Failed to retrieve fd from socket (" + fd + ")." + e.getMessage());
         }
-
-        Log.d("Openvpn", "Failed to retrieve fd from socket: " + fd);
     }
 
     private String processInput(String pendingInput) {
@@ -189,8 +186,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
                     processLogMessage(argument);
                     break;
                 default:
-                    VpnStatus.logWarning("MGMT: Got unrecognized command" + command);
-                    Log.i(TAG, "Got unrecognized command" + command);
+                    Logger.warn("MGMT: Got unrecognized command" + command);
                     break;
             }
         } else if (command.startsWith("SUCCESS:")) {
@@ -201,54 +197,26 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
                 protectFileDescriptor(fdtoprotect);
             }
         } else {
-            Log.i(TAG, "Got unrecognized line from managment" + command);
-            VpnStatus.logWarning("MGMT: Got unrecognized line from management:" + command);
+            Logger.warn("MGMT: Got unrecognized line from management: " + command);
         }
     }
 
     private void processLogMessage(String argument) {
         String[] args = argument.split(",", 4);
-        // 0 unix time stamp
-        // 1 log level N,I,E etc.
-                /*
-                  (b) zero or more message flags in a single string:
-          I -- informational
-          F -- fatal error
-          N -- non-fatal error
-          W -- warning
-          D -- debug, and
-                 */
-        // 2 log message
-
-        Log.d("OpenVPN", argument);
-
-        VpnStatus.LogLevel level;
         switch (args[1]) {
-            case "I":
-                level = VpnStatus.LogLevel.INFO;
-                break;
             case "W":
-                level = VpnStatus.LogLevel.WARNING;
+                Logger.warn(args[3]);
                 break;
             case "D":
-                level = VpnStatus.LogLevel.VERBOSE;
+                Logger.debug(args[3]);
                 break;
             case "F":
-                level = VpnStatus.LogLevel.ERROR;
+                Logger.error(args[3]);
                 break;
             default:
-                level = VpnStatus.LogLevel.INFO;
+                Logger.info(args[3]);
                 break;
         }
-
-        int ovpnlevel = Integer.parseInt(args[2]) & 0x0F;
-        String msg = args[3];
-
-        if (msg.startsWith("MANAGEMENT: CMD")) {
-            ovpnlevel = Math.max(4, ovpnlevel);
-        }
-
-        VpnStatus.logMessageOpenVPN(level, ovpnlevel, msg);
     }
 
     boolean shouldBeRunning() {
@@ -260,8 +228,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
             releaseHoldCmd();
         } else {
             mWaitingForRelease = true;
-
-            VpnStatus.updateStatePause(lastPauseReason);
+            mOpenVpn.updateNotification(R.string.state_nonetwork);
         }
     }
 
@@ -298,11 +265,10 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
 
         if (proxyaddr instanceof InetSocketAddress) {
             InetSocketAddress isa = (InetSocketAddress) proxyaddr;
-
-            VpnStatus.logInfo(R.string.using_proxy, isa.getHostName(), isa.getPort());
-
             String proxycmd = String.format(Locale.ENGLISH, "proxy HTTP %s %d\n", isa.getHostName(), isa.getPort());
             managementCommand(proxycmd);
+
+            Logger.info("Using proxy " + isa.getHostName() + " " + isa.getPort());
         } else {
             managementCommand("proxy NONE\n");
         }
@@ -313,9 +279,9 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
         String currentstate = args[1];
 
         if (args[2].equals(",,")) {
-            VpnStatus.updateStateString(currentstate, "");
+            mOpenVpn.updateNotification(getLocalizedState(currentstate));
         } else {
-            VpnStatus.updateStateString(currentstate, args[2]);
+            mOpenVpn.updateNotification(getLocalizedState(currentstate));
         }
     }
 
@@ -348,7 +314,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
                 } else if (routeparts.length >= 3) {
                     mOpenVpn.addRoute(routeparts[0], routeparts[1], routeparts[2], null);
                 } else {
-                    VpnStatus.logError("Unrecognized ROUTE cmd:" + Arrays.toString(routeparts) + " | " + argument);
+                    Logger.error("Unrecognized ROUTE cmd:" + Arrays.toString(routeparts) + " | " + argument);
                 }
 
                 break;
@@ -375,7 +341,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
                 }
                 break;
             default:
-                Log.e(TAG, "Unknown needok command " + argument);
+                Logger.error("Unknown needok command " + argument);
                 return;
         }
 
@@ -385,7 +351,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
 
     private boolean sendTunFD(String needed, String extra) {
         if (!extra.equals("tun")) {
-            VpnStatus.logError(String.format("Device type %s requested, but only tun is accepted", extra));
+            Logger.error("Device type " + extra + " requested, but only tun is accepted");
             return false;
         }
 
@@ -419,7 +385,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
             return true;
         } catch (NoSuchMethodException | IllegalArgumentException | InvocationTargetException |
                 IOException | IllegalAccessException exp) {
-            VpnStatus.logException("Could not send fd over socket", exp);
+            Logger.error("Could not send fd over socket" + exp.getMessage());
         }
 
         return false;
@@ -462,9 +428,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
         if (!mWaitingForRelease) {
             managementCommand("signal SIGUSR1\n");
         } else {
-            // If signalusr1 is called update the state string
-            // if there is another for stopping
-            VpnStatus.updateStatePause(lastPauseReason);
+            mOpenVpn.updateNotification(R.string.state_nonetwork);
         }
     }
 
@@ -489,5 +453,36 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
     public boolean stopVPN(boolean replaceConnection) {
         mShuttingDown = true;
         return stopOpenVPN();
+    }
+
+    private int getLocalizedState(String state) {
+        switch (state) {
+            case "CONNECTING":
+                return R.string.state_connecting;
+            case "WAIT":
+                return R.string.state_wait;
+            case "AUTH":
+                return R.string.state_auth;
+            case "GET_CONFIG":
+                return R.string.state_get_config;
+            case "ASSIGN_IP":
+                return R.string.state_assign_ip;
+            case "ADD_ROUTES":
+                return R.string.state_add_routes;
+            case "CONNECTED":
+                return R.string.state_connected;
+            case "DISCONNECTED":
+                return R.string.state_disconnected;
+            case "RECONNECTING":
+                return R.string.state_reconnecting;
+            case "EXITING":
+                return R.string.state_exiting;
+            case "RESOLVE":
+                return R.string.state_resolve;
+            case "TCP_CONNECT":
+                return R.string.state_tcp_connect;
+            default:
+                return R.string.unknown_state;
+        }
     }
 }
