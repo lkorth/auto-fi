@@ -4,8 +4,11 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.VpnService;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
@@ -13,6 +16,8 @@ import com.lukekorth.auto_fi.openvpn.ConfigurationGenerator;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
 
 import java.io.IOException;
+
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,6 +27,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // required to wifi scan results
+        if (ContextCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{ ACCESS_COARSE_LOCATION}, 1);
+        }
     }
 
     public void startVpn(View v) {
@@ -43,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == START_VPN) {
             if (resultCode == Activity.RESULT_OK) {
-                VpnHelper.startVpn(getApplicationContext());
+                VpnHelper.startVpn(this);
             } else {
                 // user did not consent to VPN
             }
