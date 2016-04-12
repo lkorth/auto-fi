@@ -9,8 +9,10 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 
+import com.lukekorth.auto_fi.models.Settings;
 import com.lukekorth.auto_fi.models.WifiNetwork;
 import com.lukekorth.auto_fi.utilities.Logger;
+import com.lukekorth.auto_fi.utilities.VpnHelper;
 
 import java.util.List;
 
@@ -18,7 +20,8 @@ public class WifiScanReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)) {
+        if (Settings.isEnabled(context) && VpnHelper.isVpnEnabled(context) &&
+                intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)) {
             WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 
             List<ScanResult> scanResults = wifiManager.getScanResults();

@@ -8,8 +8,10 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
+import com.lukekorth.auto_fi.models.Settings;
 import com.lukekorth.auto_fi.services.ConnectivityCheckIntentService;
 import com.lukekorth.auto_fi.utilities.Logger;
+import com.lukekorth.auto_fi.utilities.VpnHelper;
 import com.lukekorth.auto_fi.utilities.WifiUtilities;
 
 public class WifiConnectionReceiver extends BroadcastReceiver {
@@ -17,7 +19,7 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         NetworkInfo networkInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-        if (networkInfo.isConnected()) {
+        if (Settings.isEnabled(context) && VpnHelper.isVpnEnabled(context) && networkInfo.isConnected()) {
             WifiInfo wifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
             WifiConfiguration configuration = WifiUtilities.getWifiNetwork(wifiInfo.getNetworkId());
             if (configuration != null && configuration.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.NONE)) {
