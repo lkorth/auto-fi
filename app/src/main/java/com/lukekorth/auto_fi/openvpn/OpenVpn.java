@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.VpnService;
 import android.os.Build;
-import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -40,12 +39,9 @@ public class OpenVpn implements Vpn, Callback {
     private int mMtu;
     private String mLocalIPv6 = null;
     private DeviceStateReceiver mDeviceStateReceiver;
-    private boolean mStarting = false;
     private OpenVPNManagement mManagement;
     private String mLastTunCfg;
     private String mRemoteGW;
-    private final Object mProcessLock = new Object();
-    private Runnable mOpenVPNThread;
     private Context mContext;
     private VpnServiceInterface mVpnService;
 
@@ -57,29 +53,39 @@ public class OpenVpn implements Vpn, Callback {
     @MainThread
     @Override
     public void start() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                startOpenVPN();
-            }
-        }).start();
+        Logger.info("Building configuration");
+        updateNotification(R.string.building_configuration);
+
+        String nativeLibraryDirectory = mContext.getApplicationInfo().nativeLibraryDir;
+
+        // Also writes OpenVPN binary
+        String[] argv = OpenVpnSetup.buildOpenvpnArgv(mContext);
+
+        // Open the Management Interface start a Thread that handles incoming messages of the management socket
+        OpenVpnManagementThread managementThread = new OpenVpnManagementThread(this);
+        if (managementThread.openManagementInterface(mContext)) {
+            Thread socketManagerThread = new Thread(managementThread, "OpenVPNManagementThread");
+            socketManagerThread.start();
+            mManagement = managementThread;
+            Logger.info("started Socket Thread");
+        } else {
+            stop();
+            return;
+        }
+
+        HashMap<String, String> env = new HashMap<>();
+        Runnable processThread = new OpenVPNThread(this, argv, env, nativeLibraryDirectory);
+        mProcessThread = new Thread(processThread, "OpenVPNProcessThread");
+        mProcessThread.start();
+
+        registerDeviceStateReceiver(mManagement);
     }
 
     @MainThread
     @Override
     public void stop() {
         mManagement.stopVPN(false);
-
-        synchronized (mProcessLock) {
-            if (mProcessThread != null) {
-                mManagement.stopVPN(false);
-            }
-            mProcessThread = null;
-        }
-
         unregisterDeviceStateReceiver();
-
-        mOpenVPNThread = null;
     }
 
     Context getContext() {
@@ -90,7 +96,7 @@ public class OpenVpn implements Vpn, Callback {
         return mVpnService;
     }
 
-    synchronized void registerDeviceStateReceiver(OpenVPNManagement magnagement) {
+    private void registerDeviceStateReceiver(OpenVPNManagement magnagement) {
         // Registers BroadcastReceiver to track network connection changes.
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -100,84 +106,10 @@ public class OpenVpn implements Vpn, Callback {
         mContext.registerReceiver(mDeviceStateReceiver, filter);
     }
 
-    synchronized void unregisterDeviceStateReceiver() {
+    private void unregisterDeviceStateReceiver() {
         if (mDeviceStateReceiver != null) {
             mContext.unregisterReceiver(mDeviceStateReceiver);
-        }
-        mDeviceStateReceiver = null;
-    }
-
-    private void startOpenVPN() {
-        Logger.info("Building configuration");
-        updateNotification(R.string.building_configuration);
-
-        String nativeLibraryDirectory = mContext.getApplicationInfo().nativeLibraryDir;
-
-        // Also writes OpenVPN binary
-        String[] argv = OpenVpnSetup.buildOpenvpnArgv(mContext);
-
-        // Set a flag that we are starting a new VPN
-        mStarting = true;
-
-        // Stop the previous session by interrupting the thread.
-        stopOldOpenVPNProcess();
-        // An old running VPN should now be exited
-        mStarting = false;
-
-        // Open the Management Interface start a Thread that handles incoming messages of the management socket
-        OpenVpnManagementThread ovpnManagementThread = new OpenVpnManagementThread(this);
-        if (ovpnManagementThread.openManagementInterface(mContext)) {
-            Thread mSocketManagerThread = new Thread(ovpnManagementThread, "OpenVPNManagementThread");
-            mSocketManagerThread.start();
-            mManagement = ovpnManagementThread;
-            Logger.info("started Socket Thread");
-        } else {
-            stop();
-            return;
-        }
-
-        Runnable processThread;
-        HashMap<String, String> env = new HashMap<>();
-        processThread = new OpenVPNThread(this, argv, env, nativeLibraryDirectory);
-        mOpenVPNThread = processThread;
-
-        synchronized (mProcessLock) {
-            mProcessThread = new Thread(processThread, "OpenVPNProcessThread");
-            mProcessThread.start();
-        }
-
-        new Handler(mContext.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                if (mDeviceStateReceiver != null) {
-                    unregisterDeviceStateReceiver();
-                }
-
-                registerDeviceStateReceiver(mManagement);
-            }
-        });
-    }
-
-    private void stopOldOpenVPNProcess() {
-        if (mManagement != null) {
-            if (mOpenVPNThread != null) {
-                ((OpenVPNThread) mOpenVPNThread).setReplaceConnection();
-            }
-
-            if (mManagement.stopVPN(true)) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ignored) {}
-            }
-        }
-
-        synchronized (mProcessLock) {
-            if (mProcessThread != null) {
-                mProcessThread.interrupt();
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ignored) {}
-            }
+            mDeviceStateReceiver = null;
         }
     }
 

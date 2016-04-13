@@ -58,7 +58,6 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
 
     @Override
     public void onDestroy() {
-        mVpn.stop();
         unregisterReceiver(mDisconnectReceiver);
     }
 
