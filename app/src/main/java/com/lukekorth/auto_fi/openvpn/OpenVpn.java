@@ -38,8 +38,7 @@ public class OpenVpn implements Vpn, Callback {
     private CIDRIP mLocalIP = null;
     private int mMtu;
     private String mLocalIPv6 = null;
-    private DeviceStateReceiver mDeviceStateReceiver;
-    private OpenVPNManagement mManagement;
+    private OpenVpnManagementThread mManagementThread;
     private String mLastTunCfg;
     private String mRemoteGW;
     private Context mContext;
@@ -66,7 +65,7 @@ public class OpenVpn implements Vpn, Callback {
         if (managementThread.openManagementInterface(mContext)) {
             Thread socketManagerThread = new Thread(managementThread, "OpenVPNManagementThread");
             socketManagerThread.start();
-            mManagement = managementThread;
+            mManagementThread = managementThread;
             Logger.info("started Socket Thread");
         } else {
             stop();
@@ -77,15 +76,12 @@ public class OpenVpn implements Vpn, Callback {
         Runnable processThread = new OpenVPNThread(this, argv, env, nativeLibraryDirectory);
         mProcessThread = new Thread(processThread, "OpenVPNProcessThread");
         mProcessThread.start();
-
-        registerDeviceStateReceiver(mManagement);
     }
 
     @MainThread
     @Override
     public void stop() {
-        mManagement.stopVPN(false);
-        unregisterDeviceStateReceiver();
+        mManagementThread.stopVPN();
     }
 
     Context getContext() {
@@ -94,23 +90,6 @@ public class OpenVpn implements Vpn, Callback {
 
     VpnServiceInterface getVpnService() {
         return mVpnService;
-    }
-
-    private void registerDeviceStateReceiver(OpenVPNManagement magnagement) {
-        // Registers BroadcastReceiver to track network connection changes.
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(Intent.ACTION_SCREEN_ON);
-        mDeviceStateReceiver = new DeviceStateReceiver(magnagement);
-        mContext.registerReceiver(mDeviceStateReceiver, filter);
-    }
-
-    private void unregisterDeviceStateReceiver() {
-        if (mDeviceStateReceiver != null) {
-            mContext.unregisterReceiver(mDeviceStateReceiver);
-            mDeviceStateReceiver = null;
-        }
     }
 
     private String getTunConfigString() {
@@ -455,10 +434,6 @@ public class OpenVpn implements Vpn, Callback {
         } else {
             return false;
         }
-    }
-
-    public OpenVPNManagement getManagement() {
-        return mManagement;
     }
 
     public String getTunReopenStatus() {

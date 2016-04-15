@@ -10,6 +10,7 @@ import android.net.wifi.WifiManager;
 
 import com.lukekorth.auto_fi.models.Settings;
 import com.lukekorth.auto_fi.services.ConnectivityCheckIntentService;
+import com.lukekorth.auto_fi.services.VpnService;
 import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
 import com.lukekorth.auto_fi.utilities.WifiUtilities;
@@ -18,14 +19,20 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        NetworkInfo networkInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-        if (Settings.isEnabled(context) && VpnHelper.isVpnEnabled(context) && networkInfo.isConnected()) {
+        if (WifiUtilities.isConnectedToWifi(context)) {
             WifiInfo wifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
-            WifiConfiguration configuration = WifiUtilities.getWifiNetwork(wifiInfo.getNetworkId());
-            if (configuration != null && configuration.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.NONE)) {
-                Logger.info("Connected to unsecured wifi network, checking connectivity");
-                context.startService(new Intent(context, ConnectivityCheckIntentService.class));
+            if (wifiInfo != null) {
+                WifiConfiguration configuration = WifiUtilities.getWifiNetwork(wifiInfo.getNetworkId());
+                if (configuration != null && configuration.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.NONE)) {
+                    if (Settings.isEnabled(context) && VpnHelper.isVpnEnabled(context)) {
+                        Logger.info("Connected to unsecured wifi network, checking connectivity");
+                        context.startService(new Intent(context, ConnectivityCheckIntentService.class));
+                    }
+                }
             }
+        } else {
+            Logger.debug("Disconnected from wifi, sending broadcast to disconnect VPN");
+            context.sendBroadcast(new Intent(VpnService.DISCONNECT_VPN_INTENT_ACTION));
         }
     }
 }

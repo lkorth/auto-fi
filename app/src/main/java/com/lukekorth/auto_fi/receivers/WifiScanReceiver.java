@@ -13,6 +13,7 @@ import com.lukekorth.auto_fi.models.Settings;
 import com.lukekorth.auto_fi.models.WifiNetwork;
 import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
+import com.lukekorth.auto_fi.utilities.WifiUtilities;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class WifiScanReceiver extends BroadcastReceiver {
             WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 
             List<ScanResult> scanResults = wifiManager.getScanResults();
-            if (!isConnectedToWifi(context) && scanResults.size() > 0) {
+            if (!WifiUtilities.isConnectedToWifi(context) && scanResults.size() > 0) {
                 ScanResult selectedNetwork = null;
                 for (ScanResult scanResult : wifiManager.getScanResults()) {
                     if (isNetworkUnsecured(scanResult)) {
@@ -41,7 +42,12 @@ public class WifiScanReceiver extends BroadcastReceiver {
                     Logger.debug("Found network " + selectedNetwork.SSID + " nearby");
 
                     boolean configured = false;
-                    for (WifiConfiguration configuredNetwork : wifiManager.getConfiguredNetworks()) {
+                    List<WifiConfiguration> wifiConfigurationList = wifiManager.getConfiguredNetworks();
+                    if (wifiConfigurationList == null) {
+                        return;
+                    }
+
+                    for (WifiConfiguration configuredNetwork : wifiConfigurationList) {
                         if (configuredNetwork.SSID.equals(selectedNetwork.SSID)) {
                             Logger.debug("Network " + selectedNetwork.SSID + " is already configured.");
                             configured = true;
@@ -65,13 +71,7 @@ public class WifiScanReceiver extends BroadcastReceiver {
         }
     }
 
-    private boolean isConnectedToWifi(Context context) {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        return networkInfo != null && networkInfo.isConnectedOrConnecting();
-    }
-
-    public boolean isNetworkUnsecured(ScanResult result) {
+    private boolean isNetworkUnsecured(ScanResult result) {
         return !(result.capabilities.contains("WEP") || result.capabilities.contains("PSK") ||
                 result.capabilities.contains("EAP"));
     }

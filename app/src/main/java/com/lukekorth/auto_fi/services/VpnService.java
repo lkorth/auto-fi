@@ -18,8 +18,9 @@ import com.lukekorth.auto_fi.utilities.Logger;
 
 public class VpnService extends android.net.VpnService implements VpnServiceInterface {
 
+    public static final String DISCONNECT_VPN_INTENT_ACTION = "com.lukekorth.auto_fi.DISCONNECT_VPN";
+
     private static final int NOTIFICATION_ID = 1;
-    private static final String DISCONNECT_VPN = "com.lukekorth.auto_fi.DISCONNECT_VPN";
 
     private Vpn mVpn;
     private BroadcastReceiver mDisconnectReceiver;
@@ -69,7 +70,7 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
 
     @Override
     public void setNotificationMessage(String message) {
-        Intent disconnectVPN = new Intent(DISCONNECT_VPN);
+        Intent disconnectVPN = new Intent(DISCONNECT_VPN_INTENT_ACTION);
         PendingIntent disconnectPendingIntent = PendingIntent.getBroadcast(this, 0, disconnectVPN, 0);
 
         Notification.Builder builder = new Notification.Builder(this)
@@ -92,7 +93,7 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
 
     private void registerDisconnectReceiver() {
         IntentFilter filter = new IntentFilter();
-        filter.addAction(DISCONNECT_VPN);
+        filter.addAction(DISCONNECT_VPN_INTENT_ACTION);
         mDisconnectReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {

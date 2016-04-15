@@ -25,20 +25,15 @@ import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Vector;
 
-public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
+public class OpenVpnManagementThread implements Runnable {
 
     private LocalSocket mSocket;
     private OpenVpn mOpenVpn;
     private LinkedList<FileDescriptor> mFDList = new LinkedList<>();
     private LocalServerSocket mServerSocket;
-    private boolean mWaitingForRelease = false;
-    private long mLastHoldRelease = 0;
+    private boolean mShuttingDown;
 
     private static final Vector<OpenVpnManagementThread> active = new Vector<>();
-
-    private PauseReason lastPauseReason = PauseReason.NO_NETWORK;
-    private PausedStateCallback mPauseCallback;
-    private boolean mShuttingDown;
 
     public OpenVpnManagementThread(OpenVpn openVpn) {
         mOpenVpn = openVpn;
@@ -219,37 +214,10 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
         }
     }
 
-    boolean shouldBeRunning() {
-        return mPauseCallback != null && mPauseCallback.shouldBeRunning();
-    }
-
     private void handleHold() {
-        if (shouldBeRunning()) {
-            releaseHoldCmd();
-        } else {
-            mWaitingForRelease = true;
-            mOpenVpn.updateNotification(R.string.state_nonetwork);
-        }
-    }
-
-    private void releaseHoldCmd() {
-        if ((System.currentTimeMillis() - mLastHoldRelease) < 5000) {
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException ignored) {}
-        }
-
-        mWaitingForRelease = false;
-        mLastHoldRelease = System.currentTimeMillis();
         managementCommand("hold release\n");
-        managementCommand("bytecount " + mBytecountInterval + "\n");
+        managementCommand("bytecount 2\n");
         managementCommand("state on\n");
-    }
-
-    public void releaseHold() {
-        if (mWaitingForRelease) {
-            releaseHoldCmd();
-        }
     }
 
     private void processProxyCMD(String argument) {
@@ -408,49 +376,7 @@ public class OpenVpnManagementThread implements Runnable, OpenVPNManagement {
         }
     }
 
-    @Override
-    public void networkChange(boolean samenetwork) {
-        if (mWaitingForRelease) {
-            releaseHold();
-        } else if (samenetwork) {
-            managementCommand("network-change samenetwork\n");
-        } else {
-            managementCommand("network-change\n");
-        }
-    }
-
-    @Override
-    public void setPauseCallback(PausedStateCallback callback) {
-        mPauseCallback = callback;
-    }
-
-    public void signalusr1() {
-        if (!mWaitingForRelease) {
-            managementCommand("signal SIGUSR1\n");
-        } else {
-            mOpenVpn.updateNotification(R.string.state_nonetwork);
-        }
-    }
-
-    public void reconnect() {
-        signalusr1();
-        releaseHold();
-    }
-
-    @Override
-    public void pause(PauseReason reason) {
-        lastPauseReason = reason;
-        signalusr1();
-    }
-
-    @Override
-    public void resume() {
-        releaseHold();
-        lastPauseReason = PauseReason.NO_NETWORK;
-    }
-
-    @Override
-    public boolean stopVPN(boolean replaceConnection) {
+    public boolean stopVPN() {
         mShuttingDown = true;
         return stopOpenVPN();
     }
