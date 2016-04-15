@@ -8,6 +8,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.text.TextUtils;
 
 import com.lukekorth.auto_fi.models.Settings;
 import com.lukekorth.auto_fi.models.WifiNetwork;
@@ -38,7 +39,7 @@ public class WifiScanReceiver extends BroadcastReceiver {
                     }
                 }
 
-                if (selectedNetwork != null) {
+                if (selectedNetwork != null && !TextUtils.isEmpty(selectedNetwork.SSID.trim())) {
                     Logger.debug("Found network " + selectedNetwork.SSID + " nearby");
 
                     boolean configured = false;
