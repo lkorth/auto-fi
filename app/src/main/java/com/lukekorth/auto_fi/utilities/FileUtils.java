@@ -10,8 +10,12 @@ import java.io.InputStream;
 
 public class FileUtils {
 
+    public static File getFile(Context context, String filename) {
+        return new File(context.getFilesDir(), filename);
+    }
+
     public static boolean isFileAvailable(Context context, String filename) {
-        return new File(context.getFilesDir(), filename).exists();
+        return getFile(context, filename).exists();
     }
 
     public static File writeAssetFileToDisk(Context context, String assetFile, boolean executable)

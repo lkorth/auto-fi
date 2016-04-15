@@ -69,6 +69,8 @@ public class OpenVpnSetup {
                 } catch (IOException e) {
                     Logger.error(e);
                 }
+            } else {
+                return FileUtils.getFile(context, getMiniVpnExecutableName() + "." + abi).getAbsolutePath();
             }
         }
 
