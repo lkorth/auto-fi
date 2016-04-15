@@ -1,60 +1,41 @@
 package com.lukekorth.auto_fi.openvpn;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.Nullable;
 
+import com.lukekorth.auto_fi.utilities.FileUtils;
 import com.lukekorth.auto_fi.utilities.Logger;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Vector;
 
 public class OpenVpnSetup {
 
+    private static final String CONFIGURATION_FILE = "open_vpn_client_configuration.ovpn";
     private static final String MININONPIEVPN = "nopie_openvpn";
     private static final String MINIPIEVPN = "pie_openvpn";
 
-    @SuppressWarnings("deprecation")
-    private static String writeMiniVPN(Context context) {
-        String[] abis;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            abis = getSupportedABIsLollipop();
-        } else {
-            abis = new String[]{ Build.CPU_ABI, Build.CPU_ABI2 };
-        }
-
-        String nativeAPI = NativeUtils.getNativeAPI();
-        if (!nativeAPI.equals(abis[0])) {
-            Logger.warn("Preferred native ABI precedence of this device (" + Arrays.toString(abis) + ") and ABI " +
-                    "reported by native libraries (" + nativeAPI + ") mismatch");
-            abis = new String[] {nativeAPI};
-        }
-
-        for (String abi: abis) {
-            File vpnExecutable = new File(context.getCacheDir(), getMiniVPNExecutableName() + "." + abi);
-            if ((vpnExecutable.exists() && vpnExecutable.canExecute()) || writeMiniVPNBinary(context, abi, vpnExecutable)) {
-                return vpnExecutable.getPath();
-            }
-        }
-
-        return null;
-	}
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private static String[] getSupportedABIsLollipop() {
-        return Build.SUPPORTED_ABIS;
+    public static void writeConfigurationFile(Context context) throws IOException {
+        FileUtils.writeAssetFileToDisk(context, CONFIGURATION_FILE, false);
     }
 
-    private static String getMiniVPNExecutableName() {
-        if (Build.VERSION.SDK_INT  >= Build.VERSION_CODES.JELLY_BEAN) {
-            return MINIPIEVPN;
-        } else {
-            return MININONPIEVPN;
+    @Nullable
+    public static String[] buildOpenVpnArgv(Context context) {
+        String[] args = new String[3];
+
+        String binaryName = getOpenVpnExecutable(context);
+        if(binaryName == null) {
+            Logger.error("Error writing minivpn binary");
+            return null;
         }
+
+        args[0] = binaryName;
+        args[1] = "--config";
+        args[2] = context.getFilesDir().getAbsolutePath() + "/" + CONFIGURATION_FILE;
+
+        return args;
     }
 
     public static String[] replacePieWithNoPie(String[] mArgv) {
@@ -62,54 +43,43 @@ public class OpenVpnSetup {
         return mArgv;
     }
 
-    static String[] buildOpenvpnArgv(Context c) {
-        Vector<String> args = new Vector<>();
-
-        String binaryName = writeMiniVPN(c);
-        if(binaryName==null) {
-            Logger.error("Error writing minivpn binary");
-            return null;
+    @Nullable
+    private static String getOpenVpnExecutable(Context context) {
+        String[] abis;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            abis = Build.SUPPORTED_ABIS;
+        } else {
+            abis = new String[] { Build.CPU_ABI, Build.CPU_ABI2 };
         }
 
-        args.add(binaryName);
+        String nativeAPI = NativeUtils.getNativeAPI();
+        if (!nativeAPI.equals(abis[0])) {
+            Logger.warn("Preferred native ABI precedence of this device (" + Arrays.toString(abis) + ") and ABI " +
+                    "reported by native libraries (" + nativeAPI + ") mismatch");
+            abis = new String[] { nativeAPI };
+        }
 
-        args.add("--config");
-        args.add(ConfigurationGenerator.getConfigurationFilePath(c));
+        for (String abi: abis) {
+            if (!FileUtils.isFileAvailable(context, getMiniVpnExecutableName() + "." + abi)) {
+                try {
+                    File file = FileUtils.writeAssetFileToDisk(context, getMiniVpnExecutableName() + "." + abi, true);
+                    if (file != null) {
+                        return file.getAbsolutePath();
+                    }
+                } catch (IOException e) {
+                    Logger.error(e);
+                }
+            }
+        }
 
-        return args.toArray(new String[args.size()]);
+        return null;
     }
 
-    private static boolean writeMiniVPNBinary(Context context, String abi, File mvpnout) {
-        try {
-            InputStream mvpn;
-
-            try {
-                mvpn = context.getAssets().open(getMiniVPNExecutableName() + "." + abi);
-            } catch (IOException errabi) {
-                Logger.error("Failed getting assets for architecture " + abi);
-                return false;
-            }
-
-            FileOutputStream fout = new FileOutputStream(mvpnout);
-
-            byte buf[]= new byte[4096];
-
-            int lenread = mvpn.read(buf);
-            while(lenread> 0) {
-                fout.write(buf, 0, lenread);
-                lenread = mvpn.read(buf);
-            }
-            fout.close();
-
-            if(!mvpnout.setExecutable(true)) {
-                Logger.error("Failed to make OpenVPN executable");
-                return false;
-            }
-
-            return true;
-        } catch (IOException e) {
-            Logger.error(e);
-            return false;
+    private static String getMiniVpnExecutableName() {
+        if (Build.VERSION.SDK_INT  >= Build.VERSION_CODES.JELLY_BEAN) {
+            return MINIPIEVPN;
+        } else {
+            return MININONPIEVPN;
         }
     }
 }

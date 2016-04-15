@@ -15,7 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.lukekorth.auto_fi.openvpn.ConfigurationGenerator;
+import com.lukekorth.auto_fi.openvpn.OpenVpnSetup;
 import com.lukekorth.auto_fi.utilities.LogReporting;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
 
@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void startVpn(View v) {
         try {
-            ConfigurationGenerator.createConfigurationFile(this);
+            OpenVpnSetup.writeConfigurationFile(this);
         } catch (IOException ignored) {}
 
         Intent intent = VpnService.prepare(this);

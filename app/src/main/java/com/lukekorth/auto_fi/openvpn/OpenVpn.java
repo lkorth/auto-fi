@@ -2,9 +2,6 @@ package com.lukekorth.auto_fi.openvpn;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.Handler.Callback;
@@ -58,7 +55,7 @@ public class OpenVpn implements Vpn, Callback {
         String nativeLibraryDirectory = mContext.getApplicationInfo().nativeLibraryDir;
 
         // Also writes OpenVPN binary
-        String[] argv = OpenVpnSetup.buildOpenvpnArgv(mContext);
+        String[] argv = OpenVpnSetup.buildOpenVpnArgv(mContext);
 
         // Open the Management Interface start a Thread that handles incoming messages of the management socket
         OpenVpnManagementThread managementThread = new OpenVpnManagementThread(this);
