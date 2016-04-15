@@ -10,9 +10,13 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.lukekorth.auto_fi.openvpn.ConfigurationGenerator;
+import com.lukekorth.auto_fi.utilities.LogReporting;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
 
 import java.io.IOException;
@@ -58,6 +62,23 @@ public class MainActivity extends AppCompatActivity {
                 // user did not consent to VPN
             }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_activity, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.contact_developer) {
+            new LogReporting(this).collectAndSendLogs();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     public static PendingIntent getStartPendingIntent(Context context) {
