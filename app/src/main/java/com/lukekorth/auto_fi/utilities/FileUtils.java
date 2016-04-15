@@ -42,4 +42,10 @@ public class FileUtils {
             return null;
         }
     }
+
+    public static void writeToDisk(Context context, String fileContents, String filename) throws IOException {
+        FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE);
+        fos.write(fileContents.getBytes());
+        fos.close();
+    }
 }

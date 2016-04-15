@@ -16,10 +16,9 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.lukekorth.auto_fi.openvpn.OpenVpnSetup;
+import com.lukekorth.auto_fi.services.OpenVpnConfigurationIntentService;
 import com.lukekorth.auto_fi.utilities.LogReporting;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
-
-import java.io.IOException;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 
@@ -38,11 +37,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void startVpn(View v) {
-        try {
-            OpenVpnSetup.writeConfigurationFile(this);
-        } catch (IOException ignored) {}
+    @Override
+    protected void onResume() {
+        super.onResume();
 
+        if (!OpenVpnSetup.isSetup(this)) {
+            startService(new Intent(this, OpenVpnConfigurationIntentService.class));
+        }
+    }
+
+    public void startVpn(View v) {
         Intent intent = VpnService.prepare(this);
         if (intent != null) {
             startActivityForResult(intent, START_VPN);

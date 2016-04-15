@@ -9,6 +9,7 @@ import com.lukekorth.auto_fi.utilities.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 public class OpenVpnSetup {
@@ -17,8 +18,24 @@ public class OpenVpnSetup {
     private static final String MININONPIEVPN = "nopie_openvpn";
     private static final String MINIPIEVPN = "pie_openvpn";
 
-    public static void writeConfigurationFile(Context context) throws IOException {
-        FileUtils.writeAssetFileToDisk(context, CONFIGURATION_FILE, false);
+    public static boolean isSetup(Context context) {
+        return FileUtils.isFileAvailable(context, CONFIGURATION_FILE);
+    }
+
+    public static void writeConfigurationFile(Context context, String publicKey, String privateKey)
+            throws IOException {
+        InputStream in = context.getAssets().open(CONFIGURATION_FILE);
+        byte[] buffer = new byte[in.available()];
+        in.read(buffer);
+        in.close();
+
+        String configuration = new String(buffer);
+        configuration = configuration.replace("<- management string here ->",
+                context.getCacheDir().getAbsolutePath() + "/mgmtsocket unix");
+        configuration = configuration.replace("<- public key here ->\n", publicKey);
+        configuration = configuration.replace("<- private key here ->\n", privateKey);
+
+        FileUtils.writeToDisk(context, configuration, CONFIGURATION_FILE);
     }
 
     @Nullable

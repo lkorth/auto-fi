@@ -2,9 +2,16 @@ package com.lukekorth.auto_fi;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
+import com.lukekorth.auto_fi.openvpn.OpenVpnSetup;
 import com.lukekorth.auto_fi.utilities.PRNGFixes;
 import com.lukekorth.mailable_log.MailableLog;
+
+import org.spongycastle.operator.OperatorCreationException;
+
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;

@@ -8,12 +8,11 @@ import android.net.wifi.WifiManager;
 
 import com.lukekorth.auto_fi.models.WifiNetwork;
 import com.lukekorth.auto_fi.utilities.Logger;
+import com.lukekorth.auto_fi.utilities.StreamUtils;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
 import com.lukekorth.auto_fi.utilities.WifiUtilities;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -39,7 +38,7 @@ public class ConnectivityCheckIntentService extends IntentService {
 
             int responseCode = connection.getResponseCode();
             if (responseCode == HTTP_OK) {
-                if (readStream(connection.getInputStream()).contains("E1A304E5-E244-4846-B613-6290055A211D")) {
+                if (StreamUtils.readStream(connection.getInputStream()).contains("E1A304E5-E244-4846-B613-6290055A211D")) {
                     hasConnectivity = true;
                 }
             }
@@ -73,18 +72,5 @@ public class ConnectivityCheckIntentService extends IntentService {
         } else {
             VpnHelper.startVpn(this);
         }
-    }
-
-    private String readStream(InputStream in) throws IOException {
-        if (in == null) {
-            return "";
-        }
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        for (int count; (count = in.read(buffer)) != -1; ) {
-            out.write(buffer, 0, count);
-        }
-        return new String(out.toByteArray(), "UTF-8");
     }
 }
