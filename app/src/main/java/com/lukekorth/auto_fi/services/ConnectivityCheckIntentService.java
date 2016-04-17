@@ -58,12 +58,7 @@ public class ConnectivityCheckIntentService extends IntentService {
             WifiConfiguration configuration = WifiUtilities.getWifiNetwork(networkId);
 
             if (configuration != null) {
-                Realm realm = Realm.getDefaultInstance();
-                WifiNetwork wifiNetwork = WifiNetwork.findOrCreate(realm, configuration.SSID);
-                realm.beginTransaction();
-                wifiNetwork.setBlacklisted(true);
-                realm.commitTransaction();
-                realm.close();
+                WifiNetwork.blacklist(configuration.SSID);
             }
 
             wifiManager.removeNetwork(networkId);

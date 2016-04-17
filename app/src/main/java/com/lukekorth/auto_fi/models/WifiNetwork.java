@@ -9,6 +9,7 @@ public class WifiNetwork extends RealmObject {
 
     private String ssid;
     private boolean blacklisted;
+    private long blacklistedTimestamp;
 
     public String getSSID() {
         return ssid;
@@ -24,6 +25,14 @@ public class WifiNetwork extends RealmObject {
 
     public void setBlacklisted(boolean blacklisted) {
         this.blacklisted = blacklisted;
+    }
+
+    public long getBlacklistedTimestamp() {
+        return blacklistedTimestamp;
+    }
+
+    public void setBlacklistedTimestamp(long blacklistedTimestamp) {
+        this.blacklistedTimestamp = blacklistedTimestamp;
     }
 
     @Nullable
@@ -43,11 +52,31 @@ public class WifiNetwork extends RealmObject {
         return wifiNetwork;
     }
 
+    public static void blacklist(String ssid) {
+        Realm realm = Realm.getDefaultInstance();
+        WifiNetwork wifiNetwork = WifiNetwork.findOrCreate(realm, ssid);
+        realm.beginTransaction();
+        wifiNetwork.setBlacklisted(true);
+        wifiNetwork.setBlacklistedTimestamp(System.currentTimeMillis());
+        realm.commitTransaction();
+        realm.close();
+    }
+
     public static boolean isBlacklisted(String ssid) {
         Realm realm = Realm.getDefaultInstance();
         WifiNetwork wifiNetwork = findOrCreate(realm, ssid);
-        boolean blacklisted = wifiNetwork.isBlacklisted();
+
+        // blacklisting lasts for 1 week
+        boolean blacklisted = (wifiNetwork.isBlacklisted() &&
+                (wifiNetwork.blacklistedTimestamp + 604800000 > System.currentTimeMillis()));
+        if (!blacklisted) {
+            realm.beginTransaction();
+            wifiNetwork.setBlacklisted(false);
+            realm.commitTransaction();
+        }
+
         realm.close();
+
         return blacklisted;
     }
 }
