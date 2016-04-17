@@ -16,8 +16,8 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import io.realm.Realm;
-
+import static java.net.HttpURLConnection.HTTP_MOVED_PERM;
+import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
 import static java.net.HttpURLConnection.HTTP_OK;
 
 public class ConnectivityCheckIntentService extends IntentService {
@@ -41,6 +41,8 @@ public class ConnectivityCheckIntentService extends IntentService {
                 if (StreamUtils.readStream(connection.getInputStream()).contains("E1A304E5-E244-4846-B613-6290055A211D")) {
                     hasConnectivity = true;
                 }
+            } else if (responseCode == HTTP_MOVED_PERM || responseCode == HTTP_MOVED_TEMP) {
+                Logger.warn("Received an http redirect, this network likely requires user interaction before using");
             }
         } catch (IOException e) {
             Logger.info("Connectivity check failed. " + e.getMessage());
