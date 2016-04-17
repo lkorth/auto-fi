@@ -1,5 +1,7 @@
 package com.lukekorth.auto_fi.models;
 
+import android.support.annotation.Nullable;
+
 import io.realm.Realm;
 import io.realm.RealmObject;
 
@@ -24,8 +26,13 @@ public class WifiNetwork extends RealmObject {
         this.blacklisted = blacklisted;
     }
 
+    @Nullable
+    public static WifiNetwork find(Realm realm, String ssid) {
+        return realm.where(WifiNetwork.class).contains("ssid", ssid).findFirst();
+    }
+
     public static WifiNetwork findOrCreate(Realm realm, String ssid) {
-        WifiNetwork wifiNetwork = realm.where(WifiNetwork.class).contains("ssid", ssid).findFirst();
+        WifiNetwork wifiNetwork = find(realm, ssid);
         if (wifiNetwork == null) {
             realm.beginTransaction();
             wifiNetwork = realm.createObject(WifiNetwork.class);
