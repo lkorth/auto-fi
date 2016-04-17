@@ -3,8 +3,6 @@ package com.lukekorth.auto_fi.receivers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
@@ -22,9 +20,9 @@ public class WifiScanReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (Settings.isEnabled(context) && VpnHelper.isVpnEnabled(context) &&
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        if (Settings.isEnabled(context) && VpnHelper.isVpnEnabled(context) && wifiManager.isWifiEnabled() &&
                 intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)) {
-            WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 
             List<ScanResult> scanResults = wifiManager.getScanResults();
             if (!WifiUtilities.isConnectedToWifi(context) && scanResults.size() > 0) {
