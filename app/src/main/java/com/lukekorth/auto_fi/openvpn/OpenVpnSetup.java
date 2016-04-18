@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.Nullable;
 
+import com.lukekorth.auto_fi.BuildConfig;
 import com.lukekorth.auto_fi.utilities.FileUtils;
 import com.lukekorth.auto_fi.utilities.Logger;
 
@@ -30,6 +31,7 @@ public class OpenVpnSetup {
         in.close();
 
         String configuration = new String(buffer);
+        configuration = configuration.replace("<- server here ->", BuildConfig.SERVER_ADDRESS);
         configuration = configuration.replace("<- management string here ->",
                 context.getCacheDir().getAbsolutePath() + "/mgmtsocket unix");
         configuration = configuration.replace("<- public key here ->\n", publicKey);

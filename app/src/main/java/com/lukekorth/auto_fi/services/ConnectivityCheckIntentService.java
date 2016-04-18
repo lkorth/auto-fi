@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 
+import com.lukekorth.auto_fi.BuildConfig;
 import com.lukekorth.auto_fi.models.WifiNetwork;
 import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.StreamUtils;
@@ -31,7 +32,8 @@ public class ConnectivityCheckIntentService extends IntentService {
         boolean hasConnectivity = false;
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) new URL("http://vpn.ofkorth.net/connectivity-check/").openConnection();
+            connection = (HttpURLConnection) new URL("http://" + BuildConfig.SERVER_ADDRESS + "/connectivity-check/")
+                    .openConnection();
             connection.setConnectTimeout(30000);
             connection.setReadTimeout(30000);
             connection.setRequestMethod("GET");

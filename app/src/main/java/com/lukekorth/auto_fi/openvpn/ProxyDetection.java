@@ -16,7 +16,7 @@ public class ProxyDetection {
 
 	public static SocketAddress detectProxy() {
 		try {
-			URL url = new URL(String.format("https://" + BuildConfig.SERVER_ADDRESS + ":" + BuildConfig.SERVER_PORT));
+			URL url = new URL(String.format("http://" + BuildConfig.SERVER_ADDRESS));
 			Proxy proxy = getFirstProxy(url);
 
 			if(proxy == null) {

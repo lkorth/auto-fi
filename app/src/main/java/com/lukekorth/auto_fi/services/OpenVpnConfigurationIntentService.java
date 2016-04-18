@@ -3,6 +3,7 @@ package com.lukekorth.auto_fi.services;
 import android.app.IntentService;
 import android.content.Intent;
 
+import com.lukekorth.auto_fi.BuildConfig;
 import com.lukekorth.auto_fi.openvpn.OpenVpnSetup;
 import com.lukekorth.auto_fi.utilities.FileUtils;
 import com.lukekorth.auto_fi.utilities.Logger;
@@ -74,7 +75,8 @@ public class OpenVpnConfigurationIntentService extends IntentService {
     private String exchangeCsrForPublicKey(String csr) throws IOException {
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) new URL("http://vpn.ofkorth.net/sign-csr/").openConnection();
+            connection = (HttpURLConnection) new URL("http://" + BuildConfig.SERVER_ADDRESS + "/sign-csr/")
+                    .openConnection();
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
 
