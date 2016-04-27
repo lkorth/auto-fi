@@ -13,7 +13,7 @@ import com.lukekorth.auto_fi.services.ConnectivityCheckIntentService;
 import com.lukekorth.auto_fi.services.VpnService;
 import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
-import com.lukekorth.auto_fi.utilities.WifiUtilities;
+import com.lukekorth.auto_fi.utilities.WifiUtils;
 
 import java.util.List;
 
@@ -23,10 +23,10 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (WifiUtilities.isConnectedToWifi(context)) {
+        if (WifiUtils.isConnectedToWifi(context)) {
             WifiInfo wifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
             if (wifiInfo != null) {
-                WifiConfiguration configuration = WifiUtilities.getWifiNetwork(wifiInfo.getNetworkId());
+                WifiConfiguration configuration = WifiUtils.getWifiNetwork(wifiInfo.getNetworkId());
                 if (configuration != null && configuration.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.NONE)) {
                     if (Settings.isEnabled(context) && VpnHelper.isVpnEnabled(context)) {
                         Logger.info("Connected to unsecured wifi network, checking connectivity");

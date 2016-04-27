@@ -11,7 +11,7 @@ import com.lukekorth.auto_fi.AutoFiApplication;
 
 import java.util.List;
 
-public class WifiUtilities {
+public class WifiUtils {
 
     public static boolean isConnectedToWifi(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

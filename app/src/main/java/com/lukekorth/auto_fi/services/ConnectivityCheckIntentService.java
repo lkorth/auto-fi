@@ -11,7 +11,7 @@ import com.lukekorth.auto_fi.models.WifiNetwork;
 import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.StreamUtils;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
-import com.lukekorth.auto_fi.utilities.WifiUtilities;
+import com.lukekorth.auto_fi.utilities.WifiUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -59,7 +59,7 @@ public class ConnectivityCheckIntentService extends IntentService {
         if (!hasConnectivity) {
             WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
             int networkId = wifiManager.getConnectionInfo().getNetworkId();
-            WifiConfiguration configuration = WifiUtilities.getWifiNetwork(networkId);
+            WifiConfiguration configuration = WifiUtils.getWifiNetwork(networkId);
 
             if (configuration != null) {
                 WifiNetwork.blacklist(configuration.SSID);

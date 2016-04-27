@@ -12,7 +12,7 @@ import com.lukekorth.auto_fi.models.Settings;
 import com.lukekorth.auto_fi.models.WifiNetwork;
 import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
-import com.lukekorth.auto_fi.utilities.WifiUtilities;
+import com.lukekorth.auto_fi.utilities.WifiUtils;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class WifiScanReceiver extends BroadcastReceiver {
                 intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)) {
 
             List<ScanResult> scanResults = wifiManager.getScanResults();
-            if (!WifiUtilities.isConnectedToWifi(context) && scanResults.size() > 0) {
+            if (!WifiUtils.isConnectedToWifi(context) && scanResults.size() > 0) {
                 ScanResult selectedNetwork = null;
                 for (ScanResult scanResult : wifiManager.getScanResults()) {
                     if (isNetworkUnsecured(scanResult)) {
