@@ -22,7 +22,7 @@ public class CaptivePortalWebViewClient extends WebViewClient {
             byte[] buffer = new byte[in.available()];
             in.read(buffer);
             in.close();
-            mBypassJavascript = new String(buffer);
+            mBypassJavascript = new String(buffer).replaceAll("//.*\n", "").replace("\n", "");
         } catch (IOException ignored) {}
     }
 
