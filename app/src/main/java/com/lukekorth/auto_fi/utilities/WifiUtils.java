@@ -8,6 +8,7 @@ import android.net.wifi.WifiManager;
 import android.support.annotation.Nullable;
 
 import com.lukekorth.auto_fi.AutoFiApplication;
+import com.lukekorth.auto_fi.models.WifiNetwork;
 
 import java.util.List;
 
@@ -32,5 +33,20 @@ public class WifiUtils {
         }
 
         return null;
+    }
+
+    public static void blacklistAndDisconnectFromCurrentWifiNetwork(Context context) {
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        int networkId = wifiManager.getConnectionInfo().getNetworkId();
+        WifiConfiguration configuration = WifiUtils.getWifiNetwork(networkId);
+
+        if (configuration != null) {
+            Logger.info("Blacklisting " + configuration.SSID);
+            WifiNetwork.blacklist(configuration.SSID);
+        }
+
+        wifiManager.removeNetwork(networkId);
+        wifiManager.saveConfiguration();
+        wifiManager.disconnect();
     }
 }
