@@ -9,6 +9,7 @@ import android.webkit.WebView;
 
 import com.lukekorth.auto_fi.utilities.ConnectivityUtils;
 import com.lukekorth.auto_fi.webview.CaptivePortalWebViewClient;
+import com.lukekorth.auto_fi.webview.JavascriptLoggingInterface;
 
 public class CaptivePortalBypassService extends Service {
 
@@ -22,6 +23,7 @@ public class CaptivePortalBypassService extends Service {
     private void loadWebView() {
         WebView webView = new WebView(this);
         webView.getSettings().setJavaScriptEnabled(true);
+        webView.addJavascriptInterface(new JavascriptLoggingInterface(), "AutoFi");
         webView.setWebViewClient(new CaptivePortalWebViewClient(this));
         webView.loadUrl(ConnectivityUtils.CONNECTIVITY_CHECK_URL);
     }

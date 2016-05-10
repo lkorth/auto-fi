@@ -15,7 +15,12 @@ selectedElements = selectedElements.concat(findActionElements(buttons));
 selectedElements = selectedElements.concat(findActionElements(inputButtons));
 selectedElements = selectedElements.concat(findActionElements(submitButtons));
 
-selectedElements[0].click();
+AutoFi.log("Matched " + selectedElements.length + " elements");
+
+if (selectedElements.length > 0) {
+    AutoFi.log("Clicking " + selectedElements[0]);
+    selectedElements[0].click();
+}
 
 function findActionElements(elements) {
     var collectedElements = [];
