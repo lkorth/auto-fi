@@ -16,8 +16,7 @@ import java.util.Arrays;
 public class OpenVpnSetup {
 
     private static final String CONFIGURATION_FILE = "open_vpn_client_configuration.ovpn";
-    private static final String MININONPIEVPN = "nopie_openvpn";
-    private static final String MINIPIEVPN = "pie_openvpn";
+    private static final String VPN_EXECUTABLE = "pie_openvpn";
 
     public static boolean isSetup(Context context) {
         return FileUtils.isFileAvailable(context, CONFIGURATION_FILE);
@@ -57,11 +56,6 @@ public class OpenVpnSetup {
         return args;
     }
 
-    public static String[] replacePieWithNoPie(String[] mArgv) {
-        mArgv[0] = mArgv[0].replace(MINIPIEVPN, MININONPIEVPN);
-        return mArgv;
-    }
-
     @Nullable
     private static String getOpenVpnExecutable(Context context) {
         String[] abis;
@@ -79,9 +73,9 @@ public class OpenVpnSetup {
         }
 
         for (String abi: abis) {
-            if (!FileUtils.isFileAvailable(context, getMiniVpnExecutableName() + "." + abi)) {
+            if (!FileUtils.isFileAvailable(context, VPN_EXECUTABLE + "." + abi)) {
                 try {
-                    File file = FileUtils.writeAssetFileToDisk(context, getMiniVpnExecutableName() + "." + abi, true);
+                    File file = FileUtils.writeAssetFileToDisk(context, VPN_EXECUTABLE + "." + abi, true);
                     if (file != null) {
                         return file.getAbsolutePath();
                     }
@@ -89,18 +83,10 @@ public class OpenVpnSetup {
                     Logger.error(e);
                 }
             } else {
-                return FileUtils.getFile(context, getMiniVpnExecutableName() + "." + abi).getAbsolutePath();
+                return FileUtils.getFile(context, VPN_EXECUTABLE + "." + abi).getAbsolutePath();
             }
         }
 
         return null;
-    }
-
-    private static String getMiniVpnExecutableName() {
-        if (Build.VERSION.SDK_INT  >= Build.VERSION_CODES.JELLY_BEAN) {
-            return MINIPIEVPN;
-        } else {
-            return MININONPIEVPN;
-        }
     }
 }

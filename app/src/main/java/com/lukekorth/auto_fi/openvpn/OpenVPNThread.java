@@ -1,9 +1,7 @@
 package com.lukekorth.auto_fi.openvpn;
 
-import android.annotation.SuppressLint;
 import android.util.Log;
 
-import com.lukekorth.auto_fi.R;
 import com.lukekorth.auto_fi.utilities.Logger;
 
 import java.io.BufferedReader;
@@ -20,9 +18,6 @@ import java.util.regex.Pattern;
 public class OpenVPNThread implements Runnable {
 
     private static final String DUMP_PATH_STRING = "Dump path: ";
-    @SuppressLint("SdCardPath")
-    private static final String BROKEN_PIE_SUPPORT = "/data/data/de.blinkt.openvpn/cache/pievpn";
-    private final static String BROKEN_PIE_SUPPORT2 = "syntax error";
     private static final String TAG = "OpenVPN";
     public static final int M_FATAL = (1 << 4);
     public static final int M_NONFATAL = (1 << 5);
@@ -34,8 +29,6 @@ public class OpenVPNThread implements Runnable {
     private OpenVpn mService;
     private String mDumpPath;
     private Map<String, String> mProcessEnv;
-    private boolean mBrokenPie = false;
-    private boolean mNoProcessExitStatus = false;
 
     public OpenVPNThread(OpenVpn service, String[] argv, Map<String, String> processEnv, String nativelibdir) {
         mArgv = argv;
@@ -46,10 +39,6 @@ public class OpenVPNThread implements Runnable {
 
     public void stopProcess() {
         mProcess.destroy();
-    }
-
-    void setReplaceConnection() {
-        mNoProcessExitStatus = true;
     }
 
     @Override
@@ -74,22 +63,6 @@ public class OpenVPNThread implements Runnable {
 
             if (exitvalue != 0) {
                 Logger.error("Process exited with exit value " + exitvalue);
-                if (mBrokenPie) {
-                    /* This will probably fail since the NoPIE binary is probably not written */
-                    String[] noPieArgv = OpenVpnSetup.replacePieWithNoPie(mArgv);
-
-                    // We are already noPIE, nothing to gain
-                    if (!noPieArgv.equals(mArgv)) {
-                        mArgv = noPieArgv;
-                        Logger.info("PIE Version could not be executed. Trying no PIE version");
-                        run();
-                        return;
-                    }
-                }
-            }
-
-            if (!mNoProcessExitStatus) {
-                mService.updateNotification(R.string.state_noprocess);
             }
 
             if (mDumpPath != null) {
@@ -132,10 +105,6 @@ public class OpenVPNThread implements Runnable {
 
                 if (logline.startsWith(DUMP_PATH_STRING)) {
                     mDumpPath = logline.substring(DUMP_PATH_STRING.length());
-                }
-
-                if (logline.startsWith(BROKEN_PIE_SUPPORT) || logline.contains(BROKEN_PIE_SUPPORT2)) {
-                    mBrokenPie = true;
                 }
 
                 // 1380308330.240114 18000002 Send to HTTP proxy: 'X-Online-Host: bla.blabla.com'
