@@ -10,10 +10,10 @@ var inputButtons = document.querySelectorAll("input[type='button']");
 var submitButtons = document.querySelectorAll("input[type='submit']");
 
 var selectedElements = [];
-selectedElements = selectedElements.concat(findActionElements(links));
-selectedElements = selectedElements.concat(findActionElements(buttons));
-selectedElements = selectedElements.concat(findActionElements(inputButtons));
 selectedElements = selectedElements.concat(findActionElements(submitButtons));
+selectedElements = selectedElements.concat(findActionElements(inputButtons));
+selectedElements = selectedElements.concat(findActionElements(buttons));
+selectedElements = selectedElements.concat(findActionElements(links));
 
 AutoFi.log("Matched " + selectedElements.length + " elements");
 
