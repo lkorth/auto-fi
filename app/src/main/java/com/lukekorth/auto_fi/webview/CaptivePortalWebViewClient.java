@@ -2,6 +2,7 @@ package com.lukekorth.auto_fi.webview;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -29,6 +30,13 @@ public class CaptivePortalWebViewClient extends WebViewClient {
     @Override
     public void onPageFinished(WebView view, String url) {
         view.loadUrl("javascript:" + mBypassJavascript);
-        mContext.startService(new Intent(mContext, ConnectivityCheckIntentService.class));
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mContext.startService(new Intent(mContext, ConnectivityCheckIntentService.class)
+                        .putExtra(ConnectivityCheckIntentService.EXTRA_ATTEMPT_TO_BYPASS_CAPTIVE_PORTAL, false));
+            }
+        }, 5000);
     }
 }

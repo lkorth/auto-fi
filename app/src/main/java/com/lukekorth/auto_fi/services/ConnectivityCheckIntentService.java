@@ -9,6 +9,9 @@ import com.lukekorth.auto_fi.utilities.WifiUtils;
 
 public class ConnectivityCheckIntentService extends IntentService {
 
+    public static final String EXTRA_ATTEMPT_TO_BYPASS_CAPTIVE_PORTAL =
+            "com.lukekorth.auto_fi.EXTRA_ATTEMPT_TO_BYPASS_CAPTIVE_PORTAL";
+
     public ConnectivityCheckIntentService() {
         super(ConnectivityCheckIntentService.class.getName());
     }
@@ -20,7 +23,11 @@ public class ConnectivityCheckIntentService extends IntentService {
                 VpnHelper.startVpn(this);
                 break;
             } case REDIRECTED: {
-                startService(new Intent(this, CaptivePortalBypassService.class));
+                if (intent.getBooleanExtra(EXTRA_ATTEMPT_TO_BYPASS_CAPTIVE_PORTAL, true)) {
+                    startService(new Intent(this, CaptivePortalBypassService.class));
+                } else {
+                    WifiUtils.blacklistAndDisconnectFromCurrentWifiNetwork(this);
+                }
                 break;
             } case NO_CONNECTIVITY: {
                 WifiUtils.blacklistAndDisconnectFromCurrentWifiNetwork(this);
