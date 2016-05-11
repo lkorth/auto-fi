@@ -3,7 +3,7 @@ apply plugin: 'realm-android'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
         applicationId "com.lukekorth.auto_fi"
@@ -26,7 +26,7 @@ android.buildTypes.each { type ->
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:23.2.1'
+    compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.lukekorth:mailable_log:0.1.3'
     compile 'com.madgag.spongycastle:pkix:1.54.0.0'
 }
