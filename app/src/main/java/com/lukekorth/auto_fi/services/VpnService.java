@@ -7,14 +7,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.wifi.WifiConfiguration;
 import android.os.Build;
 
 import com.lukekorth.auto_fi.MainActivity;
 import com.lukekorth.auto_fi.R;
 import com.lukekorth.auto_fi.interfaces.Vpn;
 import com.lukekorth.auto_fi.interfaces.VpnServiceInterface;
+import com.lukekorth.auto_fi.models.WifiNetwork;
 import com.lukekorth.auto_fi.openvpn.OpenVpn;
 import com.lukekorth.auto_fi.utilities.Logger;
+import com.lukekorth.auto_fi.utilities.WifiUtils;
 
 public class VpnService extends android.net.VpnService implements VpnServiceInterface {
 
@@ -65,6 +68,14 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
     private void stopVpn() {
         mVpn.stop();
         stopForeground(true);
+
+        WifiConfiguration network = WifiUtils.getCurrentNetwork();
+        if (network != null) {
+            if (WifiNetwork.isAutoconnectedNetwork(network.SSID)) {
+                WifiUtils.disconnectFromCurrentWifiNetwork();
+            }
+        }
+
         stopSelf();
     }
 

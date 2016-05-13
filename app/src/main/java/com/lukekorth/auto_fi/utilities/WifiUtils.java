@@ -14,8 +14,9 @@ import java.util.List;
 
 public class WifiUtils {
 
-    public static boolean isConnectedToWifi(Context context) {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    public static boolean isConnectedToWifi() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) AutoFiApplication.getContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         return networkInfo != null && networkInfo.isConnectedOrConnecting();
     }
@@ -36,22 +37,30 @@ public class WifiUtils {
     }
 
     @Nullable
-    public static WifiConfiguration getCurrentNetwork(Context context) {
-        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        return WifiUtils.getWifiNetwork(wifiManager.getConnectionInfo().getNetworkId());
+    public static WifiConfiguration getCurrentNetwork() {
+        return WifiUtils.getWifiNetwork(getWifiManager().getConnectionInfo().getNetworkId());
     }
 
-    public static void blacklistAndDisconnectFromCurrentWifiNetwork(Context context) {
-        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-
-        WifiConfiguration configuration = getCurrentNetwork(context);
+    public static void disconnectFromCurrentWifiNetwork() {
+        WifiManager wifiManager = getWifiManager();
+        WifiConfiguration configuration = getCurrentNetwork();
         if (configuration != null) {
-            Logger.info("Blacklisting " + configuration.SSID);
-            WifiNetwork.blacklist(configuration.SSID);
-
             wifiManager.removeNetwork(configuration.networkId);
             wifiManager.saveConfiguration();
             wifiManager.disconnect();
         }
+    }
+
+    public static void blacklistAndDisconnectFromCurrentWifiNetwork() {
+        WifiConfiguration configuration = getCurrentNetwork();
+        if (configuration != null) {
+            Logger.info("Blacklisting " + configuration.SSID);
+            WifiNetwork.blacklist(configuration.SSID);
+            disconnectFromCurrentWifiNetwork();
+        }
+    }
+
+    private static WifiManager getWifiManager() {
+        return (WifiManager) AutoFiApplication.getContext().getSystemService(Context.WIFI_SERVICE);
     }
 }

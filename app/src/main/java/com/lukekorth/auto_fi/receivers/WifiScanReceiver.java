@@ -27,7 +27,7 @@ public class WifiScanReceiver extends BroadcastReceiver {
                 intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)) {
 
             List<ScanResult> scanResults = wifiManager.getScanResults();
-            if (!WifiUtils.isConnectedToWifi(context) && scanResults.size() > 0) {
+            if (!WifiUtils.isConnectedToWifi() && scanResults.size() > 0) {
                 ScanResult selectedNetwork = null;
                 for (ScanResult scanResult : wifiManager.getScanResults()) {
                     if (isNetworkUnsecured(scanResult)) {

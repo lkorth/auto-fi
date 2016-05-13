@@ -23,7 +23,7 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (WifiUtils.isConnectedToWifi(context)) {
+        if (WifiUtils.isConnectedToWifi()) {
             WifiInfo wifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
             if (wifiInfo != null) {
                 WifiConfiguration configuration = WifiUtils.getWifiNetwork(wifiInfo.getNetworkId());

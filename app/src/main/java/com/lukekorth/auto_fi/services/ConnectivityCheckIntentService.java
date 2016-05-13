@@ -39,9 +39,9 @@ public class ConnectivityCheckIntentService extends IntentService {
     }
 
     private void blacklistAndDisconnectFromNetwork() {
-        WifiConfiguration network = WifiUtils.getCurrentNetwork(this);
+        WifiConfiguration network = WifiUtils.getCurrentNetwork();
         if (network != null && WifiNetwork.isAutoconnectedNetwork(network.SSID)) {
-            WifiUtils.blacklistAndDisconnectFromCurrentWifiNetwork(this);
+            WifiUtils.blacklistAndDisconnectFromCurrentWifiNetwork();
         }
     }
 }
