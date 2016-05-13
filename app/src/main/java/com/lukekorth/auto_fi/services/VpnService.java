@@ -30,7 +30,6 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // the intent is null when the service has been restarted
         if (intent == null) {
             Logger.info("Restarting OpenVPN Service after crash or being killed");
         }
