@@ -1,6 +1,5 @@
 package com.lukekorth.auto_fi;
 
-import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -30,16 +29,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // required to wifi scan results
-        if (ContextCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{ ACCESS_COARSE_LOCATION}, 1);
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        // required for wifi scan results
+        if (ContextCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{ ACCESS_COARSE_LOCATION}, 1);
+        }
+
+        if (!VpnHelper.isVpnEnabled(this)) {
+            startActivityForResult(VpnService.prepare(this), START_VPN);
+        }
 
         if (!OpenVpnSetup.isSetup(this)) {
             startService(new Intent(this, OpenVpnConfigurationIntentService.class));
@@ -47,25 +50,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startVpn(View v) {
-        Intent intent = VpnService.prepare(this);
-        if (intent != null) {
-            startActivityForResult(intent, START_VPN);
-        } else {
-            onActivityResult(START_VPN, Activity.RESULT_OK, null);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == START_VPN) {
-            if (resultCode == Activity.RESULT_OK) {
-                VpnHelper.startVpn(this);
-            } else {
-                // user did not consent to VPN
-            }
-        }
+        VpnHelper.startVpn(this);
     }
 
     @Override

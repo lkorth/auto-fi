@@ -22,4 +22,6 @@
     <string name="state_tcp_connect">Connecting (TCP)</string>
     <string name="state_nonetwork">Waiting for usable network</string>
     <string name="unknown_state">Unknown state</string>
+    <string name="vpn_permission_revoked">VPN Permission Revoked</string>
+    <string name="vpn_permission_revoked_summary">VPN permission revoked, touch to re-enable</string>
 </resources>
