@@ -1,6 +1,6 @@
 package com.lukekorth.auto_fi.openvpn;
 
-import android.util.Log;
+import android.content.Context;
 
 import com.lukekorth.auto_fi.utilities.Logger;
 
@@ -8,33 +8,25 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class OpenVPNThread implements Runnable {
 
     private static final String DUMP_PATH_STRING = "Dump path: ";
-    private static final String TAG = "OpenVPN";
-    public static final int M_FATAL = (1 << 4);
-    public static final int M_NONFATAL = (1 << 5);
-    public static final int M_WARN = (1 << 6);
-    public static final int M_DEBUG = (1 << 7);
-    private String[] mArgv;
-    private Process mProcess;
-    private String mNativeDir;
-    private OpenVpn mService;
-    private String mDumpPath;
-    private Map<String, String> mProcessEnv;
+    private static final int M_FATAL = (1 << 4);
+    private static final int M_NONFATAL = (1 << 5);
+    private static final int M_WARN = (1 << 6);
+    private static final int M_DEBUG = (1 << 7);
 
-    public OpenVPNThread(OpenVpn service, String[] argv, Map<String, String> processEnv, String nativelibdir) {
-        mArgv = argv;
-        mNativeDir = nativelibdir;
+    private Context mContext;
+    private OpenVpn mService;
+    private Process mProcess;
+    private String mDumpPath;
+
+    public OpenVPNThread(Context context, OpenVpn service) {
+        mContext = context;
         mService = service;
-        mProcessEnv = processEnv;
     }
 
     public void stopProcess() {
@@ -44,9 +36,9 @@ public class OpenVPNThread implements Runnable {
     @Override
     public void run() {
         try {
-            Log.i(TAG, "Starting openvpn");
-            startOpenVPNThreadArgs(mArgv, mProcessEnv);
-            Log.i(TAG, "OpenVPN process exited");
+            Logger.info("Starting OpenVPN");
+            runOpenVpn();
+            Logger.info("OpenVPN exited");
         } catch (Exception e) {
             Logger.error("Starting OpenVPN Thread " + e.getMessage());
         } finally {
@@ -55,10 +47,8 @@ public class OpenVPNThread implements Runnable {
                 if (mProcess != null) {
                     exitvalue = mProcess.waitFor();
                 }
-            } catch (IllegalThreadStateException ite) {
-                Logger.error("Illegal Thread state: " + ite.getMessage());
-            } catch (InterruptedException ie) {
-                Logger.error("InterruptedException: " + ie.getMessage());
+            } catch (IllegalThreadStateException | InterruptedException e) {
+                Logger.error(e.getClass().getSimpleName() + ": " + e.getMessage());
             }
 
             if (exitvalue != 0) {
@@ -66,37 +56,25 @@ public class OpenVPNThread implements Runnable {
             }
 
             if (mDumpPath != null) {
-                Logger.error("OpenVPN crashed unexpectedly.");
+                Logger.error("OpenVPN crashed unexpectedly");
             }
 
             mService.getVpnService().shutdown();
-            Log.i(TAG, "Exiting");
+            Logger.info("Exiting OpenVPN");
         }
     }
 
-    private void startOpenVPNThreadArgs(String[] argv, Map<String, String> env) {
-        LinkedList<String> argvlist = new LinkedList<String>();
-
-        Collections.addAll(argvlist, argv);
-
-        ProcessBuilder pb = new ProcessBuilder(argvlist);
-
-        String lbpath = genLibraryPath(argv, pb);
-
-        pb.environment().put("LD_LIBRARY_PATH", lbpath);
-
-        // Add extra variables
-        for (Entry<String, String> e : env.entrySet()) {
-            pb.environment().put(e.getKey(), e.getValue());
-        }
-        pb.redirectErrorStream(true);
+    private void runOpenVpn() {
+        String[] command = OpenVpnSetup.getOpenVpnCommand(mContext);
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        processBuilder.environment().put("LD_LIBRARY_PATH", generateLibraryPath(command, processBuilder));
+        processBuilder.redirectErrorStream(true);
         try {
-            mProcess = pb.start();
-            // Close the output, since we don't need it
+            mProcess = processBuilder.start();
             mProcess.getOutputStream().close();
+
             InputStream in = mProcess.getInputStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
-
             while (true) {
                 String logline = br.readLine();
                 if (logline == null) {
@@ -113,8 +91,6 @@ public class OpenVPNThread implements Runnable {
                 if (m.matches()) {
                     int flags = Integer.parseInt(m.group(3), 16);
                     String msg = m.group(4);
-                    int logLevel = flags & 0x0F;
-
                     if ((flags & M_FATAL) != 0) {
                         Logger.error(msg);
                     } else if ((flags & M_NONFATAL) != 0) {
@@ -136,7 +112,7 @@ public class OpenVPNThread implements Runnable {
         }
     }
 
-    private String genLibraryPath(String[] argv, ProcessBuilder pb) {
+    private String generateLibraryPath(String[] argv, ProcessBuilder pb) {
         // Hack until I find a good way to get the real library path
         String applibpath = argv[0].replaceFirst("/cache/.*$", "/lib");
 
@@ -147,8 +123,9 @@ public class OpenVPNThread implements Runnable {
             lbpath = applibpath + ":" + lbpath;
         }
 
-        if (!applibpath.equals(mNativeDir)) {
-            lbpath = mNativeDir + ":" + lbpath;
+        String nativeLibraryDir = mContext.getApplicationInfo().nativeLibraryDir;
+        if (!applibpath.equals(nativeLibraryDir)) {
+            lbpath = nativeLibraryDir + ":" + lbpath;
         }
 
         return lbpath;

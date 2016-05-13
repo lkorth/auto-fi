@@ -40,9 +40,8 @@ public class OpenVpnManagementThread implements Runnable {
     }
 
     public boolean openManagementInterface(Context context) {
-        String socketName = (context.getCacheDir().getAbsolutePath() + "/" + "mgmtsocket");
-
         int tries = 8;
+        String socketName = context.getCacheDir().getAbsolutePath() + "/" + "mgmtsocket";
         LocalSocket serverSocketLocal = new LocalSocket();
         while (tries > 0 && !serverSocketLocal.isBound()) {
             try {

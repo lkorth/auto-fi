@@ -40,20 +40,20 @@ public class OpenVpnSetup {
     }
 
     @Nullable
-    public static String[] buildOpenVpnArgv(Context context) {
-        String[] args = new String[3];
+    public static String[] getOpenVpnCommand(Context context) {
+        String[] command = new String[3];
 
         String binaryName = getOpenVpnExecutable(context);
         if(binaryName == null) {
-            Logger.error("Error writing minivpn binary");
+            Logger.error("Error writing OpenVPN executable");
             return null;
         }
 
-        args[0] = binaryName;
-        args[1] = "--config";
-        args[2] = context.getFilesDir().getAbsolutePath() + "/" + CONFIGURATION_FILE;
+        command[0] = binaryName;
+        command[1] = "--config";
+        command[2] = context.getFilesDir().getAbsolutePath() + "/" + CONFIGURATION_FILE;
 
-        return args;
+        return command;
     }
 
     @Nullable

@@ -20,7 +20,6 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Vector;
 
 import static com.lukekorth.auto_fi.openvpn.NetworkSpace.ipAddress;
@@ -52,25 +51,18 @@ public class OpenVpn implements Vpn, Callback {
         Logger.info("Building configuration");
         updateNotification(R.string.building_configuration);
 
-        String nativeLibraryDirectory = mContext.getApplicationInfo().nativeLibraryDir;
-
-        // Also writes OpenVPN binary
-        String[] argv = OpenVpnSetup.buildOpenVpnArgv(mContext);
-
-        // Open the Management Interface start a Thread that handles incoming messages of the management socket
         OpenVpnManagementThread managementThread = new OpenVpnManagementThread(this);
         if (managementThread.openManagementInterface(mContext)) {
             Thread socketManagerThread = new Thread(managementThread, "OpenVPNManagementThread");
             socketManagerThread.start();
             mManagementThread = managementThread;
-            Logger.info("started Socket Thread");
+            Logger.info("Started OpenVPN management thread");
         } else {
             stop();
             return;
         }
 
-        HashMap<String, String> env = new HashMap<>();
-        Runnable processThread = new OpenVPNThread(this, argv, env, nativeLibraryDirectory);
+        Runnable processThread = new OpenVPNThread(mContext, this);
         mProcessThread = new Thread(processThread, "OpenVPNProcessThread");
         mProcessThread.start();
     }
