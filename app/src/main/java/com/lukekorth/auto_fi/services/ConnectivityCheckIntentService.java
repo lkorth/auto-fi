@@ -2,7 +2,9 @@ package com.lukekorth.auto_fi.services;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.net.wifi.WifiConfiguration;
 
+import com.lukekorth.auto_fi.models.WifiNetwork;
 import com.lukekorth.auto_fi.utilities.ConnectivityUtils;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
 import com.lukekorth.auto_fi.utilities.WifiUtils;
@@ -26,13 +28,20 @@ public class ConnectivityCheckIntentService extends IntentService {
                 if (intent.getBooleanExtra(EXTRA_ATTEMPT_TO_BYPASS_CAPTIVE_PORTAL, true)) {
                     startService(new Intent(this, CaptivePortalBypassService.class));
                 } else {
-                    WifiUtils.blacklistAndDisconnectFromCurrentWifiNetwork(this);
+                    blacklistAndDisconnectFromNetwork();
                 }
                 break;
             } case NO_CONNECTIVITY: {
-                WifiUtils.blacklistAndDisconnectFromCurrentWifiNetwork(this);
+                blacklistAndDisconnectFromNetwork();
                 break;
             }
+        }
+    }
+
+    private void blacklistAndDisconnectFromNetwork() {
+        WifiConfiguration network = WifiUtils.getCurrentNetwork(this);
+        if (network != null && WifiNetwork.isAutoconnectedNetwork(network.SSID)) {
+            WifiUtils.blacklistAndDisconnectFromCurrentWifiNetwork(this);
         }
     }
 }

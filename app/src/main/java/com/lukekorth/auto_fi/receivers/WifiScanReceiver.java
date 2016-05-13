@@ -16,6 +16,8 @@ import com.lukekorth.auto_fi.utilities.WifiUtils;
 
 import java.util.List;
 
+import io.realm.Realm;
+
 public class WifiScanReceiver extends BroadcastReceiver {
 
     @Override
@@ -57,6 +59,12 @@ public class WifiScanReceiver extends BroadcastReceiver {
                     if (WifiNetwork.isBlacklisted(ssid)) {
                         Logger.info(selectedNetwork.SSID + " is blacklisted");
                     } else if (!configured) {
+                        Realm realm = Realm.getDefaultInstance();
+                        WifiNetwork network = WifiNetwork.findOrCreate(realm, ssid);
+                        realm.beginTransaction();
+                        network.setAutoconnected(true);
+                        realm.commitTransaction();
+
                         WifiConfiguration configuration = new WifiConfiguration();
                         configuration.SSID = ssid;
                         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);

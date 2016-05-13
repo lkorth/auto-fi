@@ -35,18 +35,23 @@ public class WifiUtils {
         return null;
     }
 
+    @Nullable
+    public static WifiConfiguration getCurrentNetwork(Context context) {
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        return WifiUtils.getWifiNetwork(wifiManager.getConnectionInfo().getNetworkId());
+    }
+
     public static void blacklistAndDisconnectFromCurrentWifiNetwork(Context context) {
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        int networkId = wifiManager.getConnectionInfo().getNetworkId();
-        WifiConfiguration configuration = WifiUtils.getWifiNetwork(networkId);
 
+        WifiConfiguration configuration = getCurrentNetwork(context);
         if (configuration != null) {
             Logger.info("Blacklisting " + configuration.SSID);
             WifiNetwork.blacklist(configuration.SSID);
-        }
 
-        wifiManager.removeNetwork(networkId);
-        wifiManager.saveConfiguration();
-        wifiManager.disconnect();
+            wifiManager.removeNetwork(configuration.networkId);
+            wifiManager.saveConfiguration();
+            wifiManager.disconnect();
+        }
     }
 }

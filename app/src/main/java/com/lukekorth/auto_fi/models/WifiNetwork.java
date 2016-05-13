@@ -8,6 +8,7 @@ import io.realm.RealmObject;
 public class WifiNetwork extends RealmObject {
 
     private String ssid;
+    private boolean autoconnected;
     private boolean blacklisted;
     private long blacklistedTimestamp;
 
@@ -17,6 +18,14 @@ public class WifiNetwork extends RealmObject {
 
     public void setSSID(String ssid) {
         this.ssid= ssid;
+    }
+
+    public boolean isAutoconnected() {
+        return autoconnected;
+    }
+
+    public void setAutoconnected(boolean autoconnected) {
+        this.autoconnected = autoconnected;
     }
 
     public boolean isBlacklisted() {
@@ -50,6 +59,16 @@ public class WifiNetwork extends RealmObject {
         }
 
         return wifiNetwork;
+    }
+
+    public static boolean isAutoconnectedNetwork(String ssid) {
+        Realm realm = Realm.getDefaultInstance();
+        WifiNetwork wifiNetwork = find(realm, ssid);
+        if (wifiNetwork != null) {
+            return wifiNetwork.isAutoconnected();
+        }
+
+        return false;
     }
 
     public static void blacklist(String ssid) {
