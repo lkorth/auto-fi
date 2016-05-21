@@ -27,6 +27,8 @@ function findActionElements(elements) {
 
     collectedElements = collectedElements.concat(findElementsByText(elements, /continue/i));
     collectedElements = collectedElements.concat(findElementsByText(elements, /accept/i));
+    collectedElements = collectedElements.concat(findElementsByText(elements, /logon/i))
+    collectedElements = collectedElements.concat(findElementsByText(elements, /login/i))
 
     return collectedElements;
 }
