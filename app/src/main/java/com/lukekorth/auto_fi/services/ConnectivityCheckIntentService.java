@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.net.wifi.WifiConfiguration;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.lukekorth.auto_fi.models.WifiNetwork;
 import com.lukekorth.auto_fi.utilities.ConnectivityUtils;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
@@ -23,6 +24,7 @@ public class ConnectivityCheckIntentService extends IntentService {
         switch (ConnectivityUtils.checkConnectivity()) {
             case CONNECTED: {
                 VpnHelper.startVpn(this);
+                FirebaseAnalytics.getInstance(this).logEvent("connectivity_connected", null);
                 break;
             } case REDIRECTED: {
                 if (intent.getBooleanExtra(EXTRA_ATTEMPT_TO_BYPASS_CAPTIVE_PORTAL, true)) {
@@ -30,9 +32,11 @@ public class ConnectivityCheckIntentService extends IntentService {
                 } else {
                     blacklistAndDisconnectFromNetwork();
                 }
+                FirebaseAnalytics.getInstance(this).logEvent("connectivity_redirected", null);
                 break;
             } case NO_CONNECTIVITY: {
                 blacklistAndDisconnectFromNetwork();
+                FirebaseAnalytics.getInstance(this).logEvent("connectivity_none", null);
                 break;
             }
         }

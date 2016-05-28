@@ -8,6 +8,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.text.TextUtils;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.lukekorth.auto_fi.models.Settings;
 import com.lukekorth.auto_fi.models.WifiNetwork;
 import com.lukekorth.auto_fi.utilities.Logger;
@@ -72,6 +73,8 @@ public class WifiScanReceiver extends BroadcastReceiver {
                         wifiManager.enableNetwork(networkId, true);
                         wifiManager.saveConfiguration();
                         wifiManager.reconnect();
+
+                        FirebaseAnalytics.getInstance(context).logEvent("wifi_auto_connected", null);
                     }
                 }
             }

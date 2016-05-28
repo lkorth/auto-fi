@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "1040887319004",
+    "firebase_url": "https://auto-fi.firebaseio.com",
+    "project_id": "auto-fi",
+    "storage_bucket": "auto-fi.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1040887319004:android:9e583f1b99c95b5d",
+        "android_client_info": {
+          "package_name": "com.lukekorth.auto_fi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1040887319004-3b9c7l6iip95mj16eatuc0n5klv081lo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFJFexo9CzvcG7H8ZkWIhGVrhNQM4xKtE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.lukekorth.auto_fi.openvpn.OpenVpnSetup;
 import com.lukekorth.auto_fi.services.OpenVpnConfigurationIntentService;
 import com.lukekorth.auto_fi.utilities.LogReporting;
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        FirebaseAnalytics.getInstance(this);
     }
 
     @Override

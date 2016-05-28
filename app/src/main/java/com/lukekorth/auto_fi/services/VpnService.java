@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.net.wifi.WifiConfiguration;
 import android.os.Build;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.lukekorth.auto_fi.MainActivity;
 import com.lukekorth.auto_fi.R;
 import com.lukekorth.auto_fi.interfaces.Vpn;
@@ -39,6 +40,8 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
 
         mVpn = new OpenVpn(this, this);
         mVpn.start();
+
+        FirebaseAnalytics.getInstance(this).logEvent("vpn_started", null);
 
         return START_STICKY;
     }
