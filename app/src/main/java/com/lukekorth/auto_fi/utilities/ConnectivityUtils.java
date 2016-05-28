@@ -1,5 +1,10 @@
 package com.lukekorth.auto_fi.utilities;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkInfo;
+import android.os.Build;
 import android.support.annotation.WorkerThread;
 
 import com.lukekorth.auto_fi.BuildConfig;
@@ -23,10 +28,10 @@ public class ConnectivityUtils {
     }
 
     @WorkerThread
-    public static ConnectivityState checkConnectivity() {
+    public static ConnectivityState checkConnectivity(Context context) {
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) new URL(CONNECTIVITY_CHECK_URL).openConnection();
+            connection = getConnection(context);
             connection.setConnectTimeout(30000);
             connection.setReadTimeout(30000);
             connection.setRequestMethod("GET");
@@ -51,5 +56,20 @@ public class ConnectivityUtils {
 
         Logger.info("Unable to make a connection");
         return ConnectivityState.NO_CONNECTIVITY;
+    }
+
+    private static HttpURLConnection getConnection(Context context) throws IOException {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            ConnectivityManager connectivityManager =
+                    (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            for (Network network : connectivityManager.getAllNetworks()) {
+                NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
+                if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+                    return ((HttpURLConnection) network.openConnection(new URL(CONNECTIVITY_CHECK_URL)));
+                }
+            }
+        }
+
+        return (HttpURLConnection) new URL(CONNECTIVITY_CHECK_URL).openConnection();
     }
 }

@@ -3,7 +3,6 @@ package com.lukekorth.auto_fi.utilities;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
-import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
@@ -22,8 +21,20 @@ public class WifiUtils {
     public static boolean isConnectedToWifi() {
         ConnectivityManager connectivityManager = (ConnectivityManager) AutoFiApplication.getContext()
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        return networkInfo != null && networkInfo.isConnectedOrConnecting();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            for (Network network : connectivityManager.getAllNetworks()) {
+                NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
+                if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+                    return true;
+                }
+            }
+        } else {
+            NetworkInfo networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            return networkInfo != null && networkInfo.isConnectedOrConnecting();
+        }
+
+        return false;
     }
 
     @Nullable

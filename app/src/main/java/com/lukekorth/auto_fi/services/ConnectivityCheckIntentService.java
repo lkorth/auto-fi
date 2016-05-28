@@ -21,7 +21,7 @@ public class ConnectivityCheckIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        switch (ConnectivityUtils.checkConnectivity()) {
+        switch (ConnectivityUtils.checkConnectivity(this)) {
             case CONNECTED: {
                 VpnHelper.startVpn(this);
                 FirebaseAnalytics.getInstance(this).logEvent("connectivity_connected", null);
