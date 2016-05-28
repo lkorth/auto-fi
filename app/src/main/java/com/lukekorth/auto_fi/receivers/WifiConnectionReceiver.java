@@ -19,10 +19,6 @@ import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
 import com.lukekorth.auto_fi.utilities.WifiUtils;
 
-import java.util.List;
-
-import io.realm.Realm;
-
 public class WifiConnectionReceiver extends BroadcastReceiver {
 
     @Override
@@ -61,23 +57,6 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
         } else {
             Logger.debug("Disconnected from wifi, sending broadcast to disconnect VPN");
             context.sendBroadcast(new Intent(VpnService.DISCONNECT_VPN_INTENT_ACTION));
-
-            Logger.debug("Cleaning up saved wifi networks");
-            Realm realm = Realm.getDefaultInstance();
-            WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-            List<WifiConfiguration> wifiConfigurationList = wifiManager.getConfiguredNetworks();
-            if (wifiConfigurationList != null) {
-                for (WifiConfiguration configuration : wifiConfigurationList) {
-                    if (configuration.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.NONE)) {
-                        if (WifiNetwork.find(realm, configuration.SSID) != null) {
-                            wifiManager.removeNetwork(configuration.networkId);
-                        }
-                    }
-                }
-                wifiManager.saveConfiguration();
-            }
-
-            realm.close();
         }
     }
 }

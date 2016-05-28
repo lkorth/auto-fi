@@ -36,6 +36,8 @@ public class ConnectivityCheckIntentService extends IntentService {
                 break;
             }
         }
+
+        WifiUtils.cleanupSavedWifiNetworks();
     }
 
     private void blacklistAndDisconnectFromNetwork() {

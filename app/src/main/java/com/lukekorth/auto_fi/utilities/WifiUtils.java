@@ -2,15 +2,20 @@ package com.lukekorth.auto_fi.utilities;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.support.annotation.Nullable;
 
 import com.lukekorth.auto_fi.AutoFiApplication;
 import com.lukekorth.auto_fi.models.WifiNetwork;
 
 import java.util.List;
+
+import io.realm.Realm;
 
 public class WifiUtils {
 
@@ -58,6 +63,29 @@ public class WifiUtils {
             WifiNetwork.blacklist(configuration.SSID);
             disconnectFromCurrentWifiNetwork();
         }
+    }
+
+    public static void cleanupSavedWifiNetworks() {
+        Logger.debug("Cleaning up saved wifi networks");
+
+        Realm realm = Realm.getDefaultInstance();
+        WifiManager wifiManager = (WifiManager) AutoFiApplication.getContext().getSystemService(Context.WIFI_SERVICE);
+        List<WifiConfiguration> wifiConfigurationList = wifiManager.getConfiguredNetworks();
+        if (wifiConfigurationList != null) {
+            for (WifiConfiguration configuration : wifiConfigurationList) {
+                if (configuration.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.NONE)) {
+                    if (WifiNetwork.find(realm, configuration.SSID) != null) {
+                        WifiConfiguration currentNetwork = getCurrentNetwork();
+                        if (currentNetwork == null || configuration.networkId != currentNetwork.networkId) {
+                            wifiManager.removeNetwork(configuration.networkId);
+                        }
+                    }
+                }
+            }
+            wifiManager.saveConfiguration();
+        }
+
+        realm.close();
     }
 
     private static WifiManager getWifiManager() {
