@@ -62,11 +62,6 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
     @Override
     public void onDestroy() {
         unregisterReceiver(mDisconnectReceiver);
-    }
-
-    private void stopVpn() {
-        mVpn.stop();
-        stopForeground(true);
 
         WifiConfiguration network = WifiUtils.getCurrentNetwork();
         if (network != null) {
@@ -74,6 +69,11 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
                 WifiUtils.disconnectFromCurrentWifiNetwork();
             }
         }
+    }
+
+    private void stopVpn() {
+        mVpn.stop();
+        stopForeground(true);
 
         stopSelf();
     }
