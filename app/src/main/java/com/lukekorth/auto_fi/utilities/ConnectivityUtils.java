@@ -45,6 +45,8 @@ public class ConnectivityUtils {
             } else if (responseCode == HTTP_MOVED_PERM || responseCode == HTTP_MOVED_TEMP || responseCode == 307) {
                 Logger.info("Received an http redirect, this network likely requires user interaction before using");
                 return ConnectivityState.REDIRECTED;
+            } else {
+                Logger.info("Received " + responseCode + " response code");
             }
         } catch (IOException e) {
             Logger.info("Connectivity check failed. " + e.getMessage());
