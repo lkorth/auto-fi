@@ -37,16 +37,14 @@ public class ConnectivityUtils {
             connection.setRequestMethod("GET");
 
             int responseCode = connection.getResponseCode();
+            Logger.info("Received " + responseCode + " response code");
             if (responseCode == HTTP_OK) {
                 if (StreamUtils.readStream(connection.getInputStream()).contains("E1A304E5-E244-4846-B613-6290055A211D")) {
                     Logger.info("Wifi network has connectivity");
                     return ConnectivityState.CONNECTED;
                 }
             } else if (responseCode == HTTP_MOVED_PERM || responseCode == HTTP_MOVED_TEMP || responseCode == 307) {
-                Logger.info("Received an http redirect, this network likely requires user interaction before using");
                 return ConnectivityState.REDIRECTED;
-            } else {
-                Logger.info("Received " + responseCode + " response code");
             }
         } catch (IOException e) {
             Logger.info("Connectivity check failed. " + e.getMessage());
