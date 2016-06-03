@@ -1,5 +1,6 @@
 package com.lukekorth.auto_fi.models;
 
+import android.net.wifi.WifiConfiguration;
 import android.support.annotation.Nullable;
 
 import io.realm.Realm;
@@ -61,9 +62,13 @@ public class WifiNetwork extends RealmObject {
         return wifiNetwork;
     }
 
-    public static boolean isAutoconnectedNetwork(String ssid) {
+    public static boolean isAutoconnectedNetwork(@Nullable WifiConfiguration wifiConfiguration) {
+        if (wifiConfiguration == null) {
+            return false;
+        }
+
         Realm realm = Realm.getDefaultInstance();
-        WifiNetwork wifiNetwork = find(realm, ssid);
+        WifiNetwork wifiNetwork = find(realm, wifiConfiguration.SSID);
         if (wifiNetwork != null) {
             return wifiNetwork.isAutoconnected();
         }

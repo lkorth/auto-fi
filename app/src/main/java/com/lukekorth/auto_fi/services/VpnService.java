@@ -7,7 +7,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.wifi.WifiConfiguration;
 import android.os.Build;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -18,7 +17,7 @@ import com.lukekorth.auto_fi.interfaces.VpnServiceInterface;
 import com.lukekorth.auto_fi.models.WifiNetwork;
 import com.lukekorth.auto_fi.openvpn.OpenVpn;
 import com.lukekorth.auto_fi.utilities.Logger;
-import com.lukekorth.auto_fi.utilities.WifiUtils;
+import com.lukekorth.auto_fi.utilities.WifiHelper;
 
 public class VpnService extends android.net.VpnService implements VpnServiceInterface {
 
@@ -66,11 +65,9 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
     public void onDestroy() {
         unregisterReceiver(mDisconnectReceiver);
 
-        WifiConfiguration network = WifiUtils.getCurrentNetwork();
-        if (network != null) {
-            if (WifiNetwork.isAutoconnectedNetwork(network.SSID)) {
-                WifiUtils.disconnectFromCurrentWifiNetwork();
-            }
+        WifiHelper wifiHelper = new WifiHelper(this);
+        if (WifiNetwork.isAutoconnectedNetwork(wifiHelper.getCurrentNetwork())) {
+            wifiHelper.disconnectFromCurrentWifiNetwork();
         }
     }
 

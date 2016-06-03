@@ -2,13 +2,12 @@ package com.lukekorth.auto_fi.services;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.net.wifi.WifiConfiguration;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.lukekorth.auto_fi.models.WifiNetwork;
 import com.lukekorth.auto_fi.utilities.ConnectivityUtils;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
-import com.lukekorth.auto_fi.utilities.WifiUtils;
+import com.lukekorth.auto_fi.utilities.WifiHelper;
 
 public class ConnectivityCheckIntentService extends IntentService {
 
@@ -41,13 +40,13 @@ public class ConnectivityCheckIntentService extends IntentService {
             }
         }
 
-        WifiUtils.cleanupSavedWifiNetworks();
+        new WifiHelper(this).cleanupSavedWifiNetworks();
     }
 
     private void blacklistAndDisconnectFromNetwork() {
-        WifiConfiguration network = WifiUtils.getCurrentNetwork();
-        if (network != null && WifiNetwork.isAutoconnectedNetwork(network.SSID)) {
-            WifiUtils.blacklistAndDisconnectFromCurrentWifiNetwork();
+        WifiHelper wifiHelper = new WifiHelper(this);
+        if (WifiNetwork.isAutoconnectedNetwork(wifiHelper.getCurrentNetwork())) {
+            wifiHelper.blacklistAndDisconnectFromCurrentWifiNetwork();
         }
     }
 }

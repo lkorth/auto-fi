@@ -13,7 +13,7 @@ import com.lukekorth.auto_fi.models.Settings;
 import com.lukekorth.auto_fi.models.WifiNetwork;
 import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
-import com.lukekorth.auto_fi.utilities.WifiUtils;
+import com.lukekorth.auto_fi.utilities.WifiHelper;
 
 import java.util.List;
 
@@ -23,14 +23,18 @@ public class WifiScanReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        if (Settings.isEnabled(context) && VpnHelper.isVpnEnabled(context) && wifiManager.isWifiEnabled() &&
-                intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)) {
+        if (!Settings.isEnabled(context)) {
+            return;
+        }
 
-            List<ScanResult> scanResults = wifiManager.getScanResults();
-            if (!WifiUtils.isConnectedToWifi() && scanResults.size() > 0) {
+        WifiHelper wifiHelper = new WifiHelper(context);
+
+        if (VpnHelper.isVpnEnabled(context) && wifiHelper.getWifiManager().isWifiEnabled() &&
+                intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)) {
+            List<ScanResult> scanResults = wifiHelper.getWifiManager().getScanResults();
+            if (!wifiHelper.isConnectedToWifi() && scanResults.size() > 0) {
                 ScanResult selectedNetwork = null;
-                for (ScanResult scanResult : wifiManager.getScanResults()) {
+                for (ScanResult scanResult : wifiHelper.getWifiManager().getScanResults()) {
                     if (isNetworkUnsecured(scanResult)) {
                         if (selectedNetwork == null) {
                             selectedNetwork = scanResult;
@@ -43,8 +47,7 @@ public class WifiScanReceiver extends BroadcastReceiver {
                 if (selectedNetwork != null && !TextUtils.isEmpty(selectedNetwork.SSID.trim())) {
                     Logger.debug("Found network " + selectedNetwork.SSID + " nearby");
 
-                    boolean configured = false;
-                    List<WifiConfiguration> wifiConfigurationList = wifiManager.getConfiguredNetworks();
+                    List<WifiConfiguration> wifiConfigurationList = wifiHelper.getWifiManager().getConfiguredNetworks();
                     if (wifiConfigurationList == null) {
                         return;
                     }
@@ -52,14 +55,14 @@ public class WifiScanReceiver extends BroadcastReceiver {
                     for (WifiConfiguration configuredNetwork : wifiConfigurationList) {
                         if (configuredNetwork.SSID.equals(selectedNetwork.SSID)) {
                             Logger.debug("Network " + selectedNetwork.SSID + " is already configured.");
-                            configured = true;
+                            return;
                         }
                     }
 
                     String ssid = "\"" + selectedNetwork.SSID + "\"";
                     if (WifiNetwork.isBlacklisted(ssid)) {
                         Logger.info(selectedNetwork.SSID + " is blacklisted");
-                    } else if (!configured) {
+                    } else {
                         Realm realm = Realm.getDefaultInstance();
                         WifiNetwork network = WifiNetwork.findOrCreate(realm, ssid);
                         realm.beginTransaction();
@@ -69,10 +72,10 @@ public class WifiScanReceiver extends BroadcastReceiver {
                         WifiConfiguration configuration = new WifiConfiguration();
                         configuration.SSID = ssid;
                         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-                        int networkId = wifiManager.addNetwork(configuration);
-                        wifiManager.enableNetwork(networkId, true);
-                        wifiManager.saveConfiguration();
-                        wifiManager.reconnect();
+                        int networkId = wifiHelper.getWifiManager().addNetwork(configuration);
+                        wifiHelper.getWifiManager().enableNetwork(networkId, true);
+                        wifiHelper.getWifiManager().saveConfiguration();
+                        wifiHelper.getWifiManager().reconnect();
 
                         FirebaseAnalytics.getInstance(context).logEvent("wifi_auto_connected", null);
                     }

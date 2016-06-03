@@ -17,40 +17,30 @@ import com.lukekorth.auto_fi.services.ConnectivityCheckIntentService;
 import com.lukekorth.auto_fi.services.VpnService;
 import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
-import com.lukekorth.auto_fi.utilities.WifiUtils;
+import com.lukekorth.auto_fi.utilities.WifiHelper;
 
 public class WifiConnectionReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (WifiUtils.isConnectedToWifi()) {
-            WifiInfo wifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
-            if (wifiInfo != null) {
-                WifiConfiguration configuration = WifiUtils.getWifiNetwork(wifiInfo.getNetworkId());
-                if (configuration != null && configuration.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.NONE)) {
-                    if (Settings.isEnabled(context) && VpnHelper.isVpnEnabled(context)) {
-                        Logger.info("Connected to unsecured wifi network, checking connectivity");
-                        context.startService(new Intent(context, ConnectivityCheckIntentService.class));
-                    } else if (Settings.isEnabled(context) && !VpnHelper.isVpnEnabled(context)) {
-                        Logger.info("Vpn is disabled, creating notification");
+        if (!Settings.isEnabled(context)) {
+            return;
+        }
 
-                        Notification notification = new Notification.Builder(context)
-                                .setSmallIcon(R.mipmap.ic_launcher)
-                                .setContentTitle(context.getString(R.string.vpn_permission_revoked))
-                                .setContentText(context.getString(R.string.vpn_permission_revoked_summary))
-                                .setContentIntent(MainActivity.getStartPendingIntent(context))
-                                .setAutoCancel(true)
-                                .build();
+        WifiHelper wifiHelper = new WifiHelper(context);
 
-                        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE))
-                                .notify(0, notification);
+        if (wifiHelper.isConnectedToWifi()) {
+            WifiConfiguration configuration =
+                    wifiHelper.getWifiNetwork((WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO));
+            if (wifiHelper.isWifiUnsecured(configuration)) {
+                if (VpnHelper.isVpnEnabled(context)) {
+                    Logger.info("Connected to unsecured wifi network, checking connectivity");
+                    context.startService(new Intent(context, ConnectivityCheckIntentService.class));
+                } else {
+                    displayVpnNotEnabledNotification(context);
 
-                        WifiConfiguration network = WifiUtils.getCurrentNetwork();
-                        if (network != null) {
-                            if (WifiNetwork.isAutoconnectedNetwork(network.SSID)) {
-                                WifiUtils.disconnectFromCurrentWifiNetwork();
-                            }
-                        }
+                    if (WifiNetwork.isAutoconnectedNetwork(wifiHelper.getCurrentNetwork())) {
+                        wifiHelper.disconnectFromCurrentWifiNetwork();
                     }
                 }
             }
@@ -58,5 +48,19 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
             Logger.debug("Disconnected from wifi, sending broadcast to disconnect VPN");
             context.sendBroadcast(new Intent(VpnService.DISCONNECT_VPN_INTENT_ACTION));
         }
+    }
+
+    private void displayVpnNotEnabledNotification(Context context) {
+        Logger.info("Vpn is disabled, creating notification");
+
+        Notification notification = new Notification.Builder(context)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(context.getString(R.string.vpn_permission_revoked))
+                .setContentText(context.getString(R.string.vpn_permission_revoked_summary))
+                .setContentIntent(MainActivity.getStartPendingIntent(context))
+                .setAutoCancel(true)
+                .build();
+
+        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify(0, notification);
     }
 }
