@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -104,10 +105,16 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
     private void registerDisconnectReceiver() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(DISCONNECT_VPN_INTENT_ACTION);
+        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         mDisconnectReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                stopVpn();
+                if (intent.getAction().equals(DISCONNECT_VPN_INTENT_ACTION)) {
+                    stopVpn();
+                } else if (intent.getAction().equals(WifiManager.WIFI_STATE_CHANGED_ACTION) &&
+                        !new WifiHelper(context).isConnectedToWifi()) {
+                    stopVpn();
+                }
             }
         };
         registerReceiver(mDisconnectReceiver, filter);

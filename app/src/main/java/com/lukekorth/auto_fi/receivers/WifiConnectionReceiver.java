@@ -14,7 +14,6 @@ import com.lukekorth.auto_fi.R;
 import com.lukekorth.auto_fi.models.Settings;
 import com.lukekorth.auto_fi.models.WifiNetwork;
 import com.lukekorth.auto_fi.services.ConnectivityCheckIntentService;
-import com.lukekorth.auto_fi.services.VpnService;
 import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
 import com.lukekorth.auto_fi.utilities.WifiHelper;
@@ -44,9 +43,6 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
                     }
                 }
             }
-        } else {
-            Logger.debug("Disconnected from wifi, sending broadcast to disconnect VPN");
-            context.sendBroadcast(new Intent(VpnService.DISCONNECT_VPN_INTENT_ACTION));
         }
     }
 
