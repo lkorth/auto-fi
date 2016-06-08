@@ -14,12 +14,16 @@ public class ConnectivityCheckIntentService extends IntentService {
     public static final String EXTRA_ATTEMPT_TO_BYPASS_CAPTIVE_PORTAL =
             "com.lukekorth.auto_fi.EXTRA_ATTEMPT_TO_BYPASS_CAPTIVE_PORTAL";
 
+    public static boolean sIsRunning = false;
+
     public ConnectivityCheckIntentService() {
         super(ConnectivityCheckIntentService.class.getName());
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        sIsRunning = true;
+
         switch (ConnectivityUtils.checkConnectivity(this)) {
             case CONNECTED: {
                 VpnHelper.startVpn(this);
@@ -41,6 +45,8 @@ public class ConnectivityCheckIntentService extends IntentService {
         }
 
         new WifiHelper(this).cleanupSavedWifiNetworks();
+
+        sIsRunning = false;
     }
 
     private void blacklistAndDisconnectFromNetwork() {
