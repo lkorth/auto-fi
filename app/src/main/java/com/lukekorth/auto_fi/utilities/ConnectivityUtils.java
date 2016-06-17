@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.support.annotation.WorkerThread;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.lukekorth.auto_fi.BuildConfig;
 
 import java.io.IOException;
@@ -38,6 +39,7 @@ public class ConnectivityUtils {
 
             int responseCode = connection.getResponseCode();
             Logger.info("Received " + responseCode + " response code");
+            FirebaseAnalytics.getInstance(context).logEvent("network_response_code." + responseCode, null);
             if (responseCode == HTTP_OK) {
                 if (StreamUtils.readStream(connection.getInputStream()).contains("E1A304E5-E244-4846-B613-6290055A211D")) {
                     Logger.info("Wifi network has connectivity");
