@@ -42,7 +42,9 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                     wifiHelper.getConnectivityManager().bindProcessToNetwork(network);
                                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                    ConnectivityManager.setProcessDefaultNetwork(network);
+                                    try {
+                                        ConnectivityManager.setProcessDefaultNetwork(network);
+                                    } catch (IllegalStateException ignored) {}
                                 }
                             }
                         }
@@ -64,7 +66,9 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 wifiHelper.getConnectivityManager().bindProcessToNetwork(null);
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                ConnectivityManager.setProcessDefaultNetwork(null);
+                try {
+                    ConnectivityManager.setProcessDefaultNetwork(null);
+                } catch (IllegalStateException ignored) {}
             }
         }
     }
