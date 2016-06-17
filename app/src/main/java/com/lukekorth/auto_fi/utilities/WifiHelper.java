@@ -1,5 +1,6 @@
 package com.lukekorth.auto_fi.utilities;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -26,12 +27,16 @@ public class WifiHelper {
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     }
 
+    public ConnectivityManager getConnectivityManager() {
+        return mConnectivityManager;
+    }
+
     public WifiManager getWifiManager() {
         return mWifiManager;
     }
 
     public boolean isConnectedToWifi() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             for (Network network : mConnectivityManager.getAllNetworks()) {
                 NetworkInfo networkInfo = mConnectivityManager.getNetworkInfo(network);
                 if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
@@ -56,6 +61,18 @@ public class WifiHelper {
                         return configuration;
                     }
                 }
+            }
+        }
+
+        return null;
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public Network getLollipopWifiNetwork() {
+        for (Network network : mConnectivityManager.getAllNetworks()) {
+            NetworkInfo networkInfo = mConnectivityManager.getNetworkInfo(network);
+            if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+                return network;
             }
         }
 

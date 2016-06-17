@@ -5,9 +5,12 @@ import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 
 import com.lukekorth.auto_fi.MainActivity;
 import com.lukekorth.auto_fi.R;
@@ -33,6 +36,17 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
             if (wifiHelper.isWifiUnsecured(configuration)) {
                 if (VpnHelper.isVpnEnabled(context)) {
                     if (!ConnectivityCheckIntentService.sIsRunning) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            Network network = wifiHelper.getLollipopWifiNetwork();
+                            if (network != null) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                    wifiHelper.getConnectivityManager().bindProcessToNetwork(network);
+                                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                    ConnectivityManager.setProcessDefaultNetwork(network);
+                                }
+                            }
+                        }
+
                         Logger.info("Connected to unsecured wifi network, checking connectivity");
                         context.startService(new Intent(context, ConnectivityCheckIntentService.class));
                     } else {
@@ -45,6 +59,12 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
                         wifiHelper.disconnectFromCurrentWifiNetwork();
                     }
                 }
+            }
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                wifiHelper.getConnectivityManager().bindProcessToNetwork(null);
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                ConnectivityManager.setProcessDefaultNetwork(null);
             }
         }
     }
