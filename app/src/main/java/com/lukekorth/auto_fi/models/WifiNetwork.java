@@ -70,7 +70,7 @@ public class WifiNetwork extends RealmObject {
         Realm realm = Realm.getDefaultInstance();
         WifiNetwork wifiNetwork = find(realm, wifiConfiguration.SSID);
         if (wifiNetwork != null) {
-            return wifiNetwork.isAutoconnected();
+            return wifiNetwork.isAutoconnected() && !wifiNetwork.isBlacklisted();
         }
 
         return false;
