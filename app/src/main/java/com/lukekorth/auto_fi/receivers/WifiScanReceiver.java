@@ -63,6 +63,8 @@ public class WifiScanReceiver extends BroadcastReceiver {
                     if (WifiNetwork.isBlacklisted(ssid)) {
                         Logger.info(selectedNetwork.SSID + " is blacklisted");
                     } else {
+                        Logger.info("Automatically connecting to " + selectedNetwork.SSID);
+
                         Realm realm = Realm.getDefaultInstance();
                         WifiNetwork network = WifiNetwork.findOrCreate(realm, ssid);
                         realm.beginTransaction();

@@ -30,6 +30,7 @@ public class ConnectivityUtils {
 
     @WorkerThread
     public static ConnectivityState checkConnectivity(Context context) {
+        WifiHelper wifiHelper = new WifiHelper(context);
         HttpURLConnection connection = null;
         try {
             connection = getConnection(context);
@@ -39,11 +40,11 @@ public class ConnectivityUtils {
             connection.setRequestMethod("GET");
 
             int responseCode = connection.getResponseCode();
-            Logger.info("Received " + responseCode + " response code");
+            Logger.info("Received " + responseCode + " response code from " + wifiHelper.getCurrentNetworkName());
             FirebaseAnalytics.getInstance(context).logEvent("network_response_code." + responseCode, null);
             if (responseCode == HTTP_OK) {
                 if (StreamUtils.readStream(connection.getInputStream()).contains("E1A304E5-E244-4846-B613-6290055A211D")) {
-                    Logger.info("Wifi network has connectivity");
+                    Logger.info(wifiHelper.getCurrentNetworkName() + " has connectivity");
                     return ConnectivityState.CONNECTED;
                 }
             } else if (responseCode == HTTP_MOVED_PERM || responseCode == HTTP_MOVED_TEMP || responseCode == 307) {
@@ -57,7 +58,7 @@ public class ConnectivityUtils {
             }
         }
 
-        Logger.info("Unable to make a connection");
+        Logger.info("Unable to make a connection to " + wifiHelper.getCurrentNetworkName());
         return ConnectivityState.NO_CONNECTIVITY;
     }
 

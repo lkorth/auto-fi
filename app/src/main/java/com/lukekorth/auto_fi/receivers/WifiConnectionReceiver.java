@@ -33,7 +33,7 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
             if (wifiHelper.isWifiUnsecured(configuration)) {
                 if (VpnHelper.isVpnEnabled(context)) {
                     if (!ConnectivityCheckIntentService.sIsRunning) {
-                        Logger.info("Connected to unsecured wifi network, checking connectivity");
+                        Logger.info("Connected to unsecured wifi network " + wifiHelper.getCurrentNetworkName() + ", checking connectivity");
                         context.startService(new Intent(context, ConnectivityCheckIntentService.class));
                     } else {
                         Logger.info("ConnectivityCheckIntentService is already running");

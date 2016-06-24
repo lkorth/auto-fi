@@ -9,6 +9,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.lukekorth.auto_fi.models.WifiNetwork;
@@ -83,6 +84,16 @@ public class WifiHelper {
     @Nullable
     public WifiConfiguration getCurrentNetwork() {
         return getWifiNetwork(mWifiManager.getConnectionInfo());
+    }
+
+    @NonNull
+    public String getCurrentNetworkName() {
+        WifiConfiguration configuration = getCurrentNetwork();
+        if (configuration != null) {
+            return configuration.SSID.replace("\"", "");
+        }
+
+        return "NO_CONNECTED_NETWORK";
     }
 
     public boolean isWifiUnsecured(@Nullable WifiConfiguration wifiConfiguration) {
