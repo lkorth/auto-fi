@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">Auto Fi</string>
     <string name="contact_developer">Contact developer</string>
+    <string name="options">Options</string>
+    <string name="debug_options">Debug Options</string>
+    <string name="auto_connect_to_wifi">Automatically connect to WiFi</string>
+    <string name="auto_connect_to_wifi_summary">Automatically connect to nearby open WiFi networks</string>
+    <string name="auto_connect_to_vpn">Automatically connect to VPN</string>
+    <string name="auto_connect_to_vpn_summary">Automatically connect to a secure VPN when connected to unsecured WiFi networks</string>
+    <string name="connect_to_vpn">Connect to VPN</string>
     <string name="loading">Loading...</string>
     <string name="start_vpn">Start VPN</string>
     <string name="cancel_connection">Disconnect</string>

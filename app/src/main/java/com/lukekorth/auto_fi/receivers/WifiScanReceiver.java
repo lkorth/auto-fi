@@ -23,7 +23,7 @@ public class WifiScanReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (!Settings.isEnabled(context)) {
+        if (!Settings.autoConnectToWifi(context)) {
             return;
         }
 

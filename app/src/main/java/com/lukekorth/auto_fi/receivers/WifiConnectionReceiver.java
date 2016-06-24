@@ -22,7 +22,7 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (!Settings.isEnabled(context)) {
+        if (!Settings.autoConnectToVpn(context)) {
             return;
         }
 

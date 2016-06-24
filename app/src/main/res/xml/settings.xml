@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/options">
+
+        <CheckBoxPreference
+            android:key="auto_connect_to_wifi"
+            android:title="@string/auto_connect_to_wifi"
+            android:summary="@string/auto_connect_to_wifi_summary"
+            android:defaultValue="true"
+            android:widgetLayout="@layout/preference_switch"/>
+
+        <CheckBoxPreference
+            android:key="auto_connect_to_vpn"
+            android:title="@string/auto_connect_to_vpn"
+            android:summary="@string/auto_connect_to_vpn_summary"
+            android:defaultValue="true"
+            android:widgetLayout="@layout/preference_switch"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="debug_options"
+        android:title="@string/debug_options">
+
+        <Preference
+            android:key="connect_to_vpn"
+            android:title="@string/connect_to_vpn"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
