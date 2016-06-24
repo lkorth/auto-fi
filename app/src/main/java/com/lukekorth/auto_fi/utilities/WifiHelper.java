@@ -68,6 +68,7 @@ public class WifiHelper {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @Nullable
     public Network getLollipopWifiNetwork() {
         for (Network network : mConnectivityManager.getAllNetworks()) {
             NetworkInfo networkInfo = mConnectivityManager.getNetworkInfo(network);
@@ -99,11 +100,13 @@ public class WifiHelper {
     }
 
     public void blacklistAndDisconnectFromCurrentWifiNetwork() {
-        WifiConfiguration configuration = getCurrentNetwork();
-        if (configuration != null) {
-            Logger.info("Blacklisting " + configuration.SSID);
-            WifiNetwork.blacklist(configuration.SSID);
-            disconnectFromCurrentWifiNetwork();
+        if (WifiNetwork.isAutoconnectedNetwork(getCurrentNetwork())) {
+            WifiConfiguration configuration = getCurrentNetwork();
+            if (configuration != null) {
+                Logger.info("Blacklisting " + configuration.SSID);
+                WifiNetwork.blacklist(configuration.SSID);
+                disconnectFromCurrentWifiNetwork();
+            }
         }
     }
 

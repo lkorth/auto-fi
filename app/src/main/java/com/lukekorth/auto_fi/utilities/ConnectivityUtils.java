@@ -33,6 +33,7 @@ public class ConnectivityUtils {
         HttpURLConnection connection = null;
         try {
             connection = getConnection(context);
+            connection.setUseCaches(false);
             connection.setConnectTimeout(30000);
             connection.setReadTimeout(30000);
             connection.setRequestMethod("GET");
@@ -61,7 +62,7 @@ public class ConnectivityUtils {
     }
 
     private static HttpURLConnection getConnection(Context context) throws IOException {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ConnectivityManager connectivityManager =
                     (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             for (Network network : connectivityManager.getAllNetworks()) {
