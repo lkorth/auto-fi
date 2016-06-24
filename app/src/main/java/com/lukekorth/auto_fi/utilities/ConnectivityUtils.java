@@ -40,8 +40,12 @@ public class ConnectivityUtils {
             connection.setRequestMethod("GET");
 
             int responseCode = connection.getResponseCode();
+
             Logger.info("Received " + responseCode + " response code from " + wifiHelper.getCurrentNetworkName());
-            FirebaseAnalytics.getInstance(context).logEvent("network_response_code." + responseCode, null);
+            FirebaseAnalytics analytics = FirebaseAnalytics.getInstance(context);
+            analytics.logEvent("network_response_code." + responseCode, null);
+            analytics.logEvent(wifiHelper.getCurrentNetworkName(), null);
+
             if (responseCode == HTTP_OK) {
                 if (StreamUtils.readStream(connection.getInputStream()).contains("E1A304E5-E244-4846-B613-6290055A211D")) {
                     Logger.info(wifiHelper.getCurrentNetworkName() + " has connectivity");
