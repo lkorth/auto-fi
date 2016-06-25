@@ -35,6 +35,8 @@ public class CaptivePortalBypassService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Logger.info("Attempting to bypass captive portal");
+
         mWifiHelper = new WifiHelper(this);
 
         setupWifiConnectionBroadcastReceiver();
