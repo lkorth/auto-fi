@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.support.annotation.MainThread;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.lukekorth.auto_fi.MainActivity;
@@ -30,6 +31,7 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
     private BroadcastReceiver mDisconnectReceiver;
 
     @Override
+    @MainThread
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {
             Logger.info("Restarting OpenVPN Service after crash or being killed");
@@ -62,19 +64,16 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
         stopVpn();
     }
 
-    @Override
-    public void onDestroy() {
+    private void stopVpn() {
+        mVpn.stop();
+        stopForeground(true);
+
         unregisterReceiver(mDisconnectReceiver);
 
         WifiHelper wifiHelper = new WifiHelper(this);
         if (WifiNetwork.isAutoconnectedNetwork(wifiHelper.getCurrentNetwork())) {
             wifiHelper.disconnectFromCurrentWifiNetwork();
         }
-    }
-
-    private void stopVpn() {
-        mVpn.stop();
-        stopForeground(true);
 
         stopSelf();
     }
