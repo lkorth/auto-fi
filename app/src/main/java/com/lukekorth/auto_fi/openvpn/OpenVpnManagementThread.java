@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Locale;
-import java.util.Vector;
 
 public class OpenVpnManagementThread implements Runnable {
 
@@ -33,15 +32,13 @@ public class OpenVpnManagementThread implements Runnable {
     private LocalServerSocket mServerSocket;
     private boolean mShuttingDown;
 
-    private static final Vector<OpenVpnManagementThread> active = new Vector<>();
-
     public OpenVpnManagementThread(OpenVpn openVpn) {
         mOpenVpn = openVpn;
     }
 
     public boolean openManagementInterface(Context context) {
         int tries = 8;
-        String socketName = context.getCacheDir().getAbsolutePath() + "/" + "mgmtsocket";
+        String socketName = context.getCacheDir().getAbsolutePath() + "/mgmtsocket";
         LocalSocket serverSocketLocal = new LocalSocket();
         while (tries > 0 && !serverSocketLocal.isBound()) {
             try {
@@ -76,18 +73,12 @@ public class OpenVpnManagementThread implements Runnable {
 
     @Override
     public void run() {
-        byte[] buffer = new byte[2048];
-
-        String pendingInput = "";
-        synchronized (active) {
-            active.add(this);
-        }
-
         try {
             mSocket = mServerSocket.accept();
             InputStream instream = mSocket.getInputStream();
             mServerSocket.close();
 
+            byte[] buffer = new byte[2048];
             while (true) {
                 int numbytesread = instream.read(buffer);
                 if (numbytesread == -1) {
@@ -105,19 +96,12 @@ public class OpenVpnManagementThread implements Runnable {
                     Collections.addAll(mFDList, fds);
                 }
 
-                String input = new String(buffer, 0, numbytesread, "UTF-8");
-
-                pendingInput += input;
-                pendingInput = processInput(pendingInput);
+                processInput(new String(buffer, 0, numbytesread, "UTF-8"));
             }
         } catch (IOException e) {
             if (!e.getMessage().equals("socket closed") && !e.getMessage().equals("Connection reset by peer")) {
                 Logger.error(e);
             }
-        }
-
-        synchronized (active) {
-            active.remove(this);
         }
     }
 
@@ -138,7 +122,7 @@ public class OpenVpnManagementThread implements Runnable {
         }
     }
 
-    private String processInput(String pendingInput) {
+    private void processInput(String pendingInput) {
         while (pendingInput.contains("\n")) {
             String[] tokens = pendingInput.split("\\r?\\n", 2);
             processCommand(tokens[0]);
@@ -149,8 +133,6 @@ public class OpenVpnManagementThread implements Runnable {
                 pendingInput = tokens[1];
             }
         }
-
-        return pendingInput;
     }
 
     private void processCommand(String command) {
@@ -170,8 +152,9 @@ public class OpenVpnManagementThread implements Runnable {
                     processNeedCommand(argument);
                     break;
                 case "STATE":
-                    if (!mShuttingDown)
+                    if (!mShuttingDown) {
                         processState(argument);
+                    }
                     break;
                 case "PROXY":
                     processProxyCMD(argument);
@@ -358,26 +341,15 @@ public class OpenVpnManagementThread implements Runnable {
         return false;
     }
 
-    private static boolean stopOpenVPN() {
-        synchronized (active) {
-            boolean sendCMD = false;
-            for (OpenVpnManagementThread mt : active) {
-                mt.managementCommand("signal SIGINT\n");
-                sendCMD = true;
-                try {
-                    if (mt.mSocket != null) {
-                        mt.mSocket.close();
-                    }
-                } catch (IOException ignored) {}
-            }
-
-            return sendCMD;
-        }
-    }
-
-    public boolean stopVPN() {
+    public void stopVPN() {
         mShuttingDown = true;
-        return stopOpenVPN();
+
+        managementCommand("signal SIGINT\n");
+        try {
+            if (mSocket != null) {
+                mSocket.close();
+            }
+        } catch (IOException ignored) {}
     }
 
     private int getLocalizedState(String state) {

@@ -51,30 +51,22 @@ public class OpenVpn implements Vpn, Callback {
         Logger.info("Building configuration");
         updateNotification(R.string.building_configuration);
 
-        OpenVpnManagementThread managementThread = new OpenVpnManagementThread(this);
-        if (managementThread.openManagementInterface(mContext)) {
-            Thread socketManagerThread = new Thread(managementThread, "OpenVPNManagementThread");
-            socketManagerThread.start();
-            mManagementThread = managementThread;
+        mManagementThread = new OpenVpnManagementThread(this);
+        if (mManagementThread.openManagementInterface(mContext)) {
+            new Thread(mManagementThread, "OpenVPNManagementThread").start();
             Logger.info("Started OpenVPN management thread");
+
+            mProcessThread = new Thread(new OpenVPNThread(mContext, this), "OpenVPNProcessThread");
+            mProcessThread.start();
         } else {
             stop();
-            return;
         }
-
-        Runnable processThread = new OpenVPNThread(mContext, this);
-        mProcessThread = new Thread(processThread, "OpenVPNProcessThread");
-        mProcessThread.start();
     }
 
     @MainThread
     @Override
     public void stop() {
         mManagementThread.stopVPN();
-    }
-
-    Context getContext() {
-        return mContext;
     }
 
     VpnServiceInterface getVpnService() {
