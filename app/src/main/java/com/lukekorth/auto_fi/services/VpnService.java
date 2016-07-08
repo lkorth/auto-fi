@@ -68,7 +68,7 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
         mVpn.stop();
         stopForeground(true);
 
-        unregisterReceiver(mDisconnectReceiver);
+        unregisterDisconnectionReceiver();
 
         WifiHelper wifiHelper = new WifiHelper(this);
         if (WifiNetwork.isAutoconnectedNetwork(wifiHelper.getCurrentNetwork())) {
@@ -99,6 +99,12 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
         }
 
         startForeground(NOTIFICATION_ID, builder.build());
+    }
+
+    private void unregisterDisconnectionReceiver() {
+        try {
+            unregisterReceiver(mDisconnectReceiver);
+        } catch (IllegalArgumentException ignored) {}
     }
 
     private void registerDisconnectReceiver() {
