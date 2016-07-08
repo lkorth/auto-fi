@@ -36,6 +36,15 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
         }
 
         registerDisconnectReceiver();
+
+        if (!new WifiHelper(this).isConnectedToWifi()) {
+            Logger.info("No wifi network connected, stopping VPN");
+
+            unregisterReceiver(mDisconnectReceiver);
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
         setNotificationMessage(getString(R.string.state_connecting));
 
         mVpn = new OpenVpn(this, this);
