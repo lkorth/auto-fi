@@ -32,6 +32,7 @@ public class CaptivePortalBypassService extends Service {
 
     private WifiHelper mWifiHelper;
     private BroadcastReceiver mDisconnectReceiver;
+    private Thread mThread;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -45,11 +46,17 @@ public class CaptivePortalBypassService extends Service {
             bindProcessToNetwork();
         }
 
-        try {
-            loadWebView();
-        } catch (IOException e) {
-            stop(false);
-        }
+        mThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    loadWebView();
+                } catch (IOException e) {
+                    stop(false);
+                }
+            }
+        });
+        mThread.start();
 
         return START_NOT_STICKY;
     }
@@ -61,6 +68,7 @@ public class CaptivePortalBypassService extends Service {
 
         unregisterReceiver(mDisconnectReceiver);
         unbindProcessFromNetwork();
+        mThread.interrupt();
         stopSelf();
     }
 
