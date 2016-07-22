@@ -28,6 +28,13 @@
             android:key="connect_to_vpn"
             android:title="@string/connect_to_vpn"/>
 
+        <Preference android:title="@string/view_logs">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:targetPackage="com.lukekorth.auto_fi"
+                android:targetClass="com.lukekorth.auto_fi.LogActivity"/>
+        </Preference>
+
     </PreferenceCategory>
 
 </PreferenceScreen>
