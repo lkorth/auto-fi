@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Proxy;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.util.ArrayMap;
 import android.util.Log;
 import android.webkit.WebView;
@@ -94,7 +96,12 @@ public class CaptivePortalWebViewClient extends WebViewClient {
                     FirebaseAnalytics.getInstance(mContext).logEvent("captive_portal_bypassed", null);
                     mService.stop(false);
                 } else {
-                    loadConnectivityCheckUrl(mWebView);
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            loadConnectivityCheckUrl(mWebView);
+                        }
+                    });
                 }
             }
         }).start();
