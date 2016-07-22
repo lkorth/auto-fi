@@ -43,8 +43,8 @@ public class ConnectivityUtils {
 
             Logger.info("Received " + responseCode + " response code from " + wifiHelper.getCurrentNetworkName());
             FirebaseAnalytics analytics = FirebaseAnalytics.getInstance(context);
-            analytics.logEvent("network_response_code." + responseCode, null);
-            analytics.logEvent(wifiHelper.getCurrentNetworkName(), null);
+            analytics.logEvent("network_response_code_" + responseCode, null);
+            analytics.logEvent(wifiHelper.getCurrentNetworkName().replace(" ", "_"), null);
 
             if (responseCode == HTTP_OK) {
                 if (StreamUtils.readStream(connection.getInputStream()).contains("E1A304E5-E244-4846-B613-6290055A211D")) {
