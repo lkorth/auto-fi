@@ -3,7 +3,6 @@ package com.lukekorth.auto_fi.webview;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Proxy;
 import android.os.Handler;
 import android.os.Looper;
@@ -45,13 +44,6 @@ public class CaptivePortalWebViewClient extends WebViewClient {
         in.read(buffer);
         in.close();
         mBypassJavascript = new String(buffer).replaceAll("//.*\n", "").replace("\n", "");
-    }
-
-    @Override
-    public void onPageStarted(WebView view, String url, Bitmap favicon) {
-        if (!mFirstPageLoad) {
-            bypassCaptivePortal(view);
-        }
     }
 
     @Override
