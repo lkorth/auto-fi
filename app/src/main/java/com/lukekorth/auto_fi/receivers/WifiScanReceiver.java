@@ -35,7 +35,7 @@ public class WifiScanReceiver extends BroadcastReceiver {
             if (!wifiHelper.isConnectedToWifi() && scanResults.size() > 0) {
                 ScanResult selectedNetwork = null;
                 for (ScanResult scanResult : wifiHelper.getWifiManager().getScanResults()) {
-                    if (isNetworkUnsecured(scanResult)) {
+                    if (isNetworkUnsecured(scanResult) && !WifiNetwork.isBlacklisted("\"" + scanResult.SSID + "\"")) {
                         if (selectedNetwork == null) {
                             selectedNetwork = scanResult;
                         } else if (WifiManager.compareSignalLevel(scanResult.level, selectedNetwork.level) > 0) {
