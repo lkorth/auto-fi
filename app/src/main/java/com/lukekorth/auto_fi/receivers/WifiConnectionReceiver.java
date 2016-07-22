@@ -22,28 +22,22 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (!Settings.autoConnectToVpn(context)) {
-            return;
-        }
-
         WifiHelper wifiHelper = new WifiHelper(context);
         if (wifiHelper.isConnectedToWifi()) {
             WifiConfiguration configuration =
                     wifiHelper.getWifiNetwork((WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO));
             if (wifiHelper.isWifiUnsecured(configuration)) {
-                if (VpnHelper.isVpnEnabled(context)) {
-                    if (!ConnectivityCheckIntentService.sIsRunning) {
-                        Logger.info("Connected to unsecured wifi network " + wifiHelper.getCurrentNetworkName() + ", checking connectivity");
-                        context.startService(new Intent(context, ConnectivityCheckIntentService.class));
-                    } else {
-                        Logger.info("ConnectivityCheckIntentService is already running");
-                    }
-                } else {
+                if (Settings.autoConnectToVpn(context) && !VpnHelper.isVpnEnabled(context)) {
                     displayVpnNotEnabledNotification(context);
 
                     if (WifiNetwork.isAutoconnectedNetwork(wifiHelper.getCurrentNetwork())) {
                         wifiHelper.disconnectFromCurrentWifiNetwork();
                     }
+                } else if (!ConnectivityCheckIntentService.sIsRunning) {
+                    Logger.info("Connected to unsecured wifi network " + wifiHelper.getCurrentNetworkName() + ", checking connectivity");
+                    context.startService(new Intent(context, ConnectivityCheckIntentService.class));
+                } else {
+                    Logger.info("ConnectivityCheckIntentService is already running");
                 }
             }
         }
