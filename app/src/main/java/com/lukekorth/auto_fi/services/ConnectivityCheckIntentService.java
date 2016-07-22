@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.lukekorth.auto_fi.models.Settings;
 import com.lukekorth.auto_fi.utilities.ConnectivityUtils;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
 import com.lukekorth.auto_fi.utilities.WifiHelper;
@@ -22,7 +23,9 @@ public class ConnectivityCheckIntentService extends IntentService {
 
         switch (ConnectivityUtils.checkConnectivity(this)) {
             case CONNECTED: {
-                VpnHelper.startVpn(this);
+                if (Settings.autoConnectToVpn(this)) {
+                    VpnHelper.startVpn(this);
+                }
                 FirebaseAnalytics.getInstance(this).logEvent("connectivity_connected", null);
                 break;
             } case REDIRECTED: {
