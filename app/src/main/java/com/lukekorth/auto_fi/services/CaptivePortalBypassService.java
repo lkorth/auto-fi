@@ -89,7 +89,7 @@ public class CaptivePortalBypassService extends Service {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(WifiManager.WIFI_STATE_CHANGED_ACTION) &&
-                        mWifiHelper.isConnectedToWifi()) {
+                        !mWifiHelper.isConnectedToWifi()) {
                     stop(false);
                 }
             }
