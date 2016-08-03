@@ -15,7 +15,9 @@ import android.net.ProxyInfo;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.webkit.WebView;
 
@@ -32,7 +34,7 @@ public class CaptivePortalBypassService extends Service {
 
     private WifiHelper mWifiHelper;
     private BroadcastReceiver mDisconnectReceiver;
-    private Thread mThread;
+    private WebView mWebView;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -46,17 +48,11 @@ public class CaptivePortalBypassService extends Service {
             bindProcessToNetwork();
         }
 
-        mThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    loadWebView();
-                } catch (IOException e) {
-                    stop(false);
-                }
-            }
-        });
-        mThread.start();
+        try {
+            loadWebView();
+        } catch (IOException e) {
+            stop(false);
+        }
 
         return START_NOT_STICKY;
     }
@@ -66,20 +62,26 @@ public class CaptivePortalBypassService extends Service {
             mWifiHelper.blacklistAndDisconnectFromCurrentWifiNetwork();
         }
 
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                mWebView.stopLoading();
+            }
+        });
+
         unregisterReceiver(mDisconnectReceiver);
         unbindProcessFromNetwork();
-        mThread.interrupt();
         stopSelf();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private void loadWebView() throws IOException {
-        WebView webView = new WebView(this);
-        webView.clearCache(true);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.addJavascriptInterface(new JavascriptLoggingInterface(), "AutoFi");
-        webView.setWebViewClient(new CaptivePortalWebViewClient(this, webView));
-        webView.loadData("", "text/html", null);
+        mWebView = new WebView(this);
+        mWebView.clearCache(true);
+        mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.addJavascriptInterface(new JavascriptLoggingInterface(), "AutoFi");
+        mWebView.setWebViewClient(new CaptivePortalWebViewClient(this, mWebView));
+        mWebView.loadData("", "text/html", null);
     }
 
     private void setupWifiConnectionBroadcastReceiver() {

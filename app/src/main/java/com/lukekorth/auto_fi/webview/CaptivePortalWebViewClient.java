@@ -14,6 +14,7 @@ import android.webkit.WebViewClient;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.lukekorth.auto_fi.services.CaptivePortalBypassService;
 import com.lukekorth.auto_fi.utilities.ConnectivityUtils;
+import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
 
 import java.io.IOException;
@@ -66,7 +67,8 @@ public class CaptivePortalWebViewClient extends WebViewClient {
 
     private void bypassCaptivePortal(WebView view) {
         mBypassAttempts++;
-        if (mBypassAttempts > 3) {
+        if (mBypassAttempts == 3) {
+            Logger.info("3 captive portal bypasses attempted");
             mService.stop(true);
             return;
         }
