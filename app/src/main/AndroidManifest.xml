@@ -32,8 +32,13 @@
             </intent-filter>
         </service>
 
+        <service android:name=".services.CaptivePortalBypassService">
+            <intent-filter>
+                <action android:name="android.net.conn.CAPTIVE_PORTAL"/>
+            </intent-filter>
+        </service>
+
         <service android:name=".services.ConnectivityCheckIntentService" />
-        <service android:name=".services.CaptivePortalBypassService" />
         <service android:name=".services.OpenVpnConfigurationIntentService" />
 
         <receiver android:name=".receivers.WifiScanReceiver">

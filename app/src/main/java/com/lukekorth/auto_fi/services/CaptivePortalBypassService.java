@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.CaptivePortal;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.Network;
@@ -34,6 +35,7 @@ public class CaptivePortalBypassService extends Service {
 
     private WifiHelper mWifiHelper;
     private BroadcastReceiver mDisconnectReceiver;
+    private CaptivePortal mCaptivePortal;
     private WebView mWebView;
 
     @Override
@@ -41,6 +43,10 @@ public class CaptivePortalBypassService extends Service {
         Logger.info("Attempting to bypass captive portal");
 
         mWifiHelper = new WifiHelper(this);
+
+        if (intent != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mCaptivePortal = intent.getParcelableExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL);
+        }
 
         setupWifiConnectionBroadcastReceiver();
 
@@ -55,6 +61,12 @@ public class CaptivePortalBypassService extends Service {
         }
 
         return START_NOT_STICKY;
+    }
+
+    public void captivePortalBypassed() {
+        if (mCaptivePortal != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mCaptivePortal.reportCaptivePortalDismissed();
+        }
     }
 
     public void stop(boolean blacklistNetwork) {

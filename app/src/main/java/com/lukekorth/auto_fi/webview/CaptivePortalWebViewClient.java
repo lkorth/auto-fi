@@ -86,6 +86,7 @@ public class CaptivePortalWebViewClient extends WebViewClient {
                 } catch (InterruptedException ignored) {}
 
                 if (ConnectivityUtils.checkConnectivity(mContext) == ConnectivityUtils.ConnectivityState.CONNECTED) {
+                    mService.captivePortalBypassed();
                     VpnHelper.startVpn(mContext);
                     FirebaseAnalytics.getInstance(mContext).logEvent("captive_portal_bypassed", null);
                     mService.stop(false);
