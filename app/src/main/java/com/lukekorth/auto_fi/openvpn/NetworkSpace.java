@@ -1,6 +1,5 @@
 package com.lukekorth.auto_fi.openvpn;
 
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
@@ -312,35 +311,6 @@ public class NetworkSpace {
         for (ipAddress ia : ipsSorted) {
             if (ia.included)
                 ips.add(ia);
-        }
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-            // Include postive routes from the original set under < 4.4 since these might overrule the local
-            // network but only if no smaller negative route exists
-            for(ipAddress origIp: mIpAddresses){
-                if (!origIp.included)
-                    continue;
-
-                // The netspace exists
-                if(ipsSorted.contains(origIp))
-                    continue;
-
-                boolean skipIp=false;
-                // If there is any smaller net that is excluded we may not add the positive route back
-
-                for (ipAddress calculatedIp: ipsSorted) {
-                    if(!calculatedIp.included && origIp.containsNet(calculatedIp)) {
-                        skipIp=true;
-                        break;
-                    }
-                }
-                if (skipIp)
-                    continue;
-
-                // It is safe to include the IP
-                ips.add(origIp);
-            }
-
         }
 
         return ips;

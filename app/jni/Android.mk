@@ -7,7 +7,6 @@ JNI_DIR := $(call my-dir)
 # Build openvpn with polar (OpenVPN3 core is always build with polar)
 #WITH_BREAKPAD=0
 
-
 include lzo/Android.mk
 include openssl/Android.mk
 
@@ -53,22 +52,11 @@ LOCAL_MODULE = opvpnutil
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_LDLIBS := -llog  -lz
-LOCAL_CFLAGS = --std=c99
-LOCAL_C_INCLUDES := openssl/include openssl/crypto openssl
-LOCAL_SRC_FILES:=  jbcrypto.cpp
-LOCAL_MODULE = jbcrypto
-LOCAL_SHARED_LIBRARIES :=  libcrypto
-include $(BUILD_SHARED_LIBRARY)
-
-
-include $(CLEAR_VARS)
 LOCAL_LDLIBS := -lz  -lc 
 LOCAL_SHARED_LIBRARIES := libssl libcrypto openvpn
 LOCAL_SRC_FILES:= minivpn.c dummy.cpp
 LOCAL_MODULE = nopie_openvpn
 include $(BUILD_EXECUTABLE)
-
 
 include $(CLEAR_VARS)
 LOCAL_LDLIBS := -lz  -lc 
@@ -79,4 +67,3 @@ LOCAL_SHARED_LIBRARIES := libssl libcrypto openvpn
 LOCAL_SRC_FILES:= minivpn.c dummy.cpp
 LOCAL_MODULE = pie_openvpn
 include $(BUILD_EXECUTABLE)
-

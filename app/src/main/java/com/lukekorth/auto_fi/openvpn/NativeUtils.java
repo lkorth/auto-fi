@@ -16,8 +16,5 @@ public class NativeUtils {
 
     static {
         System.loadLibrary("opvpnutil");
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN) {
-            System.loadLibrary("jbcrypto");
-        }
     }
 }

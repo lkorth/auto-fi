@@ -234,11 +234,6 @@ public class OpenVpn implements Vpn, Callback {
             return tun;
         } catch (Exception e) {
             Logger.error("Failed to open the tun interface. " + e.getMessage());
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                Logger.error("On some custom ICS images the permission on /dev/tun might be wrong, or the tun " +
-                        "module might be missing completely. For CM9 images try the fix ownership option under " +
-                        "general settings");
-            }
             return null;
         }
     }
