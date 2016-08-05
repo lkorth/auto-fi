@@ -4,10 +4,12 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Proxy;
+import android.net.http.SslError;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.util.ArrayMap;
 import android.util.Log;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -59,6 +61,11 @@ public class CaptivePortalWebViewClient extends WebViewClient {
         } else {
             bypassCaptivePortal(view);
         }
+    }
+
+    @Override
+    public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+        handler.proceed();
     }
 
     private void loadConnectivityCheckUrl(WebView webView) {
