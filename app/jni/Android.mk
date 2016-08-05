@@ -32,17 +32,10 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_LDLIBS := -lz  -lc 
-LOCAL_SHARED_LIBRARIES := libssl libcrypto openvpn
-LOCAL_SRC_FILES:= minivpn.c dummy.cpp
-LOCAL_MODULE = nopie_openvpn
-include $(BUILD_EXECUTABLE)
-
-include $(CLEAR_VARS)
-LOCAL_LDLIBS := -lz  -lc 
 LOCAL_CFLAGS= -fPIE -pie
 LOCAL_CFLAGS = -fPIE
 LOCAL_LDFLAGS = -fPIE -pie
 LOCAL_SHARED_LIBRARIES := libssl libcrypto openvpn
-LOCAL_SRC_FILES:= minivpn.c dummy.cpp
-LOCAL_MODULE = pie_openvpn
+LOCAL_SRC_FILES:= minivpn.c
+LOCAL_MODULE = openvpn_executable
 include $(BUILD_EXECUTABLE)

@@ -35,7 +35,7 @@ if [ $? = 0 ]; then
 	mkdir -p ../src/main/assets
 	for i in *
 	do
-		cp -v $i/pie_openvpn ../src/main/assets/pie_openvpn.$i
+		cp -v $i/openvpn_executable ../src/main/assets/openvpn_executable.$i
 	done
 	# Removed compiled openssl libs, will use platform so libs
 	# Reduces size of apk

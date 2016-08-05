@@ -16,7 +16,7 @@ import java.util.Arrays;
 public class OpenVpnSetup {
 
     private static final String CONFIGURATION_FILE = "open_vpn_client_configuration.ovpn";
-    private static final String VPN_EXECUTABLE = "pie_openvpn";
+    private static final String VPN_EXECUTABLE = "openvpn_executable";
 
     public static boolean isSetup(Context context) {
         return FileUtils.isFileAvailable(context, CONFIGURATION_FILE);
