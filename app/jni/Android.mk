@@ -1,6 +1,5 @@
 # Path of the sources
 JNI_DIR := $(call my-dir)
-LOCAL_PATH := $(JNI_DIR)
 
 include lzo/Android.mk
 include openssl/Android.mk
@@ -20,6 +19,8 @@ else
 endif
 
 include openvpn/Android.mk
+
+LOCAL_PATH := $(JNI_DIR)
 
 # The only real JNI libraries
 include $(CLEAR_VARS)
