@@ -15,7 +15,7 @@ if [ -e openvpn/.git ]; then
 	if ! [ -f config-version.h ] || ! cmp -s config-version.h.tmp config-version.h; then \
 		echo "replacing config-version.h"
 		mv config-version.h.tmp config-version.h
-	else 
+	else
 		rm -f config-version.h.tmp
 	fi
     cd ..
@@ -35,10 +35,9 @@ if [ $? = 0 ]; then
 	mkdir -p ../src/main/assets
 	for i in *
 	do
-		cp -v $i/nopie_openvpn ../src/main/assets/nopie_openvpn.$i
 		cp -v $i/pie_openvpn ../src/main/assets/pie_openvpn.$i
 	done
-	# Removed compiled openssl libs, will use platform so libs 
+	# Removed compiled openssl libs, will use platform so libs
 	# Reduces size of apk
     #
 	rm -v */libcrypto.so */libssl.so
