@@ -4,6 +4,8 @@ import android.content.Context;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 
 import com.lukekorth.auto_fi.BuildConfig;
@@ -146,7 +148,7 @@ public class OpenVpnManagementThread implements Runnable {
                     // ignore
                     return;
                 case "HOLD":
-                    handleHold();
+                    handleHold(argument);
                     break;
                 case "NEED-OK":
                     processNeedCommand(argument);
@@ -196,7 +198,24 @@ public class OpenVpnManagementThread implements Runnable {
         }
     }
 
-    private void handleHold() {
+    private void handleHold(String argument) {
+        int waitTime = 0;
+        try {
+            waitTime = Integer.parseInt(argument.split(":")[1]);
+        } catch (NumberFormatException ignored) {}
+        if (waitTime > 1) {
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    releaseHoldCommand();
+                }
+            }, waitTime * 1000);
+        } else {
+            releaseHoldCommand();
+        }
+    }
+
+    private void releaseHoldCommand() {
         managementCommand("hold release\n");
         managementCommand("bytecount 2\n");
         managementCommand("state on\n");

@@ -22,7 +22,7 @@ import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Vector;
 
-import static com.lukekorth.auto_fi.openvpn.NetworkSpace.ipAddress;
+import static com.lukekorth.auto_fi.openvpn.NetworkSpace.IpAddress;
 
 public class OpenVpn implements Vpn, Callback {
 
@@ -146,15 +146,15 @@ public class OpenVpn implements Vpn, Callback {
             builder.setMtu(mMtu);
         }
 
-        Collection<ipAddress> positiveIPv4Routes = mRoutes.getPositiveIPList();
-        Collection<ipAddress> positiveIPv6Routes = mRoutesv6.getPositiveIPList();
+        Collection<IpAddress> positiveIPv4Routes = mRoutes.getPositiveIPList();
+        Collection<IpAddress> positiveIPv6Routes = mRoutesv6.getPositiveIPList();
 
         if ("samsung".equals(Build.BRAND) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && mDnslist.size() >= 1) {
             // Check if the first DNS Server is in the VPN range
             try {
-                ipAddress dnsServer = new ipAddress(new CIDRIP(mDnslist.get(0), 32), true);
+                IpAddress dnsServer = new IpAddress(new CIDRIP(mDnslist.get(0), 32), true);
                 boolean dnsIncluded = false;
-                for (ipAddress net : positiveIPv4Routes) {
+                for (IpAddress net : positiveIPv4Routes) {
                     if (net.containsNet(dnsServer)) {
                         dnsIncluded = true;
                     }
@@ -168,9 +168,9 @@ public class OpenVpn implements Vpn, Callback {
             }
         }
 
-        ipAddress multicastRange = new ipAddress(new CIDRIP("224.0.0.0", 3), true);
+        IpAddress multicastRange = new IpAddress(new CIDRIP("224.0.0.0", 3), true);
 
-        for (NetworkSpace.ipAddress route : positiveIPv4Routes) {
+        for (IpAddress route : positiveIPv4Routes) {
             try {
 
                 if (multicastRange.containsNet(route)) {
@@ -183,7 +183,7 @@ public class OpenVpn implements Vpn, Callback {
             }
         }
 
-        for (NetworkSpace.ipAddress route6 : positiveIPv6Routes) {
+        for (IpAddress route6 : positiveIPv6Routes) {
             try {
                 builder.addRoute(route6.getIPv6Address(), route6.networkMask);
             } catch (IllegalArgumentException ia) {
@@ -294,14 +294,15 @@ public class OpenVpn implements Vpn, Callback {
         CIDRIP route = new CIDRIP(dest, mask);
         boolean include = isAndroidTunDevice(device);
 
-        NetworkSpace.ipAddress gatewayIP = new NetworkSpace.ipAddress(new CIDRIP(gateway, 32), false);
+        IpAddress gatewayIP = new IpAddress(new CIDRIP(gateway, 32), false);
 
         if (mLocalIP == null) {
-            Logger.error("Local IP address unset but adding route. This is broken.");
+            Logger.error("Local IP address unset and received. Neither pushed server config nor " +
+                    "local config specifies and IP address. Opening tun device will fail");
             return;
         }
 
-        NetworkSpace.ipAddress localNet = new NetworkSpace.ipAddress(mLocalIP, true);
+        IpAddress localNet = new IpAddress(mLocalIP, true);
         if (localNet.containsNet(gatewayIP)) {
             include = true;
         }
