@@ -24,6 +24,7 @@ import android.webkit.WebView;
 
 import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.WifiHelper;
+import com.lukekorth.auto_fi.webview.CaptivePortalWebChromeClient;
 import com.lukekorth.auto_fi.webview.CaptivePortalWebViewClient;
 import com.lukekorth.auto_fi.webview.JavascriptLoggingInterface;
 
@@ -93,6 +94,7 @@ public class CaptivePortalBypassService extends Service {
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.addJavascriptInterface(new JavascriptLoggingInterface(), "AutoFi");
         mWebView.setWebViewClient(new CaptivePortalWebViewClient(this, mWebView));
+        mWebView.setWebChromeClient(new CaptivePortalWebChromeClient());
         mWebView.loadData("", "text/html", null);
     }
 

@@ -51,7 +51,10 @@ public class CaptivePortalWebViewClient extends WebViewClient {
 
     @Override
     public void onPageFinished(WebView view, String url) {
+        Logger.info("Captive portal WebView loaded: " + url);
+
         if (mFirstPageLoad) {
+            Logger.info("First page loaded, picking up proxy settings and loading connectivity url");
             mFirstPageLoad = false;
             // Now that WebView has loaded at least one page we know it has read in the proxy
             // settings.  Now prompt the WebView read the Network-specific proxy settings.
@@ -65,6 +68,7 @@ public class CaptivePortalWebViewClient extends WebViewClient {
 
     @Override
     public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+        Logger.warn("SSL error encountered while loading captive portal, proceeding");
         handler.proceed();
     }
 
@@ -73,13 +77,14 @@ public class CaptivePortalWebViewClient extends WebViewClient {
     }
 
     private void bypassCaptivePortal(WebView view) {
-        mBypassAttempts++;
         if (mBypassAttempts == 3) {
             Logger.info("3 captive portal bypasses attempted");
             mService.stop(true);
             return;
         }
 
+        mBypassAttempts++;
+        Logger.info("Loading javascript to bypass captive portal");
         view.loadUrl("javascript:" + mBypassJavascript);
         testForCaptivePortal();
     }
