@@ -202,7 +202,7 @@ public class OpenVpnManagementThread implements Runnable {
         int waitTime = 0;
         try {
             waitTime = Integer.parseInt(argument.split(":")[1]);
-        } catch (NumberFormatException ignored) {}
+        } catch (Exception ignored) {}
         if (waitTime > 1) {
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override
