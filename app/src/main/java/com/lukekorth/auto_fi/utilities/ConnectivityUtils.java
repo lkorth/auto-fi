@@ -50,6 +50,9 @@ public class ConnectivityUtils {
                 if (StreamUtils.readStream(connection.getInputStream()).contains("E1A304E5-E244-4846-B613-6290055A211D")) {
                     Logger.info(wifiHelper.getCurrentNetworkName() + " has connectivity");
                     return ConnectivityState.CONNECTED;
+                } else {
+                    Logger.info("Received 200 response code, but invalid body. Returning redirected.");
+                    return ConnectivityState.REDIRECTED;
                 }
             } else if (responseCode == HTTP_MOVED_PERM || responseCode == HTTP_MOVED_TEMP || responseCode == 307) {
                 return ConnectivityState.REDIRECTED;
