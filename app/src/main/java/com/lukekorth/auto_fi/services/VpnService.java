@@ -34,7 +34,13 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
     @MainThread
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {
-            Logger.info("Restarting OpenVPN Service after crash or being killed");
+            Logger.info("Restarting VPNService after crash or being killed");
+        }
+
+        if (!new WifiHelper(this).isConnectedToWifi()) {
+            Logger.warn("No wifi networked connected, stopping VPNService");
+            stopSelf();
+            return START_NOT_STICKY;
         }
 
         registerDisconnectReceiver();
