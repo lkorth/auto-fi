@@ -22,6 +22,7 @@
             </intent-filter>
         </activity>
 
+        <activity android:label="@string/captive_portal" android:name=".CaptivePortalBypassActivity"/>
         <activity android:label="@string/view_logs" android:name=".LogActivity"/>
 
         <service

@@ -14,10 +14,9 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.lukekorth.auto_fi.services.CaptivePortalBypassService;
+import com.lukekorth.auto_fi.interfaces.CaptivePortalWebViewListener;
 import com.lukekorth.auto_fi.utilities.ConnectivityUtils;
 import com.lukekorth.auto_fi.utilities.Logger;
-import com.lukekorth.auto_fi.utilities.VpnHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,25 +27,30 @@ import static com.google.android.gms.internal.zzs.TAG;
 
 public class CaptivePortalWebViewClient extends WebViewClient {
 
-    private CaptivePortalBypassService mService;
     private Application mApplication;
     private Context mContext;
+    private CaptivePortalWebViewListener mListener;
     private WebView mWebView;
     private String mBypassJavascript;
     private boolean mFirstPageLoad = true;
     private int mBypassAttempts = 0;
 
-    public CaptivePortalWebViewClient(CaptivePortalBypassService service, WebView webView) throws IOException {
-        mService = service;
-        mApplication = service.getApplication();
+    public CaptivePortalWebViewClient(Application application,
+                                      CaptivePortalWebViewListener listener, WebView webView) {
+        mApplication = application;
         mContext = mApplication.getApplicationContext();
+        mListener = listener;
         mWebView = webView;
 
-        InputStream in = mContext.getAssets().open("captive_portal_bypass.js");
-        byte[] buffer = new byte[in.available()];
-        in.read(buffer);
-        in.close();
-        mBypassJavascript = new String(buffer).replaceAll("//.*\n", "").replace("\n", "");
+        try {
+            InputStream in = mContext.getAssets().open("captive_portal_bypass.js");
+            byte[] buffer = new byte[in.available()];
+            in.read(buffer);
+            in.close();
+            mBypassJavascript = new String(buffer).replaceAll("//.*\n", "").replace("\n", "");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -79,7 +83,7 @@ public class CaptivePortalWebViewClient extends WebViewClient {
     private void bypassCaptivePortal(WebView view) {
         if (mBypassAttempts == 3) {
             Logger.info("3 captive portal bypasses attempted");
-            mService.stop(true);
+            mListener.onComplete(false);
             return;
         }
 
@@ -98,10 +102,13 @@ public class CaptivePortalWebViewClient extends WebViewClient {
                 } catch (InterruptedException ignored) {}
 
                 if (ConnectivityUtils.checkConnectivity(mContext) == ConnectivityUtils.ConnectivityState.CONNECTED) {
-                    mService.captivePortalBypassed();
-                    VpnHelper.startVpn(mContext);
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mListener.onComplete(true);
+                        }
+                    });
                     FirebaseAnalytics.getInstance(mContext).logEvent("captive_portal_bypassed", null);
-                    mService.stop(false);
                 } else {
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override

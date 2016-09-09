@@ -8,6 +8,12 @@
     <string name="auto_connect_to_vpn">Automatically connect to VPN</string>
     <string name="auto_connect_to_vpn_summary">Automatically connect to a secure VPN when connected to unsecured WiFi networks</string>
     <string name="connect_to_vpn">Connect to VPN</string>
+    <string name="attempt_to_bypass_captive_portal">Attempt to bypass captive portal</string>
+    <string name="captive_portal">Captive Portal</string>
+    <string name="captive_portal_bypassed">Captive Portal Bypassed</string>
+    <string name="captive_portal_bypass_failed">Captive Portal Bypass Failed</string>
+    <string name="captive_portal_bypassed_message">This captive portal was bypassed, Internet access should now be available.</string>
+    <string name="captive_portal_bypass_failed_message">This captive portal bypass failed, Internet access on this wifi network will not be available.</string>
     <string name="view_logs">View Logs</string>
     <string name="auto_scroll">Auto scroll</string>
     <string name="loading">Loading...</string>

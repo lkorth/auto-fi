@@ -24,6 +24,13 @@
         android:key="debug_options"
         android:title="@string/debug_options">
 
+        <Preference android:title="@string/attempt_to_bypass_captive_portal">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:targetPackage="com.lukekorth.auto_fi"
+                android:targetClass="com.lukekorth.auto_fi.CaptivePortalBypassActivity"/>
+        </Preference>
+
         <Preference
             android:key="connect_to_vpn"
             android:title="@string/connect_to_vpn"/>
