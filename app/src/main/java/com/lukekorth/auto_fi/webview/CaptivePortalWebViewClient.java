@@ -47,7 +47,7 @@ public class CaptivePortalWebViewClient extends WebViewClient {
             byte[] buffer = new byte[in.available()];
             in.read(buffer);
             in.close();
-            mBypassJavascript = new String(buffer).replaceAll("//.*\n", "").replace("\n", "");
+            mBypassJavascript = new String(buffer);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -89,7 +89,7 @@ public class CaptivePortalWebViewClient extends WebViewClient {
 
         mBypassAttempts++;
         Logger.info("Loading javascript to bypass captive portal");
-        view.loadUrl("javascript:" + mBypassJavascript);
+        view.evaluateJavascript(mBypassJavascript, null);
         testForCaptivePortal();
     }
 
