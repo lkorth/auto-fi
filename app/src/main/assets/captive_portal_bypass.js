@@ -25,10 +25,11 @@ if (selectedElements.length > 0) {
 function findActionElements(elements) {
     var collectedElements = [];
 
-    collectedElements = collectedElements.concat(findElementsByText(elements, /continue/i));
     collectedElements = collectedElements.concat(findElementsByText(elements, /accept/i));
-    collectedElements = collectedElements.concat(findElementsByText(elements, /logon/i));
+    collectedElements = collectedElements.concat(findElementsByText(elements, /connect/i));
+    collectedElements = collectedElements.concat(findElementsByText(elements, /continue/i));
     collectedElements = collectedElements.concat(findElementsByText(elements, /login/i));
+    collectedElements = collectedElements.concat(findElementsByText(elements, /logon/i));
 
     return collectedElements;
 }
