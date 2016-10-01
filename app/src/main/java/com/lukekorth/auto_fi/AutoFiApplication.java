@@ -16,6 +16,9 @@ public class AutoFiApplication extends Application {
 
         MailableLog.init(this, BuildConfig.DEBUG, "%date{MMM dd | HH:mm:ss.SSS} %highlight(%-5level) %msg%n");
         DebugUtils.setup(this);
-        Realm.setDefaultConfiguration(new RealmConfiguration.Builder(this).build());
+
+        Realm.init(this);
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder().build();
+        Realm.setDefaultConfiguration(realmConfiguration);
     }
 }
