@@ -1,5 +1,21 @@
 <resources>
     <string name="app_name">Auto Fi</string>
+
+    <string name="welcome">Auto Fi automatically connects to nearby open Wi-Fi networks and secures
+        your wireless traffic with encryption using a virtual private network, or VPN, to keep your
+        data safe.</string>
+    <string name="location_permission">Location Permission</string>
+    <string name="location_permission_explanation">In order to periodically check for nearby Wi-Fi
+        networks, Auto Fi requires the coarse location permission. Clicking next will prompt you to
+        grant the permission.</string>
+    <string name="vpn">VPN</string>
+    <string name="vpn_explanation">After Auto Fi connects to an open Wi-Fi network, it connects to a
+        secure VPN to encrypt all of your data. Clicking next will prompt you to add Auto Fi as a
+        VPN.</string>
+    <string name="setup">All set up!</string>
+    <string name="setup_message">Auto Fi will now monitor for and automatically connect to nearby
+        Wi-Fi and ensure your connection is secure. Enjoy!</string>
+
     <string name="contact_developer">Contact developer</string>
     <string name="options">Options</string>
     <string name="debug_options">Debug Options</string>

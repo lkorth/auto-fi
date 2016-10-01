@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.VpnService;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -29,6 +30,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (!hasCompletedIntro()) {
+            startActivity(new Intent(this, AppIntroActivity.class));
+        }
+
         FirebaseAnalytics.getInstance(this);
 
         getFragmentManager().beginTransaction()
@@ -40,13 +45,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        // required for wifi scan results
-        if (ContextCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{ ACCESS_COARSE_LOCATION}, 1);
-        }
+        if (hasCompletedIntro()) {
+            // required for wifi scan results
+            if (ContextCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{ACCESS_COARSE_LOCATION}, 1);
+            }
 
-        if (!VpnHelper.isVpnEnabled(this)) {
-            startActivityForResult(VpnService.prepare(this), START_VPN);
+            if (!VpnHelper.isVpnEnabled(this)) {
+                startActivityForResult(VpnService.prepare(this), START_VPN);
+            }
         }
 
         if (!OpenVpnSetup.isSetup(this)) {
@@ -74,5 +81,10 @@ public class MainActivity extends AppCompatActivity {
     public static PendingIntent getStartPendingIntent(Context context) {
         Intent intent = new Intent(context, MainActivity.class);
         return PendingIntent.getActivity(context, 0, intent, 0);
+    }
+
+    private boolean hasCompletedIntro() {
+        return PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean(AppIntroActivity.APP_INTRO_COMPLETE, false);
     }
 }
