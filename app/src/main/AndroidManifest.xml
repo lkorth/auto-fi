@@ -16,14 +16,17 @@
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_scheme">
 
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".SplashActivity"
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AppIntroActivity" android:theme="@style/AppIntroTheme" />
 
+        <activity android:name=".MainActivity"/>
+        <activity android:name=".AppIntroActivity" android:theme="@style/AppIntroTheme"/>
         <activity android:label="@string/captive_portal" android:name=".CaptivePortalBypassActivity"/>
         <activity android:label="@string/view_logs" android:name=".LogActivity"/>
 
