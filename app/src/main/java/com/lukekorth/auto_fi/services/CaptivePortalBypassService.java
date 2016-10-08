@@ -66,7 +66,10 @@ public class CaptivePortalBypassService extends Service implements CaptivePortal
             }
         });
 
-        unregisterReceiver(mDisconnectReceiver);
+        try {
+            unregisterReceiver(mDisconnectReceiver);
+        } catch (IllegalArgumentException ignored) {}
+
         mWebView.tearDown();
         stopSelf();
     }
