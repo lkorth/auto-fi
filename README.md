@@ -1,5 +1,20 @@
 # auto-fi
 
+Auto Fi automatically connects to nearby open wifi networks, attempts to click through captive
+portal agreements and then tunnels all traffic over a secure VPN.
+
+Auto Fi uses [OpenVPN](https://openvpn.net/), based heavily on the
+[ics-openvpn Android app](https://github.com/schwabe/ics-openvpn).
+
+## Privacy
+
+Privacy is important, especially for security applications. Auto Fi is completely open source
+to provide greater transparency. Auto Fi uses [Firebase](https://firebase.google.com/) crash
+reporting and analytics to collect non-identifiable information to make the app better.
+All traffic over Auto Fi's VPN is never logged, recorded or collected, it is encrypted
+per-device using a uniquely generated encryption key that never leaves the device and transmitted
+from the device to the VPN server where it then continue to it's destination over the Internet.
+
 ## Disclaimer
 
 This software utilizes encryption and may or may not be legal depending on the country of residence
