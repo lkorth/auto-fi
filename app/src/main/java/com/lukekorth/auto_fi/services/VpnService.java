@@ -114,7 +114,7 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
                 .setOngoing(true)
                 .setPriority(Notification.PRIORITY_MIN)
                 .setContentIntent(MainActivity.getStartPendingIntent(this))
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_vpn_key)
                 .addAction(android.R.drawable.ic_menu_close_clear_cancel,
                         getString(R.string.cancel_connection), disconnectPendingIntent);
 
