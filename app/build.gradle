@@ -15,6 +15,15 @@ android {
         vectorDrawables.useSupportLibrary = true
     }
 
+    signingConfigs {
+        release {
+            storeFile file(System.properties['KEYSTORE_PATH'])
+            storePassword System.properties['KEYSTORE_PASSWORD']
+            keyAlias System.properties['KEYSTORE_EMAIL']
+            keyPassword System.properties['KEYSTORE_PASSWORD']
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled true
