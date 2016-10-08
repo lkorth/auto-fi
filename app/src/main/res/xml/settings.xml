@@ -2,6 +2,15 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
+        android:title="@string/stats">
+
+        <Preference
+            android:key="wifi_networks_used"
+            android:title="@string/wifi_networks_used"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/options">
 
         <CheckBoxPreference

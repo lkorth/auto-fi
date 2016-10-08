@@ -10,6 +10,7 @@ public class WifiNetwork extends RealmObject {
 
     private String ssid;
     private boolean autoconnected;
+    private boolean connectedToVpn;
     private boolean blacklisted;
     private long blacklistedTimestamp;
 
@@ -27,6 +28,14 @@ public class WifiNetwork extends RealmObject {
 
     public void setAutoconnected(boolean autoconnected) {
         this.autoconnected = autoconnected;
+    }
+
+    public boolean isConnectedToVpn() {
+        return connectedToVpn;
+    }
+
+    public void setConnectedToVpn(boolean connectedToVpn) {
+        this.connectedToVpn = connectedToVpn;
     }
 
     public boolean isBlacklisted() {

@@ -17,6 +17,8 @@
         Wi-Fi and ensure your connection is secure. Enjoy!</string>
 
     <string name="contact_developer">Contact developer</string>
+    <string name="stats">Stats</string>
+    <string name="wifi_networks_used">WiFi networks used</string>
     <string name="options">Options</string>
     <string name="debug_options">Debug Options</string>
     <string name="auto_connect_to_wifi">Automatically connect to WiFi</string>

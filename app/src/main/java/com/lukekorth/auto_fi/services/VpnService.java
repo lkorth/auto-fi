@@ -21,6 +21,8 @@ import com.lukekorth.auto_fi.openvpn.OpenVpn;
 import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.WifiHelper;
 
+import io.realm.Realm;
+
 public class VpnService extends android.net.VpnService implements VpnServiceInterface {
 
     public static final String DISCONNECT_VPN_INTENT_ACTION = "com.lukekorth.auto_fi.DISCONNECT_VPN";
@@ -28,6 +30,7 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
     private static final int NOTIFICATION_ID = 1;
 
     private Vpn mVpn;
+    private WifiHelper mWifiHelper;
     private BroadcastReceiver mDisconnectReceiver;
 
     @Override
@@ -37,7 +40,9 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
             Logger.info("Restarting VPNService after crash or being killed");
         }
 
-        if (!new WifiHelper(this).isConnectedToWifi()) {
+        mWifiHelper = new WifiHelper(this);
+
+        if (!mWifiHelper.isConnectedToWifi()) {
             Logger.warn("No wifi networked connected, stopping VPNService");
             stopSelf();
             return START_NOT_STICKY;
@@ -60,6 +65,20 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
     }
 
     @Override
+    public void successfullyConnected() {
+        Realm realm = Realm.getDefaultInstance();
+
+        WifiNetwork network = WifiNetwork.find(realm, mWifiHelper.getCurrentNetworkName());
+        if (network != null) {
+            realm.beginTransaction();
+            network.setConnectedToVpn(true);
+            realm.commitTransaction();
+        }
+
+        realm.close();
+    }
+
+    @Override
     public void shutdown() {
         stopVpn();
     }
@@ -76,9 +95,8 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
 
         unregisterDisconnectionReceiver();
 
-        WifiHelper wifiHelper = new WifiHelper(this);
-        if (WifiNetwork.isAutoconnectedNetwork(wifiHelper.getCurrentNetwork())) {
-            wifiHelper.disconnectFromCurrentWifiNetwork();
+        if (WifiNetwork.isAutoconnectedNetwork(mWifiHelper.getCurrentNetwork())) {
+            mWifiHelper.disconnectFromCurrentWifiNetwork();
         }
 
         stopSelf();
@@ -123,7 +141,7 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
                 if (intent.getAction().equals(DISCONNECT_VPN_INTENT_ACTION)) {
                     stopVpn();
                 } else if (intent.getAction().equals(WifiManager.WIFI_STATE_CHANGED_ACTION) &&
-                        !new WifiHelper(context).isConnectedToWifi()) {
+                        !mWifiHelper.isConnectedToWifi()) {
                     stopVpn();
                 }
             }

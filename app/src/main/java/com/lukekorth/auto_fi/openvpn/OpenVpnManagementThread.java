@@ -252,6 +252,10 @@ public class OpenVpnManagementThread implements Runnable {
         } else {
             mOpenVpn.updateNotification(getLocalizedState(currentstate));
         }
+
+        if ("CONNECTED".equals(currentstate)) {
+            mOpenVpn.getVpnService().successfullyConnected();
+        }
     }
 
     private void processNeedCommand(String argument) {
