@@ -11,8 +11,9 @@ import com.lukekorth.auto_fi.utilities.VpnHelper;
 import java.util.Locale;
 
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
 
-public class SettingsFragment extends PreferenceFragment {
+public class SettingsFragment extends PreferenceFragment implements RealmChangeListener<Realm> {
 
     private Realm mRealm;
     private Preference mWifiNetworksUsed;
@@ -27,6 +28,29 @@ public class SettingsFragment extends PreferenceFragment {
         mWifiNetworksUsed = findPreference("wifi_networks_used");
         mDataUsage = findPreference("data_usage");
 
+        setupDebugPreferences();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mRealm.addChangeListener(this);
+        onChange(null);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mRealm.removeChangeListener(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mRealm.close();
+    }
+
+    private void setupDebugPreferences() {
         if (!BuildConfig.DEBUG) {
             getPreferenceScreen().removePreference(findPreference("debug_options"));
         } else {
@@ -40,24 +64,6 @@ public class SettingsFragment extends PreferenceFragment {
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        long wifiNetworksUsed = mRealm.where(WifiNetwork.class)
-                .equalTo("connectedToVpn", true)
-                .count();
-        mWifiNetworksUsed.setSummary(Long.toString(wifiNetworksUsed));
-
-        mDataUsage.setSummary(humanReadableByteCount(DataUsage.getUsage(mRealm).getKilobytes()));
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mRealm.close();
-    }
-
     private static String humanReadableByteCount(long kilobytes) {
         if (kilobytes == 0) {
             return "0 B";
@@ -67,5 +73,15 @@ public class SettingsFragment extends PreferenceFragment {
         int exp = (int) (Math.log(bytes) / Math.log(1024));
         String pre = String.valueOf(("KMGTPE").charAt(exp - 1));
         return String.format(Locale.getDefault(), "%.1f %sB", bytes / Math.pow(1024, exp), pre);
+    }
+
+    @Override
+    public void onChange(Realm element) {
+        long wifiNetworksUsed = mRealm.where(WifiNetwork.class)
+                .equalTo("connectedToVpn", true)
+                .count();
+        mWifiNetworksUsed.setSummary(Long.toString(wifiNetworksUsed));
+
+        mDataUsage.setSummary(humanReadableByteCount(DataUsage.getUsage(mRealm).getKilobytes()));
     }
 }
