@@ -10,6 +10,7 @@ import android.os.ParcelFileDescriptor;
 
 import com.lukekorth.auto_fi.BuildConfig;
 import com.lukekorth.auto_fi.R;
+import com.lukekorth.auto_fi.models.DataUsage;
 import com.lukekorth.auto_fi.utilities.Logger;
 
 import junit.framework.Assert;
@@ -28,10 +29,13 @@ import java.util.Locale;
 
 public class OpenVpnManagementThread implements Runnable {
 
+    private static final int BYTE_COUNT_INTERVAL = 2;
+
     private LocalSocket mSocket;
     private OpenVpn mOpenVpn;
     private LinkedList<FileDescriptor> mFDList = new LinkedList<>();
     private LocalServerSocket mServerSocket;
+    private long mPreviousKilobytesUsed = 0;
     private boolean mShuttingDown;
 
     public OpenVpnManagementThread(OpenVpn openVpn) {
@@ -144,9 +148,12 @@ public class OpenVpnManagementThread implements Runnable {
             String argument = parts[1];
 
             switch (cmd) {
-                case "INFO": case "BYTECOUNT":
+                case "INFO":
                     // ignore
-                    return;
+                    break;
+                case "BYTECOUNT":
+                    processByteCount(argument);
+                    break;
                 case "HOLD":
                     handleHold(argument);
                     break;
@@ -177,6 +184,20 @@ public class OpenVpnManagementThread implements Runnable {
             }
         } else {
             Logger.warn("MGMT: Got unrecognized line from management: " + command);
+        }
+    }
+
+    /**
+     * @param argument Format of >BYTECOUNT:{BYTES_IN},{BYTES_OUT}
+     */
+    private void processByteCount(String argument) {
+        int comma = argument.indexOf(',');
+        long kilobytes = Long.parseLong(argument.substring(0, comma)) / 1024;
+        kilobytes += Long.parseLong(argument.substring(comma + 1)) / 1024;
+
+        if (kilobytes - mPreviousKilobytesUsed > 1024) {
+            DataUsage.addUsage(kilobytes - mPreviousKilobytesUsed);
+            mPreviousKilobytesUsed = kilobytes;
         }
     }
 
@@ -217,7 +238,7 @@ public class OpenVpnManagementThread implements Runnable {
 
     private void releaseHoldCommand() {
         managementCommand("hold release\n");
-        managementCommand("bytecount 2\n");
+        managementCommand("bytecount " + BYTE_COUNT_INTERVAL + "\n");
         managementCommand("state on\n");
     }
 

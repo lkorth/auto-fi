@@ -8,6 +8,10 @@
             android:key="wifi_networks_used"
             android:title="@string/wifi_networks_used"/>
 
+        <Preference
+            android:key="data_usage"
+            android:title="@string/data_saved_by_auto_fi"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory
