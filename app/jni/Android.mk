@@ -3,21 +3,6 @@ JNI_DIR := $(call my-dir)
 
 include lzo/Android.mk
 include openssl/Android.mk
-
-ifeq ($(TARGET_ARCH),mips)
-	USE_BREAKPAD=0
-endif
-ifeq ($(TARGET_ARCH),mips64)
-	USE_BREAKPAD=0
-endif
-
-ifeq ($(USE_BREAKPAD),1)
-	WITH_BREAKPAD=1
-	include breakpad/android/google_breakpad/Android.mk 
-else
-	WITH_BREAKPAD=0
-endif
-
 include openvpn/Android.mk
 
 LOCAL_PATH := $(JNI_DIR)
