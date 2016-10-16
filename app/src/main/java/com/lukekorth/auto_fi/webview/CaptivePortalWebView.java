@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.Context;
-import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.Proxy;
@@ -62,71 +61,53 @@ public class CaptivePortalWebView extends WebView {
     }
 
     public void attemptBypass(Application application, CaptivePortalWebViewListener listener) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            bindProcessToNetwork();
-        }
+        Network network = mWifiHelper.bindToCurrentNetwork();
+        setProxyProperties(network);
 
         setWebViewClient(new CaptivePortalWebViewClient(application, listener, this));
         loadData("", "text/html", null);
     }
 
     public void tearDown() {
-        unbindProcessFromNetwork();
+        mWifiHelper.unbindFromCurrentNetwork();
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void bindProcessToNetwork() {
-        try {
-            Network network = mWifiHelper.getLollipopWifiNetwork();
-            if (network != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    mWifiHelper.getConnectivityManager().bindProcessToNetwork(network);
-                } else {
-                    ConnectivityManager.setProcessDefaultNetwork(network);
+    private void setProxyProperties(Network network) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && network != null) {
+            LinkProperties linkProperties = mWifiHelper.getConnectivityManager()
+                    .getLinkProperties(network);
+            if (linkProperties != null) {
+                ProxyInfo proxyInfo = linkProperties.getHttpProxy();
+                String host = "";
+                String port = "";
+                Uri pacFileUrl = Uri.EMPTY;
+                String exclusionList = "";
+                if (proxyInfo != null) {
+                    host = proxyInfo.getHost();
+                    port = Integer.toString(proxyInfo.getPort());
+                    pacFileUrl = proxyInfo.getPacFileUrl();
+
+                    try {
+                        Method getExclustionListMethod = ProxyInfo.class.getDeclaredMethod(
+                                "getExclusionList");
+                        getExclustionListMethod.setAccessible(true);
+                        exclusionList = (String) getExclustionListMethod.invoke(proxyInfo);
+                    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                        Logger.warn(e.getMessage());
+                    }
                 }
 
-                setProxyProperties(network);
+                try {
+                    Method setHttpProxySystemPropertyMethod = Proxy.class.getDeclaredMethod(
+                            "setHttpProxySystemProperty", String.class, String.class, String.class,
+                            Uri.class);
+                    setHttpProxySystemPropertyMethod.setAccessible(true);
+                    setHttpProxySystemPropertyMethod.invoke(null, host, port, exclusionList,
+                            pacFileUrl);
+                } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                    Logger.warn(e.getMessage());
+                }
             }
-        } catch (Exception e) {
-            Logger.warn(e.getMessage());
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void setProxyProperties(Network network) throws NoSuchMethodException, InvocationTargetException,
-            IllegalAccessException {
-        final LinkProperties linkProperties = mWifiHelper.getConnectivityManager().getLinkProperties(network);
-        if (linkProperties != null) {
-            ProxyInfo proxyInfo = linkProperties.getHttpProxy();
-            String host = "";
-            String port = "";
-            Uri pacFileUrl = Uri.EMPTY;
-            String exclusionList = "";
-            if (proxyInfo != null) {
-                host = proxyInfo.getHost();
-                port = Integer.toString(proxyInfo.getPort());
-                pacFileUrl = proxyInfo.getPacFileUrl();
-
-                Method getExclustionListMethod = ProxyInfo.class.getDeclaredMethod("getExclusionList");
-                getExclustionListMethod.setAccessible(true);
-                exclusionList = (String) getExclustionListMethod.invoke(proxyInfo);
-            }
-
-            Method setHttpProxySystemPropertyMethod = Proxy.class.getDeclaredMethod("setHttpProxySystemProperty",
-                    String.class, String.class, String.class, Uri.class);
-            setHttpProxySystemPropertyMethod.setAccessible(true);
-            setHttpProxySystemPropertyMethod.invoke(null, host, port, exclusionList, pacFileUrl);
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void unbindProcessFromNetwork() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mWifiHelper.getConnectivityManager().bindProcessToNetwork(null);
-        } else {
-            try {
-                ConnectivityManager.setProcessDefaultNetwork(null);
-            } catch (IllegalStateException ignored) {}
         }
     }
 }

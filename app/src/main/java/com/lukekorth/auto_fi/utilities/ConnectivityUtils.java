@@ -1,9 +1,7 @@
 package com.lukekorth.auto_fi.utilities;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
 import android.net.Network;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.support.annotation.WorkerThread;
 
@@ -25,7 +23,7 @@ public class ConnectivityUtils {
     public enum ConnectivityState {
         CONNECTED,
         REDIRECTED,
-        NO_CONNECTIVITY;
+        NO_CONNECTIVITY
     }
 
     @WorkerThread
@@ -33,7 +31,9 @@ public class ConnectivityUtils {
         WifiHelper wifiHelper = new WifiHelper(context);
         HttpURLConnection connection = null;
         try {
-            connection = getConnection(context);
+            Network network = wifiHelper.bindToCurrentNetwork();
+
+            connection = getConnection(network);
             connection.setUseCaches(false);
             connection.setConnectTimeout(30000);
             connection.setReadTimeout(30000);
@@ -63,24 +63,19 @@ public class ConnectivityUtils {
             if (connection != null) {
                 connection.disconnect();
             }
+
+            wifiHelper.unbindFromCurrentNetwork();
         }
 
         Logger.info("Unable to make a connection to " + wifiHelper.getCurrentNetworkName());
         return ConnectivityState.NO_CONNECTIVITY;
     }
 
-    private static HttpURLConnection getConnection(Context context) throws IOException {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ConnectivityManager connectivityManager =
-                    (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            for (Network network : connectivityManager.getAllNetworks()) {
-                NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
-                if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-                    return ((HttpURLConnection) network.openConnection(new URL(CONNECTIVITY_CHECK_URL)));
-                }
-            }
+    private static HttpURLConnection getConnection(Network network) throws IOException {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && network != null) {
+            return ((HttpURLConnection) network.openConnection(new URL(CONNECTIVITY_CHECK_URL)));
+        } else {
+            return (HttpURLConnection) new URL(CONNECTIVITY_CHECK_URL).openConnection();
         }
-
-        return (HttpURLConnection) new URL(CONNECTIVITY_CHECK_URL).openConnection();
     }
 }

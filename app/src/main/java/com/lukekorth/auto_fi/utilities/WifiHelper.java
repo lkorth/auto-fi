@@ -1,6 +1,5 @@
 package com.lukekorth.auto_fi.utilities;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -68,9 +67,12 @@ public class WifiHelper {
         return null;
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Nullable
     public Network getLollipopWifiNetwork() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            return null;
+        }
+
         for (Network network : mConnectivityManager.getAllNetworks()) {
             NetworkInfo networkInfo = mConnectivityManager.getNetworkInfo(network);
             if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
@@ -141,5 +143,31 @@ public class WifiHelper {
         }
 
         realm.close();
+    }
+
+    @SuppressWarnings("deprecation")
+    @Nullable
+    public Network bindToCurrentNetwork() {
+        Network network = getLollipopWifiNetwork();
+        if (network != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                getConnectivityManager().bindProcessToNetwork(network);
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                ConnectivityManager.setProcessDefaultNetwork(network);
+            }
+        }
+
+        return network;
+    }
+
+    @SuppressWarnings("deprecation")
+    public void unbindFromCurrentNetwork() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            getConnectivityManager().bindProcessToNetwork(null);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            try {
+                ConnectivityManager.setProcessDefaultNetwork(null);
+            } catch (IllegalStateException ignored) {}
+        }
     }
 }
