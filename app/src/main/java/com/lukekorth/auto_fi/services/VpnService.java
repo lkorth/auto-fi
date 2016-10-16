@@ -48,6 +48,8 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
             return START_NOT_STICKY;
         }
 
+        mWifiHelper.bindToCurrentNetwork();
+
         registerDisconnectReceiver();
         setNotificationMessage(getString(R.string.state_connecting));
 
@@ -94,6 +96,8 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
         stopForeground(true);
 
         unregisterDisconnectionReceiver();
+
+        mWifiHelper.unbindFromCurrentNetwork();
 
         if (WifiNetwork.isAutoconnectedNetwork(mWifiHelper.getCurrentNetwork())) {
             mWifiHelper.disconnectFromCurrentWifiNetwork();
