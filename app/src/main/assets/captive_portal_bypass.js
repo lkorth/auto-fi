@@ -8,12 +8,14 @@ var links = document.getElementsByTagName("a");
 var buttons = document.getElementsByTagName("button");
 var inputButtons = document.querySelectorAll("input[type='button']");
 var submitButtons = document.querySelectorAll("input[type='submit']");
+var imageButtons = document.querySelectorAll("input[type='image']");
 
 var selectedElements = [];
 selectedElements = selectedElements.concat(findActionElements(submitButtons));
 selectedElements = selectedElements.concat(findActionElements(inputButtons));
 selectedElements = selectedElements.concat(findActionElements(buttons));
 selectedElements = selectedElements.concat(findActionElements(links));
+selectedElements = selectedElements.concat(findActionElements(imageButtons));
 
 AutoFi.log("Matched " + selectedElements.length + " elements");
 
@@ -39,7 +41,11 @@ function findElementsByText(elements, text) {
     for (var i = 0; i < elements.length; i++) {
         if (elements[i].title && elements[i].title.match(text)) {
             collectedElements.push(elements[i]);
+        } else if (elements[i].value && elements[i].value.match(text)) {
+            collectedElements.push(elements[i])
         } else if (elements[i].innerHTML && elements[i].innerHTML.match(text)) {
+            collectedElements.push(elements[i]);
+        } else if (elements[i].alt && elements[i].alt.match(text)) {
             collectedElements.push(elements[i]);
         }
     }

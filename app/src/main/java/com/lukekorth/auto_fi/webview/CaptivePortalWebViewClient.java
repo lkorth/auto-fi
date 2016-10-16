@@ -17,9 +17,8 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.lukekorth.auto_fi.interfaces.CaptivePortalWebViewListener;
 import com.lukekorth.auto_fi.utilities.ConnectivityUtils;
 import com.lukekorth.auto_fi.utilities.Logger;
+import com.lukekorth.auto_fi.utilities.StreamUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -41,16 +40,7 @@ public class CaptivePortalWebViewClient extends WebViewClient {
         mContext = mApplication.getApplicationContext();
         mListener = listener;
         mWebView = webView;
-
-        try {
-            InputStream in = mContext.getAssets().open("captive_portal_bypass.js");
-            byte[] buffer = new byte[in.available()];
-            in.read(buffer);
-            in.close();
-            mBypassJavascript = new String(buffer);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        mBypassJavascript = StreamUtils.getAsset(mContext, "captive_portal_bypass.js");
     }
 
     @Override
