@@ -15,6 +15,7 @@ import com.lukekorth.auto_fi.R;
 import com.lukekorth.auto_fi.interfaces.Vpn;
 import com.lukekorth.auto_fi.interfaces.VpnServiceInterface;
 import com.lukekorth.auto_fi.utilities.Logger;
+import com.lukekorth.auto_fi.utilities.Version;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -99,7 +100,7 @@ public class OpenVpn implements Vpn, Callback {
 
         Logger.info("Opening tun interface");
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Version.isAtLeastLollipop()) {
             allowAllAFFamilies(builder);
         }
 
@@ -149,7 +150,7 @@ public class OpenVpn implements Vpn, Callback {
         Collection<IpAddress> positiveIPv4Routes = mRoutes.getPositiveIPList();
         Collection<IpAddress> positiveIPv6Routes = mRoutesv6.getPositiveIPList();
 
-        if ("samsung".equals(Build.BRAND) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && mDnslist.size() >= 1) {
+        if ("samsung".equals(Build.BRAND) && Version.isAtLeastLollipop() && mDnslist.size() >= 1) {
             // Check if the first DNS Server is in the VPN range
             try {
                 IpAddress dnsServer = new IpAddress(new CIDRIP(mDnslist.get(0), 32), true);
@@ -384,7 +385,7 @@ public class OpenVpn implements Vpn, Callback {
         }
 
         /* Workaround for Lollipop, it  does not route traffic to the VPNs own network mask */
-        if (mLocalIP.getLength() <= 31 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (mLocalIP.getLength() <= 31 && Version.isAtLeastLollipop()) {
             CIDRIP interfaceRoute = new CIDRIP(mLocalIP.getIp(), mLocalIP.getIp());
             interfaceRoute.normalize();
             addRoute(interfaceRoute);

@@ -19,6 +19,7 @@ import com.lukekorth.auto_fi.interfaces.VpnServiceInterface;
 import com.lukekorth.auto_fi.models.WifiNetwork;
 import com.lukekorth.auto_fi.openvpn.OpenVpn;
 import com.lukekorth.auto_fi.utilities.Logger;
+import com.lukekorth.auto_fi.utilities.Version;
 import com.lukekorth.auto_fi.utilities.WifiHelper;
 
 import io.realm.Realm;
@@ -122,7 +123,7 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
                 .addAction(android.R.drawable.ic_menu_close_clear_cancel,
                         getString(R.string.cancel_connection), disconnectPendingIntent);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Version.isAtLeastLollipop()) {
             lollipopNotificationExtras(builder);
         }
 

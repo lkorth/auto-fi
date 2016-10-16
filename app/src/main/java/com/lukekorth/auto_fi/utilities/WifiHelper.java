@@ -36,19 +36,12 @@ public class WifiHelper {
     }
 
     public boolean isConnectedToWifi() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            for (Network network : mConnectivityManager.getAllNetworks()) {
-                NetworkInfo networkInfo = mConnectivityManager.getNetworkInfo(network);
-                if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-                    return true;
-                }
-            }
+        if (Version.isAtLeastLollipop()) {
+            return getLollipopWifiNetwork() != null;
         } else {
             NetworkInfo networkInfo = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
             return networkInfo != null && networkInfo.isConnectedOrConnecting();
         }
-
-        return false;
     }
 
     @Nullable
@@ -69,7 +62,7 @@ public class WifiHelper {
 
     @Nullable
     public Network getLollipopWifiNetwork() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+        if (!Version.isAtLeastLollipop()) {
             return null;
         }
 
@@ -150,9 +143,9 @@ public class WifiHelper {
     public Network bindToCurrentNetwork() {
         Network network = getLollipopWifiNetwork();
         if (network != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Version.isAtLeastMarshmallow()) {
                 getConnectivityManager().bindProcessToNetwork(network);
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            } else if (Version.isAtLeastLollipop()) {
                 ConnectivityManager.setProcessDefaultNetwork(network);
             }
         }
@@ -162,9 +155,9 @@ public class WifiHelper {
 
     @SuppressWarnings("deprecation")
     public void unbindFromCurrentNetwork() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Version.isAtLeastMarshmallow()) {
             getConnectivityManager().bindProcessToNetwork(null);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        } else if (Version.isAtLeastLollipop()) {
             try {
                 ConnectivityManager.setProcessDefaultNetwork(null);
             } catch (IllegalStateException ignored) {}

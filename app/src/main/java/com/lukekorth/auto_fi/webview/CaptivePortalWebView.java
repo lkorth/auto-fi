@@ -15,6 +15,7 @@ import android.webkit.WebView;
 
 import com.lukekorth.auto_fi.interfaces.CaptivePortalWebViewListener;
 import com.lukekorth.auto_fi.utilities.Logger;
+import com.lukekorth.auto_fi.utilities.Version;
 import com.lukekorth.auto_fi.utilities.WifiHelper;
 
 import java.lang.reflect.InvocationTargetException;
@@ -73,7 +74,7 @@ public class CaptivePortalWebView extends WebView {
     }
 
     private void setProxyProperties(Network network) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && network != null) {
+        if (Version.isAtLeastLollipop() && network != null) {
             LinkProperties linkProperties = mWifiHelper.getConnectivityManager()
                     .getLinkProperties(network);
             if (linkProperties != null) {
