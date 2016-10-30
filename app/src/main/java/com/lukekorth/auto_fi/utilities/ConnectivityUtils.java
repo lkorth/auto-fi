@@ -28,6 +28,8 @@ public class ConnectivityUtils {
     @WorkerThread
     public static ConnectivityState checkConnectivity(Context context) {
         WifiHelper wifiHelper = new WifiHelper(context);
+        FirebaseAnalytics analytics = FirebaseAnalytics.getInstance(context);
+
         HttpURLConnection connection = null;
         try {
             Network network = wifiHelper.bindToCurrentNetwork();
@@ -41,19 +43,21 @@ public class ConnectivityUtils {
             int responseCode = connection.getResponseCode();
 
             Logger.info("Received " + responseCode + " response code from " + wifiHelper.getCurrentNetworkName());
-            FirebaseAnalytics analytics = FirebaseAnalytics.getInstance(context);
             analytics.logEvent("network_response_code_" + responseCode, null);
             analytics.logEvent(wifiHelper.getCurrentNetworkName().replace(" ", "_"), null);
 
             if (responseCode == HTTP_OK) {
                 if (StreamUtils.readStream(connection.getInputStream()).contains("E1A304E5-E244-4846-B613-6290055A211D")) {
                     Logger.info(wifiHelper.getCurrentNetworkName() + " has connectivity");
+                    analytics.logEvent("connectivity_connected", null);
                     return ConnectivityState.CONNECTED;
                 } else {
                     Logger.info("Received 200 response code, but invalid body. Returning redirected.");
+                    analytics.logEvent("connectivity_200_invalid_body", null);
                     return ConnectivityState.REDIRECTED;
                 }
             } else if (responseCode == HTTP_MOVED_PERM || responseCode == HTTP_MOVED_TEMP || responseCode == 307) {
+                analytics.logEvent("connectivity_redirected", null);
                 return ConnectivityState.REDIRECTED;
             }
         } catch (IOException e) {
@@ -67,6 +71,7 @@ public class ConnectivityUtils {
         }
 
         Logger.info("Unable to make a connection to " + wifiHelper.getCurrentNetworkName());
+        analytics.logEvent("connectivity_none", null);
         return ConnectivityState.NO_CONNECTIVITY;
     }
 

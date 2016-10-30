@@ -92,13 +92,13 @@ public class CaptivePortalWebViewClient extends WebViewClient {
                 } catch (InterruptedException ignored) {}
 
                 if (ConnectivityUtils.checkConnectivity(mContext) == ConnectivityUtils.ConnectivityState.CONNECTED) {
+                    FirebaseAnalytics.getInstance(mContext).logEvent("captive_portal_bypassed", null);
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
                             mListener.onComplete(true);
                         }
                     });
-                    FirebaseAnalytics.getInstance(mContext).logEvent("captive_portal_bypassed", null);
                 } else {
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override

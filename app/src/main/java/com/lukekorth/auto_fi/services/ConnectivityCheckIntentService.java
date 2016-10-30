@@ -3,7 +3,6 @@ package com.lukekorth.auto_fi.services;
 import android.app.IntentService;
 import android.content.Intent;
 
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.lukekorth.auto_fi.models.Settings;
 import com.lukekorth.auto_fi.utilities.ConnectivityUtils;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
@@ -26,15 +25,12 @@ public class ConnectivityCheckIntentService extends IntentService {
                 if (Settings.autoConnectToVpn(this)) {
                     VpnHelper.startVpn(this);
                 }
-                FirebaseAnalytics.getInstance(this).logEvent("connectivity_connected", null);
                 break;
             } case REDIRECTED: {
                 startService(new Intent(this, CaptivePortalBypassService.class));
-                FirebaseAnalytics.getInstance(this).logEvent("connectivity_redirected", null);
                 break;
             } case NO_CONNECTIVITY: {
                 new WifiHelper(this).blacklistAndDisconnectFromCurrentWifiNetwork();
-                FirebaseAnalytics.getInstance(this).logEvent("connectivity_none", null);
                 break;
             }
         }
