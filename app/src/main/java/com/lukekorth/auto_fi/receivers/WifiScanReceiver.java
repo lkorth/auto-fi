@@ -21,11 +21,17 @@ import io.realm.Realm;
 
 public class WifiScanReceiver extends BroadcastReceiver {
 
+    private static final String LAST_SCAN_KEY = "last_scan";
+
     @Override
     public void onReceive(Context context, Intent intent) {
         if (!Settings.autoConnectToWifi(context)) {
             return;
         }
+
+        Settings.getPrefs(context).edit()
+                .putLong(LAST_SCAN_KEY, System.currentTimeMillis())
+                .apply();
 
         WifiHelper wifiHelper = new WifiHelper(context);
 
@@ -89,5 +95,9 @@ public class WifiScanReceiver extends BroadcastReceiver {
     private boolean isNetworkUnsecured(ScanResult result) {
         return !(result.capabilities.contains("WEP") || result.capabilities.contains("PSK") ||
                 result.capabilities.contains("EAP"));
+    }
+
+    public static long getLastScan(Context context) {
+        return Settings.getPrefs(context).getLong(LAST_SCAN_KEY, 0);
     }
 }
