@@ -10,9 +10,7 @@ public class DebugUtils {
     public static void setup(Context context) {
         Stetho.initialize(Stetho.newInitializerBuilder(context)
                 .enableDumpapp(Stetho.defaultDumperPluginsProvider(context))
-                .enableWebKitInspector(RealmInspectorModulesProvider.builder(context)
-                        .withMetaTables()
-                        .build())
+                .enableWebKitInspector(RealmInspectorModulesProvider.builder(context).build())
                 .build());
     }
 }
