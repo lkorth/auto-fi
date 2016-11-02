@@ -27,6 +27,10 @@ public class CaptivePortalBypassActivity extends AppCompatActivity
 
     @Override
     public void onComplete(boolean successfullyBypassed) {
+        if (isDestroyed()) {
+            return;
+        }
+
         new AlertDialog.Builder(this)
                 .setTitle(successfullyBypassed ? R.string.captive_portal_bypassed : R.string.captive_portal_bypass_failed)
                 .setMessage(successfullyBypassed ? R.string.captive_portal_bypassed_message : R.string.captive_portal_bypass_failed_message)
