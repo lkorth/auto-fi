@@ -248,6 +248,9 @@ public class OpenVpn implements Vpn, Callback {
     private void addLocalNetworksToRoutes() {
         // Add local network interfaces
         String[] localRoutes = NativeUtils.getIfconfig();
+        if (localRoutes == null) {
+            return;
+        }
 
         // The format of mLocalRoutes is kind of broken because I don't really like JNI
         for (int i = 0; i < localRoutes.length; i += 3) {

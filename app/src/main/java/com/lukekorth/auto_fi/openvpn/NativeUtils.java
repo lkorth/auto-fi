@@ -1,7 +1,5 @@
 package com.lukekorth.auto_fi.openvpn;
 
-import android.os.Build;
-
 import java.security.InvalidKeyException;
 
 public class NativeUtils {
