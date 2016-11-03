@@ -4,7 +4,7 @@ import android.content.Context;
 
 public class DebugUtils {
 
-    public static void setup(Context context) {
-        // noop
-    }
+    public static void setup(Context context) {}
+
+    public static void setStrictMode() {}
 }
