@@ -26,8 +26,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".MainActivity"/>
         <activity android:name=".AppIntroActivity" android:theme="@style/AppIntroTheme"/>
+        <activity android:name=".MainActivity"/>
+        <activity android:label="@string/wifi_networks" android:name=".WifiNetworksActivity"/>
         <activity android:label="@string/captive_portal" android:name=".CaptivePortalBypassActivity"/>
         <activity android:label="@string/view_logs" android:name=".LogActivity"/>
 

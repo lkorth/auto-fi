@@ -41,7 +41,9 @@ public class WifiScanReceiver extends BroadcastReceiver {
             if (!wifiHelper.isConnectedToWifi() && scanResults.size() > 0) {
                 ScanResult selectedNetwork = null;
                 for (ScanResult scanResult : wifiHelper.getWifiManager().getScanResults()) {
-                    if (isNetworkUnsecured(scanResult) && !WifiNetwork.isBlacklisted("\"" + scanResult.SSID + "\"")) {
+                    if (isNetworkUnsecured(scanResult) &&
+                            !WifiNetwork.isBlacklisted("\"" + scanResult.SSID + "\"") &&
+                            !WifiNetwork.shouldNeverUse("\"" + scanResult.SSID + "\"")) {
                         if (selectedNetwork == null) {
                             selectedNetwork = scanResult;
                         } else if (WifiManager.compareSignalLevel(scanResult.level, selectedNetwork.level) > 0) {
@@ -68,6 +70,8 @@ public class WifiScanReceiver extends BroadcastReceiver {
                     String ssid = "\"" + selectedNetwork.SSID + "\"";
                     if (WifiNetwork.isBlacklisted(ssid)) {
                         Logger.info(selectedNetwork.SSID + " is blacklisted");
+                    } else if (WifiNetwork.shouldNeverUse(ssid)) {
+                        Logger.info(selectedNetwork.SSID + " should never be used");
                     } else {
                         Logger.info("Automatically connecting to " + selectedNetwork.SSID);
 

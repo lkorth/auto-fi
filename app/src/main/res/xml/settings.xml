@@ -6,7 +6,12 @@
 
         <Preference
             android:key="wifi_networks_used"
-            android:title="@string/wifi_networks_used"/>
+            android:title="@string/wifi_networks_used">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:targetPackage="com.lukekorth.auto_fi"
+                android:targetClass="com.lukekorth.auto_fi.WifiNetworksActivity"/>
+        </Preference>
 
         <Preference
             android:key="data_usage"

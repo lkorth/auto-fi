@@ -18,28 +18,50 @@ import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
 import com.lukekorth.auto_fi.utilities.WifiHelper;
 
+import io.realm.Realm;
+
 public class WifiConnectionReceiver extends BroadcastReceiver {
+
+    private WifiHelper mWifiHelper;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        WifiHelper wifiHelper = new WifiHelper(context);
-        if (wifiHelper.isConnectedToWifi()) {
+        mWifiHelper = new WifiHelper(context);
+        if (mWifiHelper.isConnectedToWifi()) {
             WifiConfiguration configuration =
-                    wifiHelper.getWifiNetwork((WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO));
-            if (wifiHelper.isWifiUnsecured(configuration)) {
+                    mWifiHelper.getWifiNetwork((WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO));
+            if (mWifiHelper.isWifiUnsecured(configuration)) {
+                setConnectionTimestamp();
+
                 if (Settings.autoConnectToVpn(context) && !VpnHelper.isVpnEnabled(context)) {
                     displayVpnNotEnabledNotification(context);
 
-                    if (WifiNetwork.isAutoconnectedNetwork(wifiHelper.getCurrentNetwork())) {
-                        wifiHelper.disconnectFromCurrentWifiNetwork();
+                    if (WifiNetwork.isAutoconnectedNetwork(mWifiHelper.getCurrentNetwork())) {
+                        mWifiHelper.disconnectFromCurrentWifiNetwork();
                     }
                 } else if (!ConnectivityCheckIntentService.sIsRunning) {
-                    Logger.info("Connected to unsecured wifi network " + wifiHelper.getCurrentNetworkName() + ", checking connectivity");
+                    Logger.info("Connected to unsecured wifi network " + mWifiHelper.getCurrentNetworkName() +
+                            ", checking connectivity");
                     context.startService(new Intent(context, ConnectivityCheckIntentService.class));
                 } else {
                     Logger.info("ConnectivityCheckIntentService is already running");
                 }
             }
+        }
+    }
+
+    private void setConnectionTimestamp() {
+        WifiConfiguration configuration = mWifiHelper.getCurrentNetwork();
+        if (configuration != null) {
+            Realm realm = Realm.getDefaultInstance();
+
+            WifiNetwork network = WifiNetwork.findOrCreate(realm, configuration.SSID);
+
+            realm.beginTransaction();
+            network.setConnectedTimestamp(System.currentTimeMillis());
+            realm.commitTransaction();
+
+            realm.close();
         }
     }
 

@@ -2,6 +2,7 @@ package com.lukekorth.auto_fi;
 
 import android.app.Application;
 
+import com.lukekorth.auto_fi.migrations.DataMigrations;
 import com.lukekorth.auto_fi.utilities.DebugUtils;
 import com.lukekorth.mailable_log.MailableLog;
 
@@ -18,7 +19,10 @@ public class AutoFiApplication extends Application {
         DebugUtils.setup(this);
 
         Realm.init(this);
-        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder().build();
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder()
+                .schemaVersion(2)
+                .migration(new DataMigrations())
+                .build();
         Realm.setDefaultConfiguration(realmConfiguration);
 
         DebugUtils.setStrictMode();
