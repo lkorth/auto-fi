@@ -21,7 +21,7 @@ public class UserPresentReceiver extends BroadcastReceiver {
         WifiHelper wifiHelper = new WifiHelper(context);
         if (!wifiHelper.isConnectedToWifi()) {
             long lastScan = WifiScanReceiver.getLastScan(context);
-            if (System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(5) < lastScan) {
+            if (System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(5) > lastScan) {
                 Logger.debug("Requesting wifi scan after unlock");
                 wifiHelper.getWifiManager().startScan();
             }
