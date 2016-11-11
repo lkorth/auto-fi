@@ -16,19 +16,30 @@ import java.util.Arrays;
 
 public class OpenVpnSetup {
 
+    private static final String PUBLIC_KEY_FILE = "open_vpn_public_key.crt";
+    private static final String PRIVATE_KEY_FILE = "open_vpn_private_key.key";
     private static final String CONFIGURATION_FILE = "open_vpn_client_configuration.ovpn";
     private static final String VPN_EXECUTABLE = "openvpn_executable";
 
     public static boolean isSetup(Context context) {
-        return FileUtils.isFileAvailable(context, CONFIGURATION_FILE);
+        return FileUtils.isFileAvailable(context, PUBLIC_KEY_FILE) &&
+                FileUtils.isFileAvailable(context, PRIVATE_KEY_FILE);
     }
 
-    public static void writeConfigurationFile(Context context, String publicKey, String privateKey)
+    public static void writeKeyPair(Context context, String publicKey, String privateKey)
             throws IOException {
+        FileUtils.writeToDisk(context, publicKey, PUBLIC_KEY_FILE);
+        FileUtils.writeToDisk(context, privateKey, PRIVATE_KEY_FILE);
+    }
+
+    public static void writeConfigurationFile(Context context) throws IOException {
         InputStream in = context.getAssets().open(CONFIGURATION_FILE);
         byte[] buffer = new byte[in.available()];
         in.read(buffer);
         in.close();
+
+        String publicKey = FileUtils.readFile(context, PUBLIC_KEY_FILE);
+        String privateKey = FileUtils.readFile(context, PRIVATE_KEY_FILE);
 
         String configuration = new String(buffer);
         configuration = configuration.replace("<- server here ->", BuildConfig.SERVER_ADDRESS);
@@ -47,6 +58,13 @@ public class OpenVpnSetup {
         String binaryName = getOpenVpnExecutable(context);
         if(binaryName == null) {
             Logger.error("Error writing OpenVPN executable");
+            return null;
+        }
+
+        try {
+            writeConfigurationFile(context);
+        } catch (IOException e) {
+            Logger.error("Error writing OpenVPN configuration file");
             return null;
         }
 

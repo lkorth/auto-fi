@@ -5,7 +5,6 @@ import android.content.Intent;
 
 import com.lukekorth.auto_fi.BuildConfig;
 import com.lukekorth.auto_fi.openvpn.OpenVpnSetup;
-import com.lukekorth.auto_fi.utilities.FileUtils;
 import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.StreamUtils;
 
@@ -49,12 +48,9 @@ public class OpenVpnConfigurationIntentService extends IntentService {
 
             String encodedCsr = encodeKey(csr.getEncoded(), "CERTIFICATE REQUEST");
             String publicKey = exchangeCsrForPublicKey(encodedCsr);
-            FileUtils.writeToDisk(this, publicKey, "open_vpn_public_key.crt");
 
-            String encodedPrivateKey = encodeKey(keyPair.getPrivate().getEncoded(), "PRIVATE KEY");
-            FileUtils.writeToDisk(this, encodedPrivateKey, "open_vpn_private_key.key");
-
-            OpenVpnSetup.writeConfigurationFile(this, publicKey, encodedPrivateKey);
+            OpenVpnSetup.writeKeyPair(this, publicKey,
+                    encodeKey(keyPair.getPrivate().getEncoded(), "PRIVATE KEY"));
         } catch (Exception e) {
             Logger.error(e);
         }

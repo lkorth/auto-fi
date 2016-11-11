@@ -3,19 +3,34 @@ package com.lukekorth.auto_fi.utilities;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 
 public class FileUtils {
 
+    public static boolean isFileAvailable(Context context, String filename) {
+        return getFile(context, filename).exists();
+    }
+
     public static File getFile(Context context, String filename) {
         return new File(context.getFilesDir(), filename);
     }
 
-    public static boolean isFileAvailable(Context context, String filename) {
-        return getFile(context, filename).exists();
+    public static String readFile(Context context, String filename) throws IOException {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(getFile(context, filename)))) {
+            StringBuilder stringBuilder = new StringBuilder();
+            String line = bufferedReader.readLine();
+            while (line != null) {
+                stringBuilder.append(line);
+                stringBuilder.append(System.lineSeparator());
+                line = bufferedReader.readLine();
+            }
+            return stringBuilder.toString();
+        }
     }
 
     public static File writeAssetFileToDisk(Context context, String assetFile, boolean executable)
