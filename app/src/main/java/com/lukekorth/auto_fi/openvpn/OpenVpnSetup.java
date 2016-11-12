@@ -42,7 +42,7 @@ public class OpenVpnSetup {
         String privateKey = FileUtils.readFile(context, PRIVATE_KEY_FILE);
 
         String configuration = new String(buffer);
-        configuration = configuration.replace("<- server here ->", BuildConfig.SERVER_ADDRESS);
+        configuration = configuration.replace("<- server here ->", BuildConfig.SERVER_IP);
         configuration = configuration.replace("<- management string here ->",
                 context.getCacheDir().getAbsolutePath() + "/mgmtsocket unix");
         configuration = configuration.replace("<- public key here ->\n", publicKey);
