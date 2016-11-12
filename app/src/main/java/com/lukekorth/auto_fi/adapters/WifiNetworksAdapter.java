@@ -14,6 +14,7 @@ import com.lukekorth.auto_fi.models.WifiNetwork;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
+import io.realm.Sort;
 
 public class WifiNetworksAdapter extends RecyclerView.Adapter<WifiNetworksAdapter.ViewHolder>
         implements RealmChangeListener<RealmResults<WifiNetwork>> {
@@ -27,11 +28,11 @@ public class WifiNetworksAdapter extends RecyclerView.Adapter<WifiNetworksAdapte
     }
 
     public void sortByTime() {
-        getWifiNetworks("connectedTimestamp");
+        getWifiNetworks("connectedTimestamp", Sort.DESCENDING);
     }
 
     public void sortBySSID() {
-        getWifiNetworks("ssid");
+        getWifiNetworks("ssid", Sort.ASCENDING);
     }
 
     public void teardown() {
@@ -39,7 +40,7 @@ public class WifiNetworksAdapter extends RecyclerView.Adapter<WifiNetworksAdapte
         mRealm.close();
     }
 
-    private void getWifiNetworks(String sortingField) {
+    private void getWifiNetworks(String sortingField, Sort sortOrder) {
         if (mWifiNetworks != null) {
             mWifiNetworks.removeChangeListener(this);
         }
@@ -50,7 +51,7 @@ public class WifiNetworksAdapter extends RecyclerView.Adapter<WifiNetworksAdapte
                 .equalTo("connectedToVpn", true)
                 .or()
                 .greaterThan("blacklistedTimestamp", 0)
-                .findAllSorted(sortingField);
+                .findAllSorted(sortingField, sortOrder);
 
         mWifiNetworks.addChangeListener(this);
         notifyDataSetChanged();
