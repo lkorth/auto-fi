@@ -29,10 +29,6 @@ public class OpenVPNThread implements Runnable {
         mService = service;
     }
 
-    public void stopProcess() {
-        mProcess.destroy();
-    }
-
     @Override
     public void run() {
         try {
@@ -40,7 +36,7 @@ public class OpenVPNThread implements Runnable {
             runOpenVpn();
             Logger.info("OpenVPN exited");
         } catch (Exception e) {
-            Logger.error("Starting OpenVPN Thread " + e.getMessage());
+            Logger.error("OpenVPN Thread Exception: " + e.getMessage());
         } finally {
             int exitvalue = 0;
             try {
@@ -105,10 +101,14 @@ public class OpenVPNThread implements Runnable {
                 } else {
                     Logger.info("P:" + logline);
                 }
+
+                if (Thread.interrupted()) {
+                    throw new InterruptedException("OpenVPNThread was interrupted");
+                }
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             Logger.error("Error reading from output of OpenVPN process. " + e.getMessage());
-            stopProcess();
+            mProcess.destroy();
         }
     }
 
