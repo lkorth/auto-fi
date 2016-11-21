@@ -1,4 +1,4 @@
-package com.lukekorth.auto_fi.migrations;
+package com.lukekorth.auto_fi.models;
 
 import io.realm.DynamicRealm;
 import io.realm.RealmSchema;

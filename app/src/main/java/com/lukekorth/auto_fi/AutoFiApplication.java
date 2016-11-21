@@ -2,7 +2,7 @@ package com.lukekorth.auto_fi;
 
 import android.app.Application;
 
-import com.lukekorth.auto_fi.migrations.DataMigrations;
+import com.lukekorth.auto_fi.models.DataMigrations;
 import com.lukekorth.auto_fi.utilities.DebugUtils;
 import com.lukekorth.mailable_log.MailableLog;
 
