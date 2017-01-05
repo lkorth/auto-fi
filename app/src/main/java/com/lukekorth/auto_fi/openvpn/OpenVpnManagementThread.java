@@ -294,6 +294,7 @@ public class OpenVpnManagementThread implements Runnable {
                 protectFileDescriptor(fdtoprotect);
                 break;
             case "DNSSERVER":
+            case "DNS6SERVER":
                 mOpenVpn.addDNS(extra);
                 break;
             case "DNSDOMAIN":
