@@ -30,6 +30,13 @@
             android:widgetLayout="@layout/preference_switch"/>
 
         <CheckBoxPreference
+            android:key="bypass_captive_portals"
+            android:title="@string/attempt_to_bypass_wifi_logins"
+            android:summary="@string/attempt_to_bypass_wifi_logins_summary"
+            android:defaultValue="true"
+            android:widgetLayout="@layout/preference_switch"/>
+
+        <CheckBoxPreference
             android:key="auto_connect_to_vpn"
             android:title="@string/auto_connect_to_vpn"
             android:summary="@string/auto_connect_to_vpn_summary"

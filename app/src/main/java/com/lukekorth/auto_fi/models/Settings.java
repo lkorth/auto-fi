@@ -14,6 +14,10 @@ public class Settings {
         return getPrefs(context).getBoolean("auto_connect_to_wifi", true);
     }
 
+    public static boolean bypassCaptivePortals(Context context) {
+        return getPrefs(context).getBoolean("bypass_captive_portals", true);
+    }
+
     public static boolean autoConnectToVpn(Context context) {
         return getPrefs(context).getBoolean("auto_connect_to_vpn", true);
     }

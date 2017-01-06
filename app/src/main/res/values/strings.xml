@@ -32,6 +32,8 @@
     <string name="debug_options">Debug Options</string>
     <string name="auto_connect_to_wifi">Automatically connect to WiFi</string>
     <string name="auto_connect_to_wifi_summary">Automatically connect to nearby open WiFi networks</string>
+    <string name="attempt_to_bypass_wifi_logins">Attempt to bypass WiFi logins</string>
+    <string name="attempt_to_bypass_wifi_logins_summary">Automatically attempt to bypass WiFi logins when present</string>
     <string name="auto_connect_to_vpn">Automatically connect to VPN</string>
     <string name="auto_connect_to_vpn_summary">Automatically connect to a secure VPN when connected to unsecured WiFi networks</string>
     <string name="connect_to_vpn">Connect to VPN</string>
