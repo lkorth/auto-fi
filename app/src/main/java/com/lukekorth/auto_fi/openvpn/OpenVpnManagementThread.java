@@ -85,7 +85,7 @@ public class OpenVpnManagementThread implements Runnable {
             mServerSocket.close();
 
             byte[] buffer = new byte[2048];
-            while (true) {
+            while (!mShuttingDown) {
                 int numbytesread = instream.read(buffer);
                 if (numbytesread == -1) {
                     return;

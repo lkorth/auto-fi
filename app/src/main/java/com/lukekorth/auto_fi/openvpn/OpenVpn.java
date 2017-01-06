@@ -30,7 +30,6 @@ public class OpenVpn implements Vpn, Callback {
     private final Vector<String> mDnslist = new Vector<>();
     private final NetworkSpace mRoutes = new NetworkSpace();
     private final NetworkSpace mRoutesv6 = new NetworkSpace();
-    private Thread mProcessThread = null;
     private String mDomain = null;
     private CIDRIP mLocalIP = null;
     private int mMtu;
@@ -57,8 +56,7 @@ public class OpenVpn implements Vpn, Callback {
             new Thread(mManagementThread, "OpenVPNManagementThread").start();
             Logger.info("Started OpenVPN management thread");
 
-            mProcessThread = new Thread(new OpenVPNThread(mContext, this), "OpenVPNProcessThread");
-            mProcessThread.start();
+            new Thread(new OpenVPNThread(mContext, this), "OpenVPNProcessThread").start();
         } else {
             stop();
         }
