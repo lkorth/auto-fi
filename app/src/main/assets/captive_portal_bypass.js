@@ -34,6 +34,7 @@ function findActionElements(elements) {
     collectedElements = collectedElements.concat(findElementsByText(elements, /\blogon\b/i));
     collectedElements = collectedElements.concat(findElementsByText(elements, /\bok\b/i));
     collectedElements = collectedElements.concat(findElementsByText(elements, /\bget connected\b/i));
+    collectedElements = collectedElements.concat(findElementsByText(elements, /\benter wifi\b/i));
 
     return collectedElements;
 }

@@ -54,6 +54,11 @@ public class CaptivePortalBypassTest {
     }
 
     @Test(timeout = 5000)
+    public void bypassesEnterWifiLink() {
+        assertTrue(bypassCaptivePortal("enter_wifi_link.html"));
+    }
+
+    @Test(timeout = 5000)
     public void bypassesSubmitInput() {
         assertTrue(bypassCaptivePortal("submit_button.html"));
     }
