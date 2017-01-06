@@ -23,7 +23,6 @@ import static junit.framework.Assert.assertTrue;
 @RunWith(AndroidJUnit4.class)
 public class CaptivePortalBypassTest {
 
-
     @Test(timeout = 5000)
     public void bypassesAcceptLink() {
         assertTrue(bypassCaptivePortal("accept_link.html"));
@@ -62,6 +61,11 @@ public class CaptivePortalBypassTest {
     @Test(timeout = 5000)
     public void bypassesImageInput() {
         assertTrue(bypassCaptivePortal("image_button.html"));
+    }
+
+    @Test(timeout = 5000)
+    public void bypassesAcceptLink_whenOtherFormsOfTheWorkAcceptAreLinks() {
+        assertTrue(bypassCaptivePortal("accept_and_acceptable_link.html"));
     }
 
     private boolean bypassCaptivePortal(final String page) {

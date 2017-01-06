@@ -27,12 +27,13 @@ if (selectedElements.length > 0) {
 function findActionElements(elements) {
     var collectedElements = [];
 
-    collectedElements = collectedElements.concat(findElementsByText(elements, /accept/i));
-    collectedElements = collectedElements.concat(findElementsByText(elements, /connect/i));
-    collectedElements = collectedElements.concat(findElementsByText(elements, /continue/i));
-    collectedElements = collectedElements.concat(findElementsByText(elements, /login/i));
-    collectedElements = collectedElements.concat(findElementsByText(elements, /logon/i));
-    collectedElements = collectedElements.concat(findElementsByText(elements, /ok/i));
+    collectedElements = collectedElements.concat(findElementsByText(elements, /\baccept\b/i));
+    collectedElements = collectedElements.concat(findElementsByText(elements, /\bconnect\b/i));
+    collectedElements = collectedElements.concat(findElementsByText(elements, /\bcontinue\b/i));
+    collectedElements = collectedElements.concat(findElementsByText(elements, /\blogin\b/i));
+    collectedElements = collectedElements.concat(findElementsByText(elements, /\blogon\b/i));
+    collectedElements = collectedElements.concat(findElementsByText(elements, /\bok\b/i));
+    collectedElements = collectedElements.concat(findElementsByText(elements, /\bget connected\b/i));
 
     return collectedElements;
 }
