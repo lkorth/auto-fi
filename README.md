@@ -1,5 +1,7 @@
 # auto-fi
 
+[![Build Status](https://travis-ci.org/lkorth/auto-fi.svg?branch=master)](https://travis-ci.org/lkorth/auto-fi)
+
 Auto Fi automatically connects to nearby open wifi networks, attempts to click through captive
 portal agreements and then tunnels all traffic over a secure VPN.
 
