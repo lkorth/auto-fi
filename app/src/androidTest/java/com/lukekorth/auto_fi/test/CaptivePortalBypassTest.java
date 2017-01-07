@@ -23,52 +23,52 @@ import static junit.framework.Assert.assertTrue;
 @RunWith(AndroidJUnit4.class)
 public class CaptivePortalBypassTest {
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void bypassesAcceptLink() {
         assertTrue(bypassCaptivePortal("accept_link.html"));
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void bypassesConnectLink() {
         assertTrue(bypassCaptivePortal("connect_link.html"));
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void bypassesContinueLink() {
         assertTrue(bypassCaptivePortal("continue_link.html"));
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void bypassesLoginLink() {
         assertTrue(bypassCaptivePortal("login_link.html"));
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void bypassesLogonLink() {
         assertTrue(bypassCaptivePortal("logon_link.html"));
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void bypassesOkLink() {
         assertTrue(bypassCaptivePortal("ok_link.html"));
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void bypassesEnterWifiLink() {
         assertTrue(bypassCaptivePortal("enter_wifi_link.html"));
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void bypassesSubmitInput() {
         assertTrue(bypassCaptivePortal("submit_button.html"));
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void bypassesImageInput() {
         assertTrue(bypassCaptivePortal("image_button.html"));
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout = 10000)
     public void bypassesAcceptLink_whenOtherFormsOfTheWorkAcceptAreLinks() {
         assertTrue(bypassCaptivePortal("accept_and_acceptable_link.html"));
     }
