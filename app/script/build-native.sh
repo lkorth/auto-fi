@@ -40,7 +40,7 @@ if [ $? = 0 ]; then
 	# Removed compiled openssl libs, will use platform so libs
 	# Reduces size of apk
     #
-	rm -v */libcrypto.so */libssl.so || true
+	rm -v */libcrypto.so */libssl.so
 
   	for arch in *
   	do
