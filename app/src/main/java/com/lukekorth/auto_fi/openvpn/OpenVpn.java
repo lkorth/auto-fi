@@ -14,6 +14,7 @@ import android.text.TextUtils;
 import com.lukekorth.auto_fi.R;
 import com.lukekorth.auto_fi.interfaces.Vpn;
 import com.lukekorth.auto_fi.interfaces.VpnServiceInterface;
+import com.lukekorth.auto_fi.network.CIDRIP;
 import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.Version;
 

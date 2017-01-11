@@ -3,6 +3,7 @@ package com.lukekorth.auto_fi.openvpn;
 import android.support.annotation.NonNull;
 
 import com.lukekorth.auto_fi.BuildConfig;
+import com.lukekorth.auto_fi.network.CIDRIP;
 
 import junit.framework.Assert;
 
