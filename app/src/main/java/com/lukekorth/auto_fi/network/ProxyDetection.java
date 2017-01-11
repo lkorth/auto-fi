@@ -1,4 +1,4 @@
-package com.lukekorth.auto_fi.openvpn;
+package com.lukekorth.auto_fi.network;
 
 import com.lukekorth.auto_fi.BuildConfig;
 import com.lukekorth.auto_fi.utilities.Logger;
@@ -16,7 +16,7 @@ public class ProxyDetection {
 
 	public static SocketAddress detectProxy() {
 		try {
-			URL url = new URL(String.format("http://" + BuildConfig.SERVER_ADDRESS));
+			URL url = new URL("http://" + BuildConfig.SERVER_ADDRESS);
 			Proxy proxy = getFirstProxy(url);
 
 			if(proxy == null) {
