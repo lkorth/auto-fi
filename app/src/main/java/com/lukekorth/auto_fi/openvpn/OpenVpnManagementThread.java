@@ -316,7 +316,7 @@ public class OpenVpnManagementThread implements Runnable {
                 break;
             case "ROUTE6":
                 String[] routeparts6 = extra.split(" ");
-                mOpenVpn.addRoutev6(routeparts6[0], routeparts6[1]);
+                mOpenVpn.addRouteV6(routeparts6[0], routeparts6[1]);
                 break;
             case "IFCONFIG":
                 String[] ifconfigparts = extra.split(" ");

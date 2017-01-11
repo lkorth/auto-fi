@@ -1,10 +1,10 @@
 package com.lukekorth.auto_fi.network;
 
 import java.net.Inet6Address;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.TreeSet;
-import java.util.Vector;
 
 public class NetworkSpace {
 
@@ -18,8 +18,8 @@ public class NetworkSpace {
         mIPAddresses.add(new IPAddress(address, mask, included));
     }
 
-    public Collection<IPAddress> getNetworks(boolean included) {
-        Vector<IPAddress> ips = new Vector<>();
+    public List<IPAddress> getNetworks(boolean included) {
+        List<IPAddress> ips = new ArrayList<>();
         for (IPAddress ip : mIPAddresses) {
             if (ip.isIncluded() == included)
                 ips.add(ip);
@@ -31,10 +31,10 @@ public class NetworkSpace {
         mIPAddresses.clear();
     }
 
-    public Collection<IPAddress> getPositiveIPList() {
+    public List<IPAddress> getPositiveIPList() {
         TreeSet<IPAddress> ipsSorted = generateIPList();
 
-        Vector<IPAddress> ips = new Vector<>();
+        List<IPAddress> ips = new ArrayList<>();
         for (IPAddress ia : ipsSorted) {
             if (ia.isIncluded())
                 ips.add(ia);

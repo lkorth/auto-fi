@@ -23,21 +23,23 @@ import com.lukekorth.auto_fi.utilities.Version;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Vector;
+import java.util.List;
 
 public class OpenVpn implements Vpn, Callback {
 
-    private final Vector<String> mDnslist = new Vector<>();
+    private final List<String> mDNSList = new ArrayList<>();
     private final NetworkSpace mRoutes = new NetworkSpace();
-    private final NetworkSpace mRoutesv6 = new NetworkSpace();
+    private final NetworkSpace mRoutesV6 = new NetworkSpace();
+
     private String mDomain = null;
     private CIDRIP mLocalIP = null;
-    private int mMtu;
+    private int mMTU;
     private String mLocalIPv6 = null;
     private OpenVpnManagementThread mManagementThread;
-    private String mLastTunCfg;
-    private String mRemoteGW;
+    private String mLastTunConfig;
+    private String mRemoteGateway;
     private Context mContext;
     private VpnServiceInterface mVpnService;
 
@@ -85,11 +87,11 @@ public class OpenVpn implements Vpn, Callback {
             cfg += mLocalIPv6;
         }
 
-        cfg += "routes: " + TextUtils.join("|", mRoutes.getNetworks(true)) + TextUtils.join("|", mRoutesv6.getNetworks(true));
-        cfg += "excl. routes:" + TextUtils.join("|", mRoutes.getNetworks(false)) + TextUtils.join("|", mRoutesv6.getNetworks(false));
-        cfg += "dns: " + TextUtils.join("|", mDnslist);
+        cfg += "routes: " + TextUtils.join("|", mRoutes.getNetworks(true)) + TextUtils.join("|", mRoutesV6.getNetworks(true));
+        cfg += "excl. routes:" + TextUtils.join("|", mRoutes.getNetworks(false)) + TextUtils.join("|", mRoutesV6.getNetworks(false));
+        cfg += "dns: " + TextUtils.join("|", mDNSList);
         cfg += "domain: " + mDomain;
-        cfg += "mtu: " + mMtu;
+        cfg += "mtu: " + mMTU;
 
         return cfg;
     }
@@ -128,7 +130,7 @@ public class OpenVpn implements Vpn, Callback {
             }
         }
 
-        for (String dns : mDnslist) {
+        for (String dns : mDNSList) {
             try {
                 builder.addDnsServer(dns);
             } catch (IllegalArgumentException iae) {
@@ -139,20 +141,20 @@ public class OpenVpn implements Vpn, Callback {
         String release = Build.VERSION.RELEASE;
         if ((Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT && !release.startsWith("4.4.3")
                 && !release.startsWith("4.4.4") && !release.startsWith("4.4.5") && !release.startsWith("4.4.6"))
-                && mMtu < 1280) {
-            Logger.info("Forcing MTU to 1280 instead of " + mMtu + " to workaround Android Bug #70916");
+                && mMTU < 1280) {
+            Logger.info("Forcing MTU to 1280 instead of " + mMTU + " to workaround Android Bug #70916");
             builder.setMtu(1280);
         } else {
-            builder.setMtu(mMtu);
+            builder.setMtu(mMTU);
         }
 
         Collection<IPAddress> positiveIPv4Routes = mRoutes.getPositiveIPList();
-        Collection<IPAddress> positiveIPv6Routes = mRoutesv6.getPositiveIPList();
+        Collection<IPAddress> positiveIPv6Routes = mRoutesV6.getPositiveIPList();
 
-        if ("samsung".equals(Build.BRAND) && Version.isAtLeastLollipop() && mDnslist.size() >= 1) {
+        if ("samsung".equals(Build.BRAND) && Version.isAtLeastLollipop() && mDNSList.size() >= 1) {
             // Check if the first DNS Server is in the VPN range
             try {
-                IPAddress dnsServer = new IPAddress(new CIDRIP(mDnslist.get(0), 32), true);
+                IPAddress dnsServer = new IPAddress(new CIDRIP(mDNSList.get(0), 32), true);
                 boolean dnsIncluded = false;
                 for (IPAddress net : positiveIPv4Routes) {
                     if (net.containsNet(dnsServer)) {
@@ -160,11 +162,13 @@ public class OpenVpn implements Vpn, Callback {
                     }
                 }
                 if (!dnsIncluded) {
-                    Logger.warn("Warning Samsung Android 5.0+ devices ignore DNS servers outside the VPN range. To enable DNS resolution a route to your DNS Server " + mDnslist.get(0) + " has been added");
+                    Logger.warn("Warning Samsung Android 5.0+ devices ignore DNS servers outside " +
+                            "the VPN range. To enable DNS resolution a route to your DNS Server " +
+                            mDNSList.get(0) + " has been added");
                     positiveIPv4Routes.add(dnsServer);
                 }
             } catch (Exception e) {
-                Logger.error("Error parsing DNS Server IP: " + mDnslist.get(0));
+                Logger.error("Error parsing DNS Server IP: " + mDNSList.get(0));
             }
         }
 
@@ -172,7 +176,6 @@ public class OpenVpn implements Vpn, Callback {
 
         for (IPAddress route : positiveIPv4Routes) {
             try {
-
                 if (multicastRange.containsNet(route)) {
                     Logger.debug("Ignoring multicast route: " + route.toString());
                 } else {
@@ -195,10 +198,10 @@ public class OpenVpn implements Vpn, Callback {
             builder.addSearchDomain(mDomain);
         }
 
-        Logger.info("Local IPv4: " + mLocalIP.getIp() + "/" + mLocalIP.getLength() + " IPv6: " + mLocalIPv6 + " MTU: " + mMtu);
-        Logger.info("DNS Server: " + TextUtils.join(", ", mDnslist) + ", Domain: " + mDomain);
-        Logger.info("Routes: " + TextUtils.join(", ", mRoutes.getNetworks(true)) + " " + TextUtils.join(", ", mRoutesv6.getNetworks(true)));
-        Logger.info("Routes excluded: " + TextUtils.join(", ", mRoutes.getNetworks(false)) + " " + TextUtils.join(", ", mRoutesv6.getNetworks(false)));
+        Logger.info("Local IPv4: " + mLocalIP.getIp() + "/" + mLocalIP.getLength() + " IPv6: " + mLocalIPv6 + " MTU: " + mMTU);
+        Logger.info("DNS Server: " + TextUtils.join(", ", mDNSList) + ", Domain: " + mDomain);
+        Logger.info("Routes: " + TextUtils.join(", ", mRoutes.getNetworks(true)) + " " + TextUtils.join(", ", mRoutesV6.getNetworks(true)));
+        Logger.info("Routes excluded: " + TextUtils.join(", ", mRoutes.getNetworks(false)) + " " + TextUtils.join(", ", mRoutesV6.getNetworks(false)));
         Logger.debug("VpnService routes installed: " + TextUtils.join(", ", positiveIPv4Routes) + " " + TextUtils.join(", ", positiveIPv6Routes));
 
         String session = "";
@@ -210,18 +213,18 @@ public class OpenVpn implements Vpn, Callback {
 
         builder.setSession(session);
 
-        if (mDnslist.size() == 0) {
+        if (mDNSList.size() == 0) {
             Logger.info("No DNS servers being used. Name resolution may not work. Consider setting custom DNS " +
                     "Servers. Please also note that Android will keep using your proxy settings specified for your " +
                     "mobile/Wi-Fi connection when no DNS servers are set.");
         }
 
-        mLastTunCfg = getTunConfigString();
+        mLastTunConfig = getTunConfigString();
 
         // Reset information
-        mDnslist.clear();
+        mDNSList.clear();
         mRoutes.clear();
-        mRoutesv6.clear();
+        mRoutesV6.clear();
         mLocalIP = null;
         mLocalIPv6 = null;
         mDomain = null;
@@ -277,7 +280,7 @@ public class OpenVpn implements Vpn, Callback {
     }
 
     public void addDNS(String dns) {
-        mDnslist.add(dns);
+        mDNSList.add(dns);
     }
 
     public void setDomain(String domain) {
@@ -310,7 +313,7 @@ public class OpenVpn implements Vpn, Callback {
             include = true;
         }
 
-        if (gateway != null && (gateway.equals("255.255.255.255") || gateway.equals(mRemoteGW))) {
+        if (gateway != null && (gateway.equals("255.255.255.255") || gateway.equals(mRemoteGateway))) {
             include = true;
         }
 
@@ -327,7 +330,7 @@ public class OpenVpn implements Vpn, Callback {
         mRoutes.addIP(route, include);
     }
 
-    public void addRoutev6(String network, String device) {
+    public void addRouteV6(String network, String device) {
         String[] v6parts = network.split("/");
         boolean included = isAndroidTunDevice(device);
 
@@ -335,25 +338,24 @@ public class OpenVpn implements Vpn, Callback {
         try {
             Inet6Address ip = (Inet6Address) InetAddress.getAllByName(v6parts[0])[0];
             int mask = Integer.parseInt(v6parts[1]);
-            mRoutesv6.addIPv6(ip, mask, included);
+            mRoutesV6.addIPv6(ip, mask, included);
         } catch (UnknownHostException e) {
             Logger.error(e);
         }
     }
 
     private boolean isAndroidTunDevice(String device) {
-        return device != null &&
-                (device.startsWith("tun") || "(null)".equals(device) || "vpnservice-tun".equals(device));
+        return device != null && (device.startsWith("tun") || "(null)".equals(device) || "vpnservice-tun".equals(device));
     }
 
     public void setMtu(int mtu) {
-        mMtu = mtu;
+        mMTU = mtu;
     }
 
     public void setLocalIP(String local, String netmask, int mtu, String mode) {
         mLocalIP = new CIDRIP(local, netmask);
-        mMtu = mtu;
-        mRemoteGW = null;
+        mMTU = mtu;
+        mRemoteGateway = null;
 
         long netMaskAsInt = CIDRIP.getInt(netmask);
 
@@ -394,7 +396,7 @@ public class OpenVpn implements Vpn, Callback {
         }
 
         // Configurations are sometimes really broken...
-        mRemoteGW = netmask;
+        mRemoteGateway = netmask;
     }
 
     public void setLocalIPv6(String ipv6addr) {
@@ -418,7 +420,7 @@ public class OpenVpn implements Vpn, Callback {
 
     public String getTunReopenStatus() {
         String currentConfiguration = getTunConfigString();
-        if (currentConfiguration.equals(mLastTunCfg)) {
+        if (currentConfiguration.equals(mLastTunConfig)) {
             return "NOACTION";
         } else {
             String release = Build.VERSION.RELEASE;
