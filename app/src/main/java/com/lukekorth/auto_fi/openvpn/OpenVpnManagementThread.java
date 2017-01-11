@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Locale;
 
-public class OpenVpnManagementThread implements Runnable {
+class OpenVpnManagementThread implements Runnable {
 
     private static final int BYTE_COUNT_INTERVAL = 2;
 
@@ -39,17 +39,18 @@ public class OpenVpnManagementThread implements Runnable {
     private long mPreviousKilobytesUsed = 0;
     private boolean mShuttingDown;
 
-    public OpenVpnManagementThread(OpenVpn openVpn) {
+    OpenVpnManagementThread(OpenVpn openVpn) {
         mOpenVpn = openVpn;
     }
 
-    public boolean openManagementInterface(Context context) {
+    boolean openManagementConnection(Context context) {
         int tries = 8;
         String socketName = context.getCacheDir().getAbsolutePath() + "/mgmtsocket";
         LocalSocket serverSocketLocal = new LocalSocket();
         while (tries > 0 && !serverSocketLocal.isBound()) {
             try {
-                serverSocketLocal.bind(new LocalSocketAddress(socketName, LocalSocketAddress.Namespace.FILESYSTEM));
+                serverSocketLocal.bind(new LocalSocketAddress(socketName,
+                        LocalSocketAddress.Namespace.FILESYSTEM));
             } catch (IOException e) {
                 try {
                     Thread.sleep(300);
@@ -64,16 +65,17 @@ public class OpenVpnManagementThread implements Runnable {
             return true;
         } catch (IOException e) {
             Logger.error(e);
+            return false;
         }
-
-        return false;
     }
 
-    public void managementCommand(String cmd) {
+    void stopVPN() {
+        mShuttingDown = true;
+
+        sendManagementCommand("signal SIGINT\n");
         try {
-            if (mSocket != null && mSocket.getOutputStream() != null) {
-                mSocket.getOutputStream().write(cmd.getBytes());
-                mSocket.getOutputStream().flush();
+            if (mSocket != null) {
+                mSocket.close();
             }
         } catch (IOException ignored) {}
     }
@@ -82,13 +84,13 @@ public class OpenVpnManagementThread implements Runnable {
     public void run() {
         try {
             mSocket = mServerSocket.accept();
-            InputStream instream = mSocket.getInputStream();
+            InputStream inputStream = mSocket.getInputStream();
             mServerSocket.close();
 
             byte[] buffer = new byte[2048];
             while (!mShuttingDown) {
-                int numbytesread = instream.read(buffer);
-                if (numbytesread == -1) {
+                int bytesRead = inputStream.read(buffer);
+                if (bytesRead == -1) {
                     return;
                 }
 
@@ -103,7 +105,7 @@ public class OpenVpnManagementThread implements Runnable {
                     Collections.addAll(mFDList, fds);
                 }
 
-                processInput(new String(buffer, 0, numbytesread, "UTF-8"));
+                processInput(new String(buffer, 0, bytesRead, "UTF-8"));
             }
         } catch (IOException e) {
             if (!e.getMessage().equals("socket closed") && !e.getMessage().equals("Connection reset by peer")) {
@@ -123,21 +125,20 @@ public class OpenVpnManagementThread implements Runnable {
             }
 
             NativeUtils.jniclose(fdint);
-        } catch (NoSuchMethodException | IllegalArgumentException | InvocationTargetException | IllegalAccessException |
-                NullPointerException e) {
+        } catch (NoSuchMethodException | IllegalArgumentException | InvocationTargetException |
+                IllegalAccessException | NullPointerException e) {
             Logger.error("Failed to retrieve fd from socket (" + fd + ")." + e.getMessage());
         }
     }
 
-    private void processInput(String pendingInput) {
-        while (pendingInput.contains("\n")) {
-            String[] tokens = pendingInput.split("\\r?\\n", 2);
+    private void processInput(String input) {
+        while (input.contains("\n")) {
+            String[] tokens = input.split("\\r?\\n", 2);
             processCommand(tokens[0]);
             if (tokens.length == 1) {
-                // No second part, newline was at the end
-                pendingInput = "";
+                input = "";
             } else {
-                pendingInput = tokens[1];
+                input = tokens[1];
             }
         }
     }
@@ -167,7 +168,7 @@ public class OpenVpnManagementThread implements Runnable {
                     }
                     break;
                 case "PROXY":
-                    processProxyCMD(argument);
+                    processProxyCommand(argument);
                     break;
                 case "LOG":
                     processLogMessage(argument);
@@ -176,14 +177,12 @@ public class OpenVpnManagementThread implements Runnable {
                     Logger.warn("MGMT: Got unrecognized command" + command);
                     break;
             }
-        } else if (command.startsWith("SUCCESS:")) {
-            // ignore
         } else if (command.startsWith("PROTECTFD: ")) {
             FileDescriptor fdtoprotect = mFDList.pollFirst();
             if (fdtoprotect != null) {
                 protectFileDescriptor(fdtoprotect);
             }
-        } else {
+        } else if (!command.startsWith("SUCCESS:")) {
             Logger.warn("MGMT: Got unrecognized line from management: " + command);
         }
     }
@@ -238,12 +237,12 @@ public class OpenVpnManagementThread implements Runnable {
     }
 
     private void releaseHoldCommand() {
-        managementCommand("hold release\n");
-        managementCommand("bytecount " + BYTE_COUNT_INTERVAL + "\n");
-        managementCommand("state on\n");
+        sendManagementCommand("hold release\n");
+        sendManagementCommand("bytecount " + BYTE_COUNT_INTERVAL + "\n");
+        sendManagementCommand("state on\n");
     }
 
-    private void processProxyCMD(String argument) {
+    private void processProxyCommand(String argument) {
         String[] args = argument.split(",", 3);
         SocketAddress proxyaddr = ProxyDetection.detectProxy();
 
@@ -257,11 +256,11 @@ public class OpenVpnManagementThread implements Runnable {
         if (proxyaddr instanceof InetSocketAddress) {
             InetSocketAddress isa = (InetSocketAddress) proxyaddr;
             String proxycmd = String.format(Locale.ENGLISH, "proxy HTTP %s %d\n", isa.getHostName(), isa.getPort());
-            managementCommand(proxycmd);
+            sendManagementCommand(proxycmd);
 
             Logger.info("Using proxy " + isa.getHostName() + " " + isa.getPort());
         } else {
-            managementCommand("proxy NONE\n");
+            sendManagementCommand("proxy NONE\n");
         }
     }
 
@@ -342,7 +341,7 @@ public class OpenVpnManagementThread implements Runnable {
         }
 
         String cmd = String.format("needok '%s' %s\n", needed, status);
-        managementCommand(cmd);
+        sendManagementCommand(cmd);
     }
 
     private boolean sendTunFD(String needed, String extra) {
@@ -371,7 +370,7 @@ public class OpenVpnManagementThread implements Runnable {
             // The API documentation fails to mention that it will not reset the file descriptor to
             // be send and will happily send the file descriptor on every write ...
             String cmd = String.format("needok '%s' %s\n", needed, "ok");
-            managementCommand(cmd);
+            sendManagementCommand(cmd);
 
             // Set the FileDescriptor to null to stop this mad behavior
             mSocket.setFileDescriptorsForSend(null);
@@ -387,13 +386,11 @@ public class OpenVpnManagementThread implements Runnable {
         return false;
     }
 
-    public void stopVPN() {
-        mShuttingDown = true;
-
-        managementCommand("signal SIGINT\n");
+    private void sendManagementCommand(String command) {
         try {
-            if (mSocket != null) {
-                mSocket.close();
+            if (mSocket != null && mSocket.getOutputStream() != null) {
+                mSocket.getOutputStream().write(command.getBytes());
+                mSocket.getOutputStream().flush();
             }
         } catch (IOException ignored) {}
     }
