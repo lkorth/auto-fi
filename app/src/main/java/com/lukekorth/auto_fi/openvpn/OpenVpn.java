@@ -59,7 +59,7 @@ public class OpenVpn implements Vpn, Callback {
             new Thread(mManagementThread, "OpenVPNManagementThread").start();
             Logger.info("Started OpenVPN management thread");
 
-            new Thread(new OpenVPNThread(mContext, this), "OpenVPNProcessThread").start();
+            new Thread(new OpenVpnThread(mContext, this), "OpenVPNProcessThread").start();
         } else {
             stop();
         }

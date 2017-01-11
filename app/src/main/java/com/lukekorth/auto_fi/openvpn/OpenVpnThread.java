@@ -11,7 +11,7 @@ import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class OpenVPNThread implements Runnable {
+class OpenVpnThread implements Runnable {
 
     private static final String DUMP_PATH_STRING = "Dump path: ";
     private static final int M_FATAL = (1 << 4);
@@ -24,7 +24,7 @@ public class OpenVPNThread implements Runnable {
     private Process mProcess;
     private String mDumpPath;
 
-    public OpenVPNThread(Context context, OpenVpn service) {
+    OpenVpnThread(Context context, OpenVpn service) {
         mContext = context;
         mService = service;
     }
@@ -103,7 +103,7 @@ public class OpenVPNThread implements Runnable {
                 }
 
                 if (Thread.interrupted()) {
-                    throw new InterruptedException("OpenVPNThread was interrupted");
+                    throw new InterruptedException("OpenVpnThread was interrupted");
                 }
             }
         } catch (IOException | InterruptedException e) {
@@ -112,19 +112,19 @@ public class OpenVPNThread implements Runnable {
         }
     }
 
-    private String generateLibraryPath(String[] argv, ProcessBuilder pb) {
+    private String generateLibraryPath(String[] argv, ProcessBuilder processBuilder) {
         // Hack until I find a good way to get the real library path
-        String applibpath = argv[0].replaceFirst("/cache/.*$", "/lib");
+        String appLibraryPath = argv[0].replaceFirst("/cache/.*$", "/lib");
 
-        String lbpath = pb.environment().get("LD_LIBRARY_PATH");
+        String lbpath = processBuilder.environment().get("LD_LIBRARY_PATH");
         if (lbpath == null) {
-            lbpath = applibpath;
+            lbpath = appLibraryPath;
         } else {
-            lbpath = applibpath + ":" + lbpath;
+            lbpath = appLibraryPath + ":" + lbpath;
         }
 
         String nativeLibraryDir = mContext.getApplicationInfo().nativeLibraryDir;
-        if (!applibpath.equals(nativeLibraryDir)) {
+        if (!appLibraryPath.equals(nativeLibraryDir)) {
             lbpath = nativeLibraryDir + ":" + lbpath;
         }
 
