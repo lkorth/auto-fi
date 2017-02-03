@@ -42,24 +42,13 @@
                 android:text='@{network.SSID.replace("\"", "")}'/>
 
             <TextView
-                android:id="@+id/auto_connected"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginLeft="16dp"
-                android:layout_toRightOf="@+id/icon"
-                android:layout_below="@id/ssid"
-                android:visibility="@{network.shouldNeverUse() ? View.GONE : View.VISIBLE}"
-                android:text="@{network.autoconnected ? @string/auto_connected(RelativeTime.get(context, network.connectedTimestamp)) : @string/manually_connected(RelativeTime.get(context, network.connectedTimestamp))}"/>
-
-            <TextView
                 android:id="@+id/blacklisted"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:layout_marginLeft="16dp"
                 android:layout_toRightOf="@+id/icon"
-                android:layout_below="@id/auto_connected"
+                android:layout_below="@id/ssid"
                 android:visibility="@{WifiNetwork.isBlacklisted(network.SSID) &amp;&amp; !network.shouldNeverUse() ? View.VISIBLE : View.GONE}"
                 android:text="@{@string/blacklisted_until(WifiNetwork.blacklistedUntil(context, network))}"/>
 

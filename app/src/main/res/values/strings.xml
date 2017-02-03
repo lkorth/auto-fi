@@ -22,8 +22,6 @@
     <string name="wifi_networks_used">WiFi networks used</string>
     <string name="data_saved_by_auto_fi">Data saved by Auto Fi</string>
     <string name="sort">Sort</string>
-    <string name="auto_connected">Automatically connected %s</string>
-    <string name="manually_connected">Manually connected %s</string>
     <string name="blacklisted_until">Blacklisted until %s</string>
     <string name="use">Use</string>
     <string name="never_use">Never use</string>

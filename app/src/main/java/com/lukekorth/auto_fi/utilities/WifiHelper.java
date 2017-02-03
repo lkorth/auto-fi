@@ -1,5 +1,6 @@
 package com.lukekorth.auto_fi.utilities;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -60,6 +61,7 @@ public class WifiHelper {
         return null;
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Nullable
     public Network getLollipopWifiNetwork() {
         if (!Version.isAtLeastLollipop()) {
@@ -106,13 +108,11 @@ public class WifiHelper {
     }
 
     public void blacklistAndDisconnectFromCurrentWifiNetwork() {
-        if (WifiNetwork.isAutoconnectedNetwork(getCurrentNetwork())) {
-            WifiConfiguration configuration = getCurrentNetwork();
-            if (configuration != null) {
-                Logger.info("Blacklisting " + configuration.SSID);
-                WifiNetwork.blacklist(configuration.SSID);
-                disconnectFromCurrentWifiNetwork();
-            }
+        WifiConfiguration configuration = getCurrentNetwork();
+        if (configuration != null && WifiNetwork.isAutoconnectedNetwork(configuration)) {
+            Logger.info("Blacklisting " + configuration.SSID);
+            WifiNetwork.blacklist(configuration.SSID);
+            disconnectFromCurrentWifiNetwork();
         }
     }
 

@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.realm.Realm;
 import io.realm.RealmObject;
+import io.realm.RealmResults;
 
 public class WifiNetwork extends RealmObject {
 
@@ -124,5 +125,22 @@ public class WifiNetwork extends RealmObject {
         realm.close();
 
         return shouldNeverUse;
+    }
+
+    public static void setAllAutoConnectedNetworksDisconnected() {
+        Realm realm = Realm.getDefaultInstance();
+
+        RealmResults<WifiNetwork> networks = realm.where(WifiNetwork.class)
+                .equalTo("autoconnected", true)
+                .findAll();
+
+        realm.beginTransaction();
+
+        for (WifiNetwork network : networks) {
+            network.setAutoconnected(false);
+        }
+
+        realm.commitTransaction();
+        realm.close();
     }
 }
