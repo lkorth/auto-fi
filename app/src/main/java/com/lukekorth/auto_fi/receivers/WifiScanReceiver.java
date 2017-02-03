@@ -55,7 +55,14 @@ public class WifiScanReceiver extends BroadcastReceiver {
                 if (selectedNetwork != null && !TextUtils.isEmpty(selectedNetwork.SSID.trim())) {
                     Logger.debug("Found network " + selectedNetwork.SSID + " nearby");
 
-                    List<WifiConfiguration> wifiConfigurationList = wifiHelper.getWifiManager().getConfiguredNetworks();
+                    if (WifiManager.calculateSignalLevel(selectedNetwork.level, 5) == 0) {
+                        Logger.debug("Avoiding network with signal level of 0");
+                        FirebaseAnalytics.getInstance(context).logEvent("poor_wifi_signal", null);
+                        return;
+                    }
+
+                    List<WifiConfiguration> wifiConfigurationList = wifiHelper.getWifiManager()
+                            .getConfiguredNetworks();
                     if (wifiConfigurationList == null) {
                         return;
                     }
