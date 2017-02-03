@@ -73,6 +73,7 @@ public class CaptivePortalWebView extends WebView {
         mWifiHelper.unbindFromCurrentNetwork();
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void setProxyProperties(Network network) {
         if (Version.isAtLeastLollipop() && network != null) {
             LinkProperties linkProperties = mWifiHelper.getConnectivityManager()
