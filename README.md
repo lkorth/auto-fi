@@ -15,7 +15,7 @@ to provide greater transparency. Auto Fi uses [Firebase](https://firebase.google
 reporting and analytics to collect non-identifiable information to make the app better.
 All traffic over Auto Fi's VPN is never logged, recorded or collected, it is encrypted
 per-device using a uniquely generated encryption key that never leaves the device and transmitted
-from the device to the VPN server where it then continue to it's destination over the Internet.
+from the device to the VPN server where it then continues to it's destination over the Internet.
 
 ## Disclaimer
 
