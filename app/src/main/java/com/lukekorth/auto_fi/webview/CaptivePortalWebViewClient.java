@@ -62,8 +62,14 @@ public class CaptivePortalWebViewClient extends WebViewClient {
 
     @Override
     public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-        Logger.warn("SSL error encountered while loading captive portal, proceeding");
-        handler.proceed();
+        Logger.warn("SSL error encountered while loading captive portal");
+        FirebaseAnalytics.getInstance(mContext).logEvent("ssl_webview_error", null);
+
+        if (!error.hasError(SslError.SSL_DATE_INVALID)) {
+            handler.proceed();
+        } else {
+            handler.cancel();
+        }
     }
 
     private void loadConnectivityCheckUrl(WebView webView) {
