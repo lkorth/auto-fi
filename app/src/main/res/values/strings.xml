@@ -16,6 +16,7 @@
     <string name="setup_message">Auto Fi will now monitor for and automatically connect to nearby
         Wi-Fi and ensure your connection is secure. Enjoy!</string>
 
+    <string name="rate">Rate Auto Fi</string>
     <string name="contact_developer">Contact developer</string>
     <string name="stats">Stats</string>
     <string name="wifi_networks">WiFi Networks</string>

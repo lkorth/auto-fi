@@ -20,6 +20,9 @@ import com.lukekorth.auto_fi.services.OpenVpnConfigurationIntentService;
 import com.lukekorth.auto_fi.utilities.LogReporting;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
 
+import fr.nicolaspomepuy.discreetapprate.AppRate;
+import fr.nicolaspomepuy.discreetapprate.RetryPolicy;
+
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 
 public class MainActivity extends AppCompatActivity {
@@ -39,6 +42,12 @@ public class MainActivity extends AppCompatActivity {
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new SettingsFragment())
                 .commit();
+
+        AppRate.with(this)
+                .text(R.string.rate)
+                .initialLaunchCount(3)
+                .retryPolicy(RetryPolicy.EXPONENTIAL)
+                .checkAndShow();
     }
 
     @Override
