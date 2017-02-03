@@ -46,8 +46,9 @@
             </intent-filter>
         </service>
 
-        <service android:name=".services.ConnectivityCheckIntentService" />
-        <service android:name=".services.OpenVpnConfigurationIntentService" />
+        <service android:name=".services.ConnectivityCheckIntentService"/>
+        <service android:name=".services.OpenVpnConfigurationIntentService"/>
+        <service android:name=".services.CaptivePortalPageUploadService"/>
 
         <receiver android:name=".receivers.WifiScanReceiver">
             <intent-filter>

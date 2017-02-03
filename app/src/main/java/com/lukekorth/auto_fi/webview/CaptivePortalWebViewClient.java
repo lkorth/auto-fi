@@ -10,17 +10,21 @@ import android.os.Looper;
 import android.support.v4.util.ArrayMap;
 import android.util.Log;
 import android.webkit.SslErrorHandler;
+import android.webkit.ValueCallback;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.lukekorth.auto_fi.interfaces.CaptivePortalWebViewListener;
+import com.lukekorth.auto_fi.models.CaptivePortalPage;
 import com.lukekorth.auto_fi.utilities.ConnectivityUtils;
 import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.StreamUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+
+import io.realm.Realm;
 
 import static com.google.android.gms.internal.zzs.TAG;
 
@@ -79,7 +83,21 @@ public class CaptivePortalWebViewClient extends WebViewClient {
     private void bypassCaptivePortal(WebView view) {
         if (mBypassAttempts == 3) {
             Logger.info("3 captive portal bypasses attempted");
-            mListener.onComplete(false);
+            view.evaluateJavascript("document.documentElement.outerHTML", new ValueCallback<String>() {
+                @Override
+                public void onReceiveValue(String value) {
+                    Realm realm = Realm.getDefaultInstance();
+
+                    realm.beginTransaction();
+                    CaptivePortalPage page = realm.createObject(CaptivePortalPage.class);
+                    page.setHtml(value);
+                    realm.commitTransaction();
+
+                    realm.close();
+
+                    mListener.onComplete(false);
+                }
+            });
             return;
         }
 

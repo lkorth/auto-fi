@@ -11,8 +11,10 @@ import android.net.wifi.WifiManager;
 
 import com.lukekorth.auto_fi.MainActivity;
 import com.lukekorth.auto_fi.R;
+import com.lukekorth.auto_fi.models.CaptivePortalPage;
 import com.lukekorth.auto_fi.models.Settings;
 import com.lukekorth.auto_fi.models.WifiNetwork;
+import com.lukekorth.auto_fi.services.CaptivePortalPageUploadService;
 import com.lukekorth.auto_fi.services.ConnectivityCheckIntentService;
 import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
@@ -26,6 +28,10 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         WifiHelper wifiHelper = new WifiHelper(context);
         if (wifiHelper.isConnectedToWifi()) {
+            if (CaptivePortalPage.hasStoredPages()) {
+                context.startService(new Intent(context, CaptivePortalPageUploadService.class));
+            }
+
             WifiConfiguration configuration =
                     wifiHelper.getWifiNetwork((WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO));
             if (wifiHelper.isWifiUnsecured(configuration)) {

@@ -21,7 +21,7 @@ public class AutoFiApplication extends Application {
         Realm.init(this);
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder()
                 .name("auto-fi.realm")
-                .schemaVersion(1)
+                .schemaVersion(2)
                 .migration(new DataMigrations())
                 .build();
         Realm.setDefaultConfiguration(realmConfiguration);
