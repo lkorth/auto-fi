@@ -22,25 +22,23 @@ import io.realm.Realm;
 
 public class WifiConnectionReceiver extends BroadcastReceiver {
 
-    private WifiHelper mWifiHelper;
-
     @Override
     public void onReceive(Context context, Intent intent) {
-        mWifiHelper = new WifiHelper(context);
-        if (mWifiHelper.isConnectedToWifi()) {
+        WifiHelper wifiHelper = new WifiHelper(context);
+        if (wifiHelper.isConnectedToWifi()) {
             WifiConfiguration configuration =
-                    mWifiHelper.getWifiNetwork((WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO));
-            if (mWifiHelper.isWifiUnsecured(configuration)) {
-                setConnectionTimestamp();
+                    wifiHelper.getWifiNetwork((WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO));
+            if (wifiHelper.isWifiUnsecured(configuration)) {
+                setConnectionTimestamp(configuration);
 
                 if (Settings.autoConnectToVpn(context) && !VpnHelper.isVpnEnabled(context)) {
                     displayVpnNotEnabledNotification(context);
 
-                    if (WifiNetwork.isAutoconnectedNetwork(mWifiHelper.getCurrentNetwork())) {
-                        mWifiHelper.disconnectFromCurrentWifiNetwork();
+                    if (WifiNetwork.isAutoconnectedNetwork(wifiHelper.getCurrentNetwork())) {
+                        wifiHelper.disconnectFromCurrentWifiNetwork();
                     }
                 } else if (!ConnectivityCheckIntentService.sIsRunning) {
-                    Logger.info("Connected to unsecured wifi network " + mWifiHelper.getCurrentNetworkName() +
+                    Logger.info("Connected to unsecured wifi network " + wifiHelper.getCurrentNetworkName() +
                             ", checking connectivity");
                     context.startService(new Intent(context, ConnectivityCheckIntentService.class));
                 } else {
@@ -50,8 +48,7 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
         }
     }
 
-    private void setConnectionTimestamp() {
-        WifiConfiguration configuration = mWifiHelper.getCurrentNetwork();
+    private void setConnectionTimestamp(WifiConfiguration configuration) {
         if (configuration != null) {
             Realm realm = Realm.getDefaultInstance();
 
