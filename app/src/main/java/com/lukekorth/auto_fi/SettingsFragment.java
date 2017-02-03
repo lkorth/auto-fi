@@ -10,6 +10,8 @@ import com.lukekorth.auto_fi.utilities.VpnHelper;
 
 import java.util.Locale;
 
+import fr.nicolaspomepuy.discreetapprate.AppRate;
+import fr.nicolaspomepuy.discreetapprate.RetryPolicy;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 
@@ -29,6 +31,17 @@ public class SettingsFragment extends PreferenceFragment implements RealmChangeL
         mDataUsage = findPreference("data_usage");
 
         setupDebugPreferences();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        AppRate.with(getActivity())
+                .text(R.string.rate)
+                .initialLaunchCount(6)
+                .retryPolicy(RetryPolicy.EXPONENTIAL)
+                .checkAndShow();
     }
 
     @Override
