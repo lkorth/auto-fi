@@ -51,8 +51,7 @@ public class OpenVpn implements Vpn, Callback {
     @MainThread
     @Override
     public void start() {
-        Logger.info("Building configuration");
-        updateNotification(R.string.building_configuration);
+        mVpnService.setNotificationMessage(R.string.building_configuration);
 
         mManagementThread = new OpenVpnManagementThread(this);
         if (mManagementThread.openManagementConnection(mContext)) {
@@ -401,11 +400,6 @@ public class OpenVpn implements Vpn, Callback {
 
     public void setLocalIPv6(String ipv6addr) {
         mLocalIPv6 = ipv6addr;
-    }
-
-    public void updateNotification(int stringId) {
-        Logger.debug(mContext.getString(stringId));
-        mVpnService.setNotificationMessage(mContext.getString(stringId));
     }
 
     @Override

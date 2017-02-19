@@ -52,7 +52,7 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
         mWifiHelper.bindToCurrentNetwork();
 
         registerDisconnectReceiver();
-        setNotificationMessage(getString(R.string.state_connecting));
+        setNotificationMessage(R.string.state_connecting);
 
         mVpn = new OpenVpn(this, this);
         mVpn.start();
@@ -60,6 +60,11 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
         FirebaseAnalytics.getInstance(this).logEvent("vpn_started", null);
 
         return START_STICKY;
+    }
+
+    @Override
+    public WifiHelper getWifiHelper() {
+        return mWifiHelper;
     }
 
     @Override
@@ -92,29 +97,16 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
         stopVpn();
     }
 
-    private void stopVpn() {
-        mVpn.stop();
-        stopForeground(true);
-
-        unregisterDisconnectionReceiver();
-
-        mWifiHelper.unbindFromCurrentNetwork();
-
-        if (WifiNetwork.isAutoconnectedNetwork(mWifiHelper.getCurrentNetwork())) {
-            mWifiHelper.disconnectFromCurrentWifiNetwork();
-        }
-
-        stopSelf();
-    }
-
     @Override
-    public void setNotificationMessage(String message) {
+    public void setNotificationMessage(int message) {
+        Logger.debug(getString(message));
+
         Intent disconnectVPN = new Intent(DISCONNECT_VPN_INTENT_ACTION);
         PendingIntent disconnectPendingIntent = PendingIntent.getBroadcast(this, 0, disconnectVPN, 0);
 
         Notification.Builder builder = new Notification.Builder(this)
                 .setContentTitle(getString(R.string.app_name))
-                .setContentText(message)
+                .setContentText(getString(message))
                 .setOnlyAlertOnce(true)
                 .setOngoing(true)
                 .setPriority(Notification.PRIORITY_MIN)
@@ -130,10 +122,10 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
         startForeground(NOTIFICATION_ID, builder.build());
     }
 
-    private void unregisterDisconnectionReceiver() {
-        try {
-            unregisterReceiver(mDisconnectReceiver);
-        } catch (IllegalArgumentException ignored) {}
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void lollipopNotificationExtras(Notification.Builder builder) {
+        builder.setCategory(Notification.CATEGORY_SERVICE)
+                .setLocalOnly(true);
     }
 
     private void registerDisconnectReceiver() {
@@ -154,9 +146,24 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
         registerReceiver(mDisconnectReceiver, filter);
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void lollipopNotificationExtras(Notification.Builder builder) {
-        builder.setCategory(Notification.CATEGORY_SERVICE)
-                .setLocalOnly(true);
+    private void stopVpn() {
+        mVpn.stop();
+        stopForeground(true);
+
+        unregisterDisconnectionReceiver();
+
+        mWifiHelper.unbindFromCurrentNetwork();
+
+        if (WifiNetwork.isAutoconnectedNetwork(mWifiHelper.getCurrentNetwork())) {
+            mWifiHelper.disconnectFromCurrentWifiNetwork();
+        }
+
+        stopSelf();
+    }
+
+    private void unregisterDisconnectionReceiver() {
+        try {
+            unregisterReceiver(mDisconnectReceiver);
+        } catch (IllegalArgumentException ignored) {}
     }
 }
