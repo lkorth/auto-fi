@@ -404,6 +404,7 @@ public class OpenVpn implements Vpn, Callback {
     }
 
     public void updateNotification(int stringId) {
+        Logger.debug(mContext.getString(stringId));
         mVpnService.setNotificationMessage(mContext.getString(stringId));
     }
 
