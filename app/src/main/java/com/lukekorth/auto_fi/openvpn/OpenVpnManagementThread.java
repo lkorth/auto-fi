@@ -266,15 +266,11 @@ class OpenVpnManagementThread implements Runnable {
 
     private void processState(String argument) {
         String[] args = argument.split(",", 3);
-        String currentstate = args[1];
+        String currentState = args[1];
 
-        if (args[2].equals(",,")) {
-            mOpenVpn.updateNotification(getLocalizedState(currentstate));
-        } else {
-            mOpenVpn.updateNotification(getLocalizedState(currentstate));
-        }
+        mOpenVpn.getVpnService().setNotificationMessage(getLocalizedState(currentState));
 
-        if ("CONNECTED".equals(currentstate)) {
+        if ("CONNECTED".equals(currentState)) {
             mOpenVpn.getVpnService().successfullyConnected();
         }
     }
@@ -372,7 +368,7 @@ class OpenVpnManagementThread implements Runnable {
             String cmd = String.format("needok '%s' %s\n", needed, "ok");
             sendManagementCommand(cmd);
 
-            // Set the FileDescriptor to null to stop this mad behavior
+            // Set the FileDescriptor to null to stop this behavior
             mSocket.setFileDescriptorsForSend(null);
 
             pfd.close();
