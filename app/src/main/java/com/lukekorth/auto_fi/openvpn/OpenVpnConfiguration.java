@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
-public class OpenVpnSetup {
+public class OpenVpnConfiguration {
 
     private static final String PUBLIC_KEY_FILE = "open_vpn_public_key.crt";
     private static final String PRIVATE_KEY_FILE = "open_vpn_private_key.key";
@@ -32,27 +32,8 @@ public class OpenVpnSetup {
         FileUtils.writeToDisk(context, privateKey, PRIVATE_KEY_FILE);
     }
 
-    public static void writeConfigurationFile(Context context) throws IOException {
-        InputStream in = context.getAssets().open(CONFIGURATION_FILE);
-        byte[] buffer = new byte[in.available()];
-        in.read(buffer);
-        in.close();
-
-        String publicKey = FileUtils.readFile(context, PUBLIC_KEY_FILE);
-        String privateKey = FileUtils.readFile(context, PRIVATE_KEY_FILE);
-
-        String configuration = new String(buffer);
-        configuration = configuration.replace("<- server here ->", BuildConfig.SERVER_IP);
-        configuration = configuration.replace("<- management string here ->",
-                context.getCacheDir().getAbsolutePath() + "/mgmtsocket unix");
-        configuration = configuration.replace("<- public key here ->\n", publicKey);
-        configuration = configuration.replace("<- private key here ->\n", privateKey);
-
-        FileUtils.writeToDisk(context, configuration, CONFIGURATION_FILE);
-    }
-
     @Nullable
-    public static String[] getOpenVpnCommand(Context context) {
+    static String[] getOpenVpnCommand(Context context) {
         String[] command = new String[3];
 
         String binaryName = getOpenVpnExecutable(context);
@@ -73,6 +54,25 @@ public class OpenVpnSetup {
         command[2] = context.getFilesDir().getAbsolutePath() + "/" + CONFIGURATION_FILE;
 
         return command;
+    }
+
+    private static void writeConfigurationFile(Context context) throws IOException {
+        InputStream in = context.getAssets().open(CONFIGURATION_FILE);
+        byte[] buffer = new byte[in.available()];
+        in.read(buffer);
+        in.close();
+
+        String publicKey = FileUtils.readFile(context, PUBLIC_KEY_FILE);
+        String privateKey = FileUtils.readFile(context, PRIVATE_KEY_FILE);
+
+        String configuration = new String(buffer);
+        configuration = configuration.replace("<- server here ->", BuildConfig.SERVER_IP);
+        configuration = configuration.replace("<- management string here ->",
+                context.getCacheDir().getAbsolutePath() + "/mgmtsocket unix");
+        configuration = configuration.replace("<- public key here ->\n", publicKey);
+        configuration = configuration.replace("<- private key here ->\n", privateKey);
+
+        FileUtils.writeToDisk(context, configuration, CONFIGURATION_FILE);
     }
 
     @Nullable

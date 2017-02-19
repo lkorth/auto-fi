@@ -15,7 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.lukekorth.auto_fi.openvpn.OpenVpnSetup;
+import com.lukekorth.auto_fi.openvpn.OpenVpnConfiguration;
 import com.lukekorth.auto_fi.services.OpenVpnConfigurationIntentService;
 import com.lukekorth.auto_fi.utilities.LogReporting;
 import com.lukekorth.auto_fi.utilities.VpnHelper;
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        if (!OpenVpnSetup.isSetup(this)) {
+        if (!OpenVpnConfiguration.isSetup(this)) {
             startService(new Intent(this, OpenVpnConfigurationIntentService.class));
         }
     }

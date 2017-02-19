@@ -61,7 +61,7 @@ class OpenVpnThread implements Runnable {
     }
 
     private void runOpenVpn() {
-        String[] command = OpenVpnSetup.getOpenVpnCommand(mContext);
+        String[] command = OpenVpnConfiguration.getOpenVpnCommand(mContext);
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         processBuilder.environment().put("LD_LIBRARY_PATH", generateLibraryPath(command, processBuilder));
         processBuilder.redirectErrorStream(true);

@@ -4,7 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 
 import com.lukekorth.auto_fi.BuildConfig;
-import com.lukekorth.auto_fi.openvpn.OpenVpnSetup;
+import com.lukekorth.auto_fi.openvpn.OpenVpnConfiguration;
 import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.StreamUtils;
 
@@ -49,7 +49,7 @@ public class OpenVpnConfigurationIntentService extends IntentService {
             String encodedCsr = encodeKey(csr.getEncoded(), "CERTIFICATE REQUEST");
             String publicKey = exchangeCsrForPublicKey(encodedCsr);
 
-            OpenVpnSetup.writeKeyPair(this, publicKey,
+            OpenVpnConfiguration.writeKeyPair(this, publicKey,
                     encodeKey(keyPair.getPrivate().getEncoded(), "PRIVATE KEY"));
         } catch (Exception e) {
             Logger.error(e);
