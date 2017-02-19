@@ -270,8 +270,23 @@ class OpenVpnManagementThread implements Runnable {
 
         mOpenVpn.getVpnService().setNotificationMessage(getLocalizedState(currentState));
 
-        if ("CONNECTED".equals(currentState)) {
-            mOpenVpn.getVpnService().successfullyConnected();
+        switch (currentState) {
+            case "CONNECTED":
+                mOpenVpn.getVpnService().successfullyConnected();
+                break;
+            case "DISCONNECTED":
+                checkWifiConnection();
+                break;
+            case "RECONNECTING":
+                checkWifiConnection();
+                break;
+        }
+    }
+
+    private void checkWifiConnection() {
+        if (!mOpenVpn.getVpnService().getWifiHelper().isConnectedToWifi()) {
+            Logger.debug("Disconnected or reconnecting VPN with no wifi connection. Stopping VPN.");
+            stopVPN();
         }
     }
 
