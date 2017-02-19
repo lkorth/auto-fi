@@ -113,6 +113,7 @@ public class WifiHelper {
             Logger.info("Blacklisting " + configuration.SSID);
             WifiNetwork.blacklist(configuration.SSID);
             disconnectFromCurrentWifiNetwork();
+            cleanupSavedWifiNetworks();
         }
     }
 
