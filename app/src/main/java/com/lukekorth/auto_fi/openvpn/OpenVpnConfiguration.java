@@ -84,7 +84,7 @@ public class OpenVpnConfiguration {
             abis = new String[] { Build.CPU_ABI, Build.CPU_ABI2 };
         }
 
-        String nativeAPI = NativeUtils.getNativeAPI();
+        String nativeAPI = NativeMethods.getNativeAPI();
         if (!nativeAPI.equals(abis[0])) {
             Logger.warn("Preferred native ABI precedence of this device (" + Arrays.toString(abis) + ") and ABI " +
                     "reported by native libraries (" + nativeAPI + ") mismatch");

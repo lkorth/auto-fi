@@ -14,9 +14,8 @@
 
 #include "jniglue.h"
 
-jobjectArray Java_com_lukekorth_auto_1fi_openvpn_NativeUtils_getIfconfig(JNIEnv* env)
+jobjectArray Java_com_lukekorth_auto_1fi_openvpn_NativeMethods_getIfconfig(JNIEnv* env)
 {
-
 	int sd;
     if ((sd = socket (AF_INET, SOCK_DGRAM, 0)) < 0) {
         __android_log_print(ANDROID_LOG_DEBUG, "openvpn", "Opening socket for intface get failed");
@@ -35,9 +34,6 @@ jobjectArray Java_com_lukekorth_auto_1fi_openvpn_NativeUtils_getIfconfig(JNIEnv*
         //jniThrowException(env, "java/lang/IllegalArgumentException", "IOTCL socket for intface get failed");
         return NULL;
     }
-    
-
-    
 
     char buf[NI_MAXHOST];
     
@@ -51,8 +47,7 @@ jobjectArray Java_com_lukekorth_auto_1fi_openvpn_NativeUtils_getIfconfig(JNIEnv*
     size_t num_intf=ifc.ifc_len / sizeof(struct ifreq);
     jobjectArray ret= (jobjectArray) (*env)->NewObjectArray(env, num_intf*3,(*env)->FindClass(env, "java/lang/String"), NULL);
 
-    for (struct ifreq* ifr = ifc.ifc_req; ifr <   ifs + num_intf; ifr++) {
-        
+    for (struct ifreq* ifr = ifc.ifc_req; ifr < ifs + num_intf; ifr++) {
         if (ifr->ifr_addr.sa_family != AF_INET)  {
             __android_log_print(ANDROID_LOG_DEBUG, "openvpn", "NOT AF_INET: %s", ifr->ifr_name);
             continue;
@@ -63,12 +58,11 @@ jobjectArray Java_com_lukekorth_auto_1fi_openvpn_NativeUtils_getIfconfig(JNIEnv*
         int err;
         if (err=getnameinfo(&ifr->ifr_addr, sizeof(struct sockaddr_in), buf, NI_MAXHOST, NULL, 0,
                                 NI_NUMERICHOST) !=0) {
-            __android_log_print(ANDROID_LOG_DEBUG, "openvpn", "getnameinfo failed for  %s: %s", ifr->ifr_name,  gai_strerror(err));
+            __android_log_print(ANDROID_LOG_DEBUG, "openvpn", "getnameinfo failed for  %s: %s", ifr->ifr_name, gai_strerror(err));
             continue;
         }
         jstring jaddr = (*env)->NewStringUTF(env, buf);
         jstring jname = (*env)->NewStringUTF(env, ifr->ifr_name);
-            
 
         struct ifreq ifreq;
         strncpy (ifreq.ifr_name, ifr->ifr_name, sizeof (ifreq.ifr_name));
@@ -95,14 +89,17 @@ jobjectArray Java_com_lukekorth_auto_1fi_openvpn_NativeUtils_getIfconfig(JNIEnv*
             __android_log_print(ANDROID_LOG_DEBUG, "openvpn", "getnameinfo failed for  %s: %s", ifr->ifr_name,  gai_strerror(err));
             continue;
         }
+
         jstring jnetmask = (*env)->NewStringUTF(env, buf);
         
         (*env)->SetObjectArrayElement(env, ret, ji++, jname);
         (*env)->SetObjectArrayElement(env, ret, ji++, jaddr);
         (*env)->SetObjectArrayElement(env, ret, ji++, jnetmask);
     }
-    if (sd >= 0)
+
+    if (sd >= 0) {
         close (sd);
+    }
     
     return ret;
 }

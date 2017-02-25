@@ -248,7 +248,7 @@ public class OpenVpn implements Vpn, Callback {
 
     private void addLocalNetworksToRoutes() {
         // Add local network interfaces
-        String[] localRoutes = NativeUtils.getIfconfig();
+        String[] localRoutes = NativeMethods.getIfconfig();
         if (localRoutes == null) {
             return;
         }

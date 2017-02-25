@@ -124,7 +124,7 @@ class OpenVpnManagementThread implements Runnable {
                 Logger.warn("Could not protect VPN socket");
             }
 
-            NativeUtils.jniclose(fdint);
+            NativeMethods.jniclose(fdint);
         } catch (NoSuchMethodException | IllegalArgumentException | InvocationTargetException |
                 IllegalAccessException | NullPointerException e) {
             Logger.error("Failed to retrieve fd from socket (" + fd + ")." + e.getMessage());

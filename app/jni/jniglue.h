@@ -8,7 +8,7 @@
 
 #ifndef xcopenvpn_jniglue_h
 #define xcopenvpn_jniglue_h
-void android_openvpn_log(int level,const char* prefix,const char* prefix_sep,const char* m1);
+void android_openvpn_log(int level, const char* prefix, const char* prefix_sep, const char* m1);
 #endif
 
 #ifdef __cplusplus
