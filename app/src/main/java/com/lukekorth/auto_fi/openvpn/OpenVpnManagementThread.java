@@ -275,8 +275,6 @@ class OpenVpnManagementThread implements Runnable {
                 mOpenVpn.getVpnService().successfullyConnected();
                 break;
             case "DISCONNECTED":
-                checkWifiConnection();
-                break;
             case "RECONNECTING":
                 checkWifiConnection();
                 break;
