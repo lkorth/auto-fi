@@ -15,7 +15,12 @@ public class AutoFiApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        MailableLog.init(this, BuildConfig.DEBUG, "%date{MMM dd | HH:mm:ss.SSS} %highlight(%-5level) %msg%n");
+        if (BuildConfig.DEBUG) {
+            MailableLog.init(this, true, "%date{HH:mm:ss.SSS} %msg%n");
+        } else {
+            MailableLog.init(this, false, "%date{MMM dd | HH:mm:ss.SSS} %-5level %msg%n");
+        }
+
         DebugUtils.setup(this);
 
         Realm.init(this);
