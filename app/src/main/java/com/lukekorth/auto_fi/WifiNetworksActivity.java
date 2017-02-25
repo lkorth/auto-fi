@@ -82,6 +82,7 @@ public class WifiNetworksActivity extends AppCompatActivity {
             WifiNetwork network = mAdapter.getNetwork(item.getItemId());
             realm.beginTransaction();
             network.setNeverUse(false);
+            network.setBlacklistedTimestamp(0);
             realm.commitTransaction();
             realm.close();
 
