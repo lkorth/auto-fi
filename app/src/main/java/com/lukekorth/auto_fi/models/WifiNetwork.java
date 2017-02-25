@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.wifi.WifiConfiguration;
 import android.support.annotation.Nullable;
 
+import com.lukekorth.auto_fi.utilities.Logger;
 import com.lukekorth.auto_fi.utilities.RelativeTime;
 
 import java.util.concurrent.TimeUnit;
@@ -128,6 +129,8 @@ public class WifiNetwork extends RealmObject {
     }
 
     public static void setAllAutoConnectedNetworksDisconnected() {
+        Logger.debug("Setting all auto connected networks disconnected");
+
         Realm realm = Realm.getDefaultInstance();
 
         RealmResults<WifiNetwork> networks = realm.where(WifiNetwork.class)

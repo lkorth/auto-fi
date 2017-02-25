@@ -106,6 +106,7 @@ public class WifiHelper {
             mWifiManager.disconnect();
         }
 
+        WifiNetwork.setAllAutoConnectedNetworksDisconnected();
         cleanupSavedWifiNetworks();
     }
 

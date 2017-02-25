@@ -51,8 +51,6 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
                     Logger.info("ConnectivityCheckIntentService is already running");
                 }
             }
-        } else {
-            WifiNetwork.setAllAutoConnectedNetworksDisconnected();
         }
     }
 
