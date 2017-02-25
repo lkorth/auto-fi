@@ -47,11 +47,13 @@ public class CaptivePortalBypassService extends Service implements CaptivePortal
     @Override
     public void onComplete(boolean successfullyBypassed) {
         if (successfullyBypassed) {
+            Logger.debug("Captive portal successfully bypassed");
             if (mCaptivePortal != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 mCaptivePortal.reportCaptivePortalDismissed();
             }
             VpnHelper.startVpn(this);
         } else {
+            Logger.debug("Captive portal could not be bypassed");
             mWifiHelper.blacklistAndDisconnectFromCurrentWifiNetwork();
         }
 
