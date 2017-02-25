@@ -30,7 +30,7 @@ public class DataUsage extends RealmObject {
     public static void addUsage(long kilobytes) {
         Realm realm = Realm.getDefaultInstance();
 
-        DataUsage dataUsage = realm.where(DataUsage.class).findFirst();
+        DataUsage dataUsage = getUsage(realm);
         realm.beginTransaction();
         dataUsage.setKilobytes(dataUsage.getKilobytes() + kilobytes);
         realm.commitTransaction();
