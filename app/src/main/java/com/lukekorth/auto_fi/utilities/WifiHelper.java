@@ -24,6 +24,7 @@ public class WifiHelper {
     private WifiManager mWifiManager;
 
     public WifiHelper(Context context) {
+        context = context.getApplicationContext();
         mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     }
