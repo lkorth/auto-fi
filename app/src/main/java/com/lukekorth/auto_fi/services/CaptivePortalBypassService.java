@@ -54,7 +54,7 @@ public class CaptivePortalBypassService extends Service implements CaptivePortal
             VpnHelper.startVpn(this);
         } else {
             Logger.debug("Captive portal could not be bypassed");
-            mWifiHelper.blacklistAndDisconnectFromCurrentWifiNetwork();
+            mWifiHelper.blacklistAndDisconnectFromCurrentNetwork();
         }
 
         stop();
@@ -83,7 +83,7 @@ public class CaptivePortalBypassService extends Service implements CaptivePortal
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(WifiManager.WIFI_STATE_CHANGED_ACTION) &&
-                        !mWifiHelper.isConnectedToWifi()) {
+                        !mWifiHelper.isConnected()) {
                     stop();
                 }
             }

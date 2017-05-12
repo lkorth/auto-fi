@@ -1,7 +1,6 @@
 package com.lukekorth.auto_fi.webview;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.Context;
 import android.net.LinkProperties;
@@ -9,13 +8,11 @@ import android.net.Network;
 import android.net.Proxy;
 import android.net.ProxyInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.webkit.WebView;
 
 import com.lukekorth.auto_fi.interfaces.CaptivePortalWebViewListener;
 import com.lukekorth.auto_fi.utilities.Logger;
-import com.lukekorth.auto_fi.utilities.Version;
 import com.lukekorth.auto_fi.utilities.WifiHelper;
 
 import java.lang.reflect.InvocationTargetException;
@@ -40,7 +37,6 @@ public class CaptivePortalWebView extends WebView {
         init();
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public CaptivePortalWebView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
@@ -73,9 +69,8 @@ public class CaptivePortalWebView extends WebView {
         mWifiHelper.unbindFromCurrentNetwork();
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void setProxyProperties(Network network) {
-        if (Version.isAtLeastLollipop() && network != null) {
+        if (network != null) {
             LinkProperties linkProperties = mWifiHelper.getConnectivityManager()
                     .getLinkProperties(network);
             if (linkProperties != null) {

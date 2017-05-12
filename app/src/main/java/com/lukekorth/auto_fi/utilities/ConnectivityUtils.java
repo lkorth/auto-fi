@@ -2,6 +2,7 @@ package com.lukekorth.auto_fi.utilities;
 
 import android.content.Context;
 import android.net.Network;
+import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -75,8 +76,8 @@ public class ConnectivityUtils {
         return ConnectivityState.NO_CONNECTIVITY;
     }
 
-    private static HttpURLConnection getConnection(Network network) throws IOException {
-        if (Version.isAtLeastLollipop() && network != null) {
+    private static HttpURLConnection getConnection(@Nullable Network network) throws IOException {
+        if (network != null) {
             return ((HttpURLConnection) network.openConnection(new URL(CONNECTIVITY_CHECK_URL)));
         } else {
             return (HttpURLConnection) new URL(CONNECTIVITY_CHECK_URL).openConnection();

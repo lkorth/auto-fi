@@ -1,6 +1,5 @@
 package com.lukekorth.auto_fi.openvpn;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.VpnService;
 import android.os.Build;
@@ -18,7 +17,6 @@ import com.lukekorth.auto_fi.network.CIDRIP;
 import com.lukekorth.auto_fi.network.IPAddress;
 import com.lukekorth.auto_fi.network.NetworkSpace;
 import com.lukekorth.auto_fi.utilities.Logger;
-import com.lukekorth.auto_fi.utilities.Version;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -96,13 +94,12 @@ public class OpenVpn implements Vpn, Callback {
     }
 
     public ParcelFileDescriptor openTun() {
-        VpnService.Builder builder = mVpnService.getBuilder();
-
         Logger.info("Opening tun interface");
 
-        if (Version.isAtLeastLollipop()) {
-            allowAllAFFamilies(builder);
-        }
+        VpnService.Builder builder = mVpnService.getBuilder();
+
+        builder.allowFamily(OsConstants.AF_INET);
+        builder.allowFamily(OsConstants.AF_INET6);
 
         if (mLocalIP == null && mLocalIPv6 == null) {
             Logger.error("Refusing to open tun device without IP information");
@@ -150,7 +147,7 @@ public class OpenVpn implements Vpn, Callback {
         Collection<IPAddress> positiveIPv4Routes = mRoutes.getPositiveIPList();
         Collection<IPAddress> positiveIPv6Routes = mRoutesV6.getPositiveIPList();
 
-        if ("samsung".equals(Build.BRAND) && Version.isAtLeastLollipop() && mDNSList.size() >= 1) {
+        if ("samsung".equals(Build.BRAND) && mDNSList.size() >= 1) {
             // Check if the first DNS Server is in the VPN range
             try {
                 IPAddress dnsServer = new IPAddress(new CIDRIP(mDNSList.get(0), 32), true);
@@ -238,12 +235,6 @@ public class OpenVpn implements Vpn, Callback {
             Logger.error("Failed to open the tun interface. " + e.getMessage());
             return null;
         }
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void allowAllAFFamilies(VpnService.Builder builder) {
-        builder.allowFamily(OsConstants.AF_INET);
-        builder.allowFamily(OsConstants.AF_INET6);
     }
 
     private void addLocalNetworksToRoutes() {
@@ -388,7 +379,7 @@ public class OpenVpn implements Vpn, Callback {
         }
 
         /* Workaround for Lollipop, it  does not route traffic to the VPNs own network mask */
-        if (mLocalIP.getLength() <= 31 && Version.isAtLeastLollipop()) {
+        if (mLocalIP.getLength() <= 31) {
             CIDRIP interfaceRoute = new CIDRIP(mLocalIP.getIp(), mLocalIP.getIp());
             interfaceRoute.normalize();
             addRoute(interfaceRoute);

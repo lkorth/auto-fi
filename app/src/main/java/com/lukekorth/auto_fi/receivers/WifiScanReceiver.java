@@ -36,9 +36,9 @@ public class WifiScanReceiver extends BroadcastReceiver {
         WifiHelper wifiHelper = new WifiHelper(context);
 
         if (VpnHelper.isVpnEnabled(context) && wifiHelper.getWifiManager().isWifiEnabled() &&
-                !wifiHelper.isConnectedToWifi() && intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)) {
+                !wifiHelper.isConnected() && intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)) {
             List<ScanResult> scanResults = wifiHelper.getWifiManager().getScanResults();
-            if (!wifiHelper.isConnectedToWifi() && scanResults.size() > 0) {
+            if (!wifiHelper.isConnected() && scanResults.size() > 0) {
                 ScanResult selectedNetwork = null;
                 for (ScanResult scanResult : wifiHelper.getWifiManager().getScanResults()) {
                     if (isNetworkUnsecured(scanResult) &&

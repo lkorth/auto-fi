@@ -1,6 +1,5 @@
 package com.lukekorth.auto_fi.services;
 
-import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -8,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.support.annotation.MainThread;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -19,7 +17,6 @@ import com.lukekorth.auto_fi.interfaces.VpnServiceInterface;
 import com.lukekorth.auto_fi.models.WifiNetwork;
 import com.lukekorth.auto_fi.openvpn.OpenVpn;
 import com.lukekorth.auto_fi.utilities.Logger;
-import com.lukekorth.auto_fi.utilities.Version;
 import com.lukekorth.auto_fi.utilities.WifiHelper;
 
 import io.realm.Realm;
@@ -43,7 +40,7 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
 
         mWifiHelper = new WifiHelper(this);
 
-        if (!mWifiHelper.isConnectedToWifi()) {
+        if (!mWifiHelper.isConnected()) {
             Logger.warn("No wifi networked connected, stopping VPNService");
             stopSelf();
             return START_NOT_STICKY;
@@ -107,25 +104,17 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
         Notification.Builder builder = new Notification.Builder(this)
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText(getString(message))
+                .setCategory(Notification.CATEGORY_SERVICE)
                 .setOnlyAlertOnce(true)
                 .setOngoing(true)
+                .setLocalOnly(true)
                 .setPriority(Notification.PRIORITY_MIN)
                 .setContentIntent(MainActivity.getStartPendingIntent(this))
                 .setSmallIcon(R.drawable.ic_vpn_key)
                 .addAction(android.R.drawable.ic_menu_close_clear_cancel,
                         getString(R.string.cancel_connection), disconnectPendingIntent);
 
-        if (Version.isAtLeastLollipop()) {
-            lollipopNotificationExtras(builder);
-        }
-
         startForeground(NOTIFICATION_ID, builder.build());
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void lollipopNotificationExtras(Notification.Builder builder) {
-        builder.setCategory(Notification.CATEGORY_SERVICE)
-                .setLocalOnly(true);
     }
 
     private void registerDisconnectReceiver() {
@@ -138,7 +127,7 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
                 if (intent.getAction().equals(DISCONNECT_VPN_INTENT_ACTION)) {
                     stopVpn();
                 } else if (intent.getAction().equals(WifiManager.WIFI_STATE_CHANGED_ACTION) &&
-                        !mWifiHelper.isConnectedToWifi()) {
+                        !mWifiHelper.isConnected()) {
                     stopVpn();
                 }
             }
@@ -155,7 +144,7 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
         mWifiHelper.unbindFromCurrentNetwork();
 
         if (WifiNetwork.isAutoconnectedNetwork(mWifiHelper.getCurrentNetwork())) {
-            mWifiHelper.disconnectFromCurrentWifiNetwork();
+            mWifiHelper.disconnectFromCurrentNetwork();
         }
 
         stopSelf();

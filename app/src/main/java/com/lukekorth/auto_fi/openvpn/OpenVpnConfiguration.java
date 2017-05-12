@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import com.lukekorth.auto_fi.BuildConfig;
 import com.lukekorth.auto_fi.utilities.FileUtils;
 import com.lukekorth.auto_fi.utilities.Logger;
-import com.lukekorth.auto_fi.utilities.Version;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,12 +76,7 @@ public class OpenVpnConfiguration {
 
     @Nullable
     private static String getOpenVpnExecutable(Context context) {
-        String[] abis;
-        if (Version.isAtLeastLollipop()) {
-            abis = Build.SUPPORTED_ABIS;
-        } else {
-            abis = new String[] { Build.CPU_ABI, Build.CPU_ABI2 };
-        }
+        String[] abis = Build.SUPPORTED_ABIS;
 
         String nativeAPI = NativeMethods.getNativeAPI();
         if (!nativeAPI.equals(abis[0])) {

@@ -282,7 +282,7 @@ class OpenVpnManagementThread implements Runnable {
     }
 
     private void checkWifiConnection() {
-        if (!mOpenVpn.getVpnService().getWifiHelper().isConnectedToWifi()) {
+        if (!mOpenVpn.getVpnService().getWifiHelper().isConnected()) {
             Logger.debug("Disconnected or reconnecting VPN with no wifi connection. Stopping VPN.");
             stopVPN();
         }

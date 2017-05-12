@@ -30,16 +30,16 @@ public class ConnectivityCheckIntentService extends IntentService {
                 if (Settings.bypassCaptivePortals(this)) {
                     startService(new Intent(this, CaptivePortalBypassService.class));
                 } else {
-                    new WifiHelper(this).blacklistAndDisconnectFromCurrentWifiNetwork();
+                    new WifiHelper(this).blacklistAndDisconnectFromCurrentNetwork();
                 }
                 break;
             } case NO_CONNECTIVITY: {
-                new WifiHelper(this).blacklistAndDisconnectFromCurrentWifiNetwork();
+                new WifiHelper(this).blacklistAndDisconnectFromCurrentNetwork();
                 break;
             }
         }
 
-        new WifiHelper(this).cleanupSavedWifiNetworks();
+        new WifiHelper(this).cleanupSavedNetworks();
 
         sIsRunning = false;
     }

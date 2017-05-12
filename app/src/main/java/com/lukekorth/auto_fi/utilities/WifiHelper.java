@@ -1,6 +1,6 @@
 package com.lukekorth.auto_fi.utilities;
 
-import android.annotation.TargetApi;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -8,7 +8,6 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -23,6 +22,7 @@ public class WifiHelper {
     private ConnectivityManager mConnectivityManager;
     private WifiManager mWifiManager;
 
+    @SuppressLint("WifiManagerPotentialLeak")
     public WifiHelper(Context context) {
         context = context.getApplicationContext();
         mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -37,17 +37,23 @@ public class WifiHelper {
         return mWifiManager;
     }
 
-    public boolean isConnectedToWifi() {
-        if (Version.isAtLeastLollipop()) {
-            return getLollipopWifiNetwork() != null;
-        } else {
-            NetworkInfo networkInfo = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-            return networkInfo != null && networkInfo.isConnectedOrConnecting();
+    @Nullable
+    public WifiConfiguration getCurrentNetwork() {
+        return getNetworkConfiguration(mWifiManager.getConnectionInfo());
+    }
+
+    @NonNull
+    public String getCurrentNetworkName() {
+        WifiConfiguration configuration = getCurrentNetwork();
+        if (configuration != null) {
+            return configuration.SSID.replace("\"", "");
         }
+
+        return "NO_CONNECTED_NETWORK";
     }
 
     @Nullable
-    public WifiConfiguration getWifiNetwork(@Nullable WifiInfo wifiInfo) {
+    public WifiConfiguration getNetworkConfiguration(@Nullable WifiInfo wifiInfo) {
         if (wifiInfo != null) {
             List<WifiConfiguration> wifiConfigurationList = mWifiManager.getConfiguredNetworks();
             if (wifiConfigurationList != null) {
@@ -62,13 +68,12 @@ public class WifiHelper {
         return null;
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    @Nullable
-    public Network getLollipopWifiNetwork() {
-        if (!Version.isAtLeastLollipop()) {
-            return null;
-        }
+    public boolean isConnected() {
+        return getConnectedNetwork() != null;
+    }
 
+    @Nullable
+    private Network getConnectedNetwork() {
         for (Network network : mConnectivityManager.getAllNetworks()) {
             NetworkInfo networkInfo = mConnectivityManager.getNetworkInfo(network);
             if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
@@ -79,27 +84,12 @@ public class WifiHelper {
         return null;
     }
 
-    @Nullable
-    public WifiConfiguration getCurrentNetwork() {
-        return getWifiNetwork(mWifiManager.getConnectionInfo());
+    public boolean isUnsecured(@Nullable WifiConfiguration wifiConfiguration) {
+        return wifiConfiguration != null &&
+                wifiConfiguration.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.NONE);
     }
 
-    @NonNull
-    public String getCurrentNetworkName() {
-        WifiConfiguration configuration = getCurrentNetwork();
-        if (configuration != null) {
-            return configuration.SSID.replace("\"", "");
-        }
-
-        return "NO_CONNECTED_NETWORK";
-    }
-
-    public boolean isWifiUnsecured(@Nullable WifiConfiguration wifiConfiguration) {
-        return wifiConfiguration != null && wifiConfiguration.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.NONE);
-
-    }
-
-    public void disconnectFromCurrentWifiNetwork() {
+    public void disconnectFromCurrentNetwork() {
         WifiConfiguration configuration = getCurrentNetwork();
         if (configuration != null) {
             mWifiManager.removeNetwork(configuration.networkId);
@@ -108,19 +98,19 @@ public class WifiHelper {
         }
 
         WifiNetwork.setAllAutoConnectedNetworksDisconnected();
-        cleanupSavedWifiNetworks();
+        cleanupSavedNetworks();
     }
 
-    public void blacklistAndDisconnectFromCurrentWifiNetwork() {
+    public void blacklistAndDisconnectFromCurrentNetwork() {
         WifiConfiguration configuration = getCurrentNetwork();
         if (configuration != null && WifiNetwork.isAutoconnectedNetwork(configuration)) {
             Logger.info("Blacklisting " + configuration.SSID);
             WifiNetwork.blacklist(configuration.SSID);
-            disconnectFromCurrentWifiNetwork();
+            disconnectFromCurrentNetwork();
         }
     }
 
-    public void cleanupSavedWifiNetworks() {
+    public void cleanupSavedNetworks() {
         Logger.debug("Cleaning up saved wifi networks");
 
         Realm realm = Realm.getDefaultInstance();
@@ -145,11 +135,11 @@ public class WifiHelper {
     @SuppressWarnings("deprecation")
     @Nullable
     public Network bindToCurrentNetwork() {
-        Network network = getLollipopWifiNetwork();
+        Network network = getConnectedNetwork();
         if (network != null) {
             if (Version.isAtLeastMarshmallow()) {
                 getConnectivityManager().bindProcessToNetwork(network);
-            } else if (Version.isAtLeastLollipop()) {
+            } else {
                 ConnectivityManager.setProcessDefaultNetwork(network);
             }
         }
@@ -161,7 +151,7 @@ public class WifiHelper {
     public void unbindFromCurrentNetwork() {
         if (Version.isAtLeastMarshmallow()) {
             getConnectivityManager().bindProcessToNetwork(null);
-        } else if (Version.isAtLeastLollipop()) {
+        } else {
             try {
                 ConnectivityManager.setProcessDefaultNetwork(null);
             } catch (IllegalStateException ignored) {}

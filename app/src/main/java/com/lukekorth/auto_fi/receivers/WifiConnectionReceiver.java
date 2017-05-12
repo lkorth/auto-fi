@@ -27,21 +27,21 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         WifiHelper wifiHelper = new WifiHelper(context);
-        if (wifiHelper.isConnectedToWifi()) {
+        if (wifiHelper.isConnected()) {
             if (CaptivePortalPage.hasStoredPages()) {
                 context.startService(new Intent(context, CaptivePortalPageUploadService.class));
             }
 
             WifiConfiguration configuration =
-                    wifiHelper.getWifiNetwork((WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO));
-            if (wifiHelper.isWifiUnsecured(configuration)) {
+                    wifiHelper.getNetworkConfiguration((WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO));
+            if (wifiHelper.isUnsecured(configuration)) {
                 setConnectionTimestamp(configuration);
 
                 if (Settings.autoConnectToVpn(context) && !VpnHelper.isVpnEnabled(context)) {
                     displayVpnNotEnabledNotification(context);
 
                     if (WifiNetwork.isAutoconnectedNetwork(wifiHelper.getCurrentNetwork())) {
-                        wifiHelper.disconnectFromCurrentWifiNetwork();
+                        wifiHelper.disconnectFromCurrentNetwork();
                     }
                 } else if (!ConnectivityCheckIntentService.sIsRunning) {
                     Logger.info("Connected to unsecured wifi network " + wifiHelper.getCurrentNetworkName() +
