@@ -8,7 +8,6 @@ import android.net.http.SslError;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.util.ArrayMap;
-import android.util.Log;
 import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
@@ -25,8 +24,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import io.realm.Realm;
-
-import static com.google.android.gms.internal.zzs.TAG;
 
 public class CaptivePortalWebViewClient extends WebViewClient {
 
@@ -150,12 +147,12 @@ public class CaptivePortalWebViewClient extends WebViewClient {
                         Method onReceiveMethod = clazz.getDeclaredMethod("onReceive", Context.class, Intent.class);
                         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
                         onReceiveMethod.invoke(rec, mContext, intent);
-                        Log.v(TAG, "Prompting WebView proxy reload.");
+                        Logger.debug("Prompting WebView proxy reload.");
                     }
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "Exception while setting WebView proxy: " + e);
+            Logger.error("Exception while setting WebView proxy: " + e);
         }
     }
 }
