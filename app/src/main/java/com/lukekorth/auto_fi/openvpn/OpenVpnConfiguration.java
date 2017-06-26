@@ -21,14 +21,19 @@ public class OpenVpnConfiguration {
     private static final String VPN_EXECUTABLE = "openvpn_executable";
 
     public static boolean isSetup(Context context) {
-        return FileUtils.isFileAvailable(context, PUBLIC_KEY_FILE) &&
-                FileUtils.isFileAvailable(context, PRIVATE_KEY_FILE);
+        return FileUtils.isAvailable(context, PUBLIC_KEY_FILE) &&
+                FileUtils.isAvailable(context, PRIVATE_KEY_FILE);
+    }
+
+    public static void clearKeyPair(Context context) {
+        FileUtils.get(context, PUBLIC_KEY_FILE).delete();
+        FileUtils.get(context, PRIVATE_KEY_FILE).delete();
     }
 
     public static void writeKeyPair(Context context, String publicKey, String privateKey)
             throws IOException {
-        FileUtils.writeToDisk(context, publicKey, PUBLIC_KEY_FILE);
-        FileUtils.writeToDisk(context, privateKey, PRIVATE_KEY_FILE);
+        FileUtils.write(context, publicKey, PUBLIC_KEY_FILE);
+        FileUtils.write(context, privateKey, PRIVATE_KEY_FILE);
     }
 
     @Nullable
@@ -61,8 +66,8 @@ public class OpenVpnConfiguration {
         in.read(buffer);
         in.close();
 
-        String publicKey = FileUtils.readFile(context, PUBLIC_KEY_FILE);
-        String privateKey = FileUtils.readFile(context, PRIVATE_KEY_FILE);
+        String publicKey = FileUtils.read(context, PUBLIC_KEY_FILE);
+        String privateKey = FileUtils.read(context, PRIVATE_KEY_FILE);
 
         String configuration = new String(buffer);
         configuration = configuration.replace("<- server here ->", BuildConfig.SERVER_IP);
@@ -71,7 +76,7 @@ public class OpenVpnConfiguration {
         configuration = configuration.replace("<- public key here ->\n", publicKey);
         configuration = configuration.replace("<- private key here ->\n", privateKey);
 
-        FileUtils.writeToDisk(context, configuration, CONFIGURATION_FILE);
+        FileUtils.write(context, configuration, CONFIGURATION_FILE);
     }
 
     @Nullable
@@ -86,7 +91,7 @@ public class OpenVpnConfiguration {
         }
 
         for (String abi: abis) {
-            if (!FileUtils.isFileAvailable(context, VPN_EXECUTABLE + "." + abi)) {
+            if (!FileUtils.isAvailable(context, VPN_EXECUTABLE + "." + abi)) {
                 try {
                     File file = FileUtils.writeAssetFileToDisk(context, VPN_EXECUTABLE + "." + abi, true);
                     if (file != null) {
@@ -96,7 +101,7 @@ public class OpenVpnConfiguration {
                     Logger.error(e);
                 }
             } else {
-                return FileUtils.getFile(context, VPN_EXECUTABLE + "." + abi).getAbsolutePath();
+                return FileUtils.get(context, VPN_EXECUTABLE + "." + abi).getAbsolutePath();
             }
         }
 

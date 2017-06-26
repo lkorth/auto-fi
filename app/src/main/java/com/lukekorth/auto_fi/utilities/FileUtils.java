@@ -12,16 +12,16 @@ import java.io.InputStream;
 
 public class FileUtils {
 
-    public static boolean isFileAvailable(Context context, String filename) {
-        return getFile(context, filename).exists();
+    public static boolean isAvailable(Context context, String filename) {
+        return get(context, filename).exists();
     }
 
-    public static File getFile(Context context, String filename) {
+    public static File get(Context context, String filename) {
         return new File(context.getFilesDir(), filename);
     }
 
-    public static String readFile(Context context, String filename) throws IOException {
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(getFile(context, filename)))) {
+    public static String read(Context context, String filename) throws IOException {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(get(context, filename)))) {
             StringBuilder stringBuilder = new StringBuilder();
             String line = bufferedReader.readLine();
             while (line != null) {
@@ -31,6 +31,12 @@ public class FileUtils {
             }
             return stringBuilder.toString();
         }
+    }
+
+    public static void write(Context context, String fileContents, String filename) throws IOException {
+        FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE);
+        fos.write(fileContents.getBytes());
+        fos.close();
     }
 
     public static File writeAssetFileToDisk(Context context, String assetFile, boolean executable)
@@ -56,11 +62,5 @@ public class FileUtils {
         } else {
             return null;
         }
-    }
-
-    public static void writeToDisk(Context context, String fileContents, String filename) throws IOException {
-        FileOutputStream fos = context.openFileOutput(filename, Context.MODE_PRIVATE);
-        fos.write(fileContents.getBytes());
-        fos.close();
     }
 }

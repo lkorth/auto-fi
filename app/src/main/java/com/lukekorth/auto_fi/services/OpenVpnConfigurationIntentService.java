@@ -23,6 +23,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.util.UUID;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -36,13 +37,17 @@ public class OpenVpnConfigurationIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        if (OpenVpnConfiguration.isSetup(this)) {
+            return;
+        }
+
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
             keyPairGenerator.initialize(2048);
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
             PKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(
-                    new X500Principal("CN=auto-fi client"), keyPair.getPublic());
+                    new X500Principal(generateCommonName()), keyPair.getPublic());
             PKCS10CertificationRequest csr = p10Builder.build(
                     new JcaContentSignerBuilder("SHA256withRSA").build(keyPair.getPrivate()));
 
@@ -92,5 +97,12 @@ public class OpenVpnConfigurationIntentService extends IntentService {
                 connection.disconnect();
             }
         }
+    }
+
+    private String generateCommonName() {
+        String debug = BuildConfig.DEBUG ? "debug" : "release";
+
+        return "CN=auto_fi|" + BuildConfig.VERSION_NAME + "-" + debug + "|" +
+                UUID.randomUUID().toString().replace("-", "").substring(0, 8);
     }
 }
