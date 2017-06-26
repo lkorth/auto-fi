@@ -18,7 +18,7 @@ import static java.net.HttpURLConnection.HTTP_OK;
 
 public class ConnectivityUtils {
 
-    public static final String CONNECTIVITY_CHECK_URL = "http://" + BuildConfig.SERVER_ADDRESS + "/connectivity-check/";
+    public static final String CONNECTIVITY_CHECK_URL = "http://" + BuildConfig.SERVER_IP + "/connectivity-check/";
 
     public enum ConnectivityState {
         CONNECTED,

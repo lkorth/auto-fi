@@ -16,7 +16,7 @@ public class ProxyDetection {
 
 	public static SocketAddress detectProxy() {
 		try {
-			URL url = new URL("http://" + BuildConfig.SERVER_ADDRESS);
+			URL url = new URL("http://" + BuildConfig.SERVER_IP);
 			Proxy proxy = getFirstProxy(url);
 
 			if(proxy == null) {

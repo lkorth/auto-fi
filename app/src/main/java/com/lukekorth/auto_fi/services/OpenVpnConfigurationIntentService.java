@@ -76,7 +76,7 @@ public class OpenVpnConfigurationIntentService extends IntentService {
     private String exchangeCsrForPublicKey(String csr) throws IOException {
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) new URL("http://" + BuildConfig.SERVER_ADDRESS + "/sign-csr/")
+            connection = (HttpURLConnection) new URL("http://" + BuildConfig.SERVER_IP + "/sign-csr/")
                     .openConnection();
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);

@@ -44,7 +44,7 @@ public class CaptivePortalPageUploadService extends IntentService {
     private boolean uploadPage(String page) {
         HttpURLConnection connection = null;
         try {
-            connection = (HttpURLConnection) new URL("http://" + BuildConfig.SERVER_ADDRESS + "/captive-portal-page/")
+            connection = (HttpURLConnection) new URL("http://" + BuildConfig.SERVER_IP + "/captive-portal-page/")
                     .openConnection();
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);

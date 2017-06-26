@@ -36,7 +36,6 @@ android {
 }
 
 android.buildTypes.each { type ->
-    type.buildConfigField 'String', 'SERVER_ADDRESS', '"vpn.ofkorth.net"'
     type.buildConfigField 'String', 'SERVER_IP', '"104.131.125.53"'
 }
 
