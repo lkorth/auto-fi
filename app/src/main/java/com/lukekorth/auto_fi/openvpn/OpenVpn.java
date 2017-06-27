@@ -263,9 +263,7 @@ public class OpenVpn implements Vpn, Callback {
                 continue;
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                mRoutes.addIP(new CIDRIP(ipAddr, netMask), false);
-            }
+            mRoutes.addIP(new CIDRIP(ipAddr, netMask), false);
         }
     }
 
