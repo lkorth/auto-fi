@@ -25,12 +25,15 @@ else
 fi
 
 if [ "x$1" = "x" ]; then
-    ndk-build  -j 8 USE_BREAKPAD=0
+    ndk-build  -j 8
 else
   ndk-build $@
 fi
 
 if [ $? = 0 ]; then
+	rm -rf ../libs/
+	rm -rf ../obj/
+
 	cd libs
 	mkdir -p ../src/main/assets
 	for i in *
@@ -40,7 +43,7 @@ if [ $? = 0 ]; then
 	# Removed compiled openssl libs, will use platform so libs
 	# Reduces size of apk
     #
-	rm -v */libcrypto.so */libssl.so
+	rm -v */libcrypto.so */libssl.so || true
 
   	for arch in *
   	do
