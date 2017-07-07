@@ -32,7 +32,7 @@ public class WifiNetworksActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mAdapter = new WifiNetworksAdapter();
+        mAdapter = new WifiNetworksAdapter(this);
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);

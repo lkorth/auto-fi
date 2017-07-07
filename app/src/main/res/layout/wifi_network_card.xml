@@ -1,70 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto">
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:foreground="?android:attr/selectableItemBackground"
+    card_view:cardCornerRadius="4dp"
+    card_view:cardElevation="5dp"
+    card_view:cardPreventCornerOverlap="false"
+    card_view:cardUseCompatPadding="true">
 
-    <data>
-        <import type="android.view.View"/>
-        <import type="com.lukekorth.auto_fi.utilities.RelativeTime"/>
-        <import type="com.lukekorth.auto_fi.models.WifiNetwork"/>
-        <variable name="network" type="com.lukekorth.auto_fi.models.WifiNetwork" />
-    </data>
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="100dp">
 
-    <android.support.v7.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:foreground="?android:attr/selectableItemBackground"
-        card_view:cardCornerRadius="4dp"
-        card_view:cardElevation="5dp"
-        card_view:cardPreventCornerOverlap="false"
-        card_view:cardUseCompatPadding="true">
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="@dimen/activity_horizontal_margin"/>
 
-        <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="100dp">
+        <TextView
+            android:id="@+id/ssid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_toRightOf="@+id/icon"
+            android:textStyle="bold"/>
 
-            <ImageView
-                android:id="@+id/icon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:layout_margin="@dimen/activity_horizontal_margin"
-                android:src="@{WifiNetwork.isBlacklisted(network.SSID) ? @drawable/ic_wifi_off : @drawable/ic_wifi}"/>
+        <TextView
+            android:id="@+id/blacklisted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginLeft="16dp"
+            android:layout_toRightOf="@+id/icon"
+            android:layout_below="@id/ssid"/>
 
-            <TextView
-                android:id="@+id/ssid"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_toRightOf="@+id/icon"
-                android:textStyle="bold"
-                android:text='@{network.SSID.replace("\"", "")}'/>
+        <TextView
+            android:id="@+id/never_connect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginLeft="16dp"
+            android:layout_toRightOf="@+id/icon"
+            android:layout_below="@id/ssid"
+            android:text="@string/will_never_connect_to"/>
 
-            <TextView
-                android:id="@+id/blacklisted"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:layout_marginLeft="16dp"
-                android:layout_toRightOf="@+id/icon"
-                android:layout_below="@id/ssid"
-                android:visibility="@{WifiNetwork.isBlacklisted(network.SSID) &amp;&amp; !network.shouldNeverUse() ? View.VISIBLE : View.GONE}"
-                android:text="@{@string/blacklisted_until(WifiNetwork.blacklistedUntil(context, network))}"/>
+    </RelativeLayout>
 
-            <TextView
-                android:id="@+id/never_connect"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:layout_marginLeft="16dp"
-                android:layout_toRightOf="@+id/icon"
-                android:layout_below="@id/ssid"
-                android:visibility="@{network.shouldNeverUse() ? View.VISIBLE : View.GONE}"
-                android:text="@string/will_never_connect_to"/>
-
-        </RelativeLayout>
-
-    </android.support.v7.widget.CardView>
-
-</layout>
+</android.support.v7.widget.CardView>
