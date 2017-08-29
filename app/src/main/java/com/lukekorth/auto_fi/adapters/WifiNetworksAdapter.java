@@ -113,10 +113,10 @@ public class WifiNetworksAdapter extends RecyclerView.Adapter<WifiNetworksAdapte
             super(view);
 
             view.setOnCreateContextMenuListener(this);
-            icon = (ImageView) view.findViewById(R.id.icon);
-            ssid = (TextView) view.findViewById(R.id.ssid);
-            blacklisted = (TextView) view.findViewById(R.id.blacklisted);
-            neverConnect = (TextView) view.findViewById(R.id.never_connect);
+            icon = view.findViewById(R.id.icon);
+            ssid = view.findViewById(R.id.ssid);
+            blacklisted = view.findViewById(R.id.blacklisted);
+            neverConnect = view.findViewById(R.id.never_connect);
         }
 
         @Override

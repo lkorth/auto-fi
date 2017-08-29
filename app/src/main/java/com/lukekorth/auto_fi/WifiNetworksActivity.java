@@ -34,7 +34,7 @@ public class WifiNetworksActivity extends AppCompatActivity {
 
         mAdapter = new WifiNetworksAdapter(this);
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mAdapter);

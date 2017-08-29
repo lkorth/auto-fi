@@ -34,7 +34,7 @@ public class LogActivity extends AppCompatActivity implements TextWatcher {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mAutoScroll = true;
-        mScrollView = (ScrollView) findViewById(R.id.scroll_view);
+        mScrollView = findViewById(R.id.scroll_view);
 
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
@@ -43,7 +43,7 @@ public class LogActivity extends AppCompatActivity implements TextWatcher {
         encoder.setPattern("%date{HH:mm:ss} %-5level %msg%n");
         encoder.start();
 
-        TextView textView = (TextView) findViewById(R.id.logs);
+        TextView textView = findViewById(R.id.logs);
         textView.addTextChangedListener(this);
         mAppender = new TextViewAppender(textView);
         mAppender.setContext(loggerContext);
