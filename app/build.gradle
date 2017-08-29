@@ -50,7 +50,7 @@ dependencies {
     compile 'com.github.paolorotolo:appintro:3.4.0'
     compile 'fr.nicolaspomepuy:discreetapprate:2.0.4@aar'
 
-    debugCompile 'com.facebook.stetho:stetho:1.4.1'
+    debugCompile 'com.facebook.stetho:stetho:1.5.0'
     debugCompile 'com.uphyca:stetho_realm:2.0.0'
 
     androidTestCompile 'junit:junit:4.12'
