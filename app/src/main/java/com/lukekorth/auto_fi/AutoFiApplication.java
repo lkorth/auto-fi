@@ -1,13 +1,18 @@
 package com.lukekorth.auto_fi;
 
 import android.app.Application;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.preference.PreferenceManager;
 
 import com.lukekorth.auto_fi.models.DataMigrations;
 import com.lukekorth.auto_fi.openvpn.OpenVpnConfiguration;
 import com.lukekorth.auto_fi.services.OpenVpnConfigurationIntentService;
+import com.lukekorth.auto_fi.services.VpnService;
 import com.lukekorth.auto_fi.utilities.DebugUtils;
 import com.lukekorth.mailable_log.MailableLog;
 
@@ -41,6 +46,7 @@ public class AutoFiApplication extends Application {
         DebugUtils.setStrictMode();
 
         handleUpdate();
+        createNotificationChannel();
     }
 
     private void handleUpdate() {
@@ -53,5 +59,19 @@ public class AutoFiApplication extends Application {
             OpenVpnConfiguration.clearKeyPair(this);
             startService(new Intent(this, OpenVpnConfigurationIntentService.class));
         }
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return;
+        }
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.createNotificationChannel(new NotificationChannel(
+                VpnService.VPN_STATUS_NOTIFICATION_CHANNEL,
+                getString(R.string.vpn_status_notification_channel_name),
+                NotificationManager.IMPORTANCE_MIN));
     }
 }

@@ -67,4 +67,5 @@
     <string name="unknown_state">Unknown state</string>
     <string name="vpn_permission_revoked">VPN Permission Revoked</string>
     <string name="vpn_permission_revoked_summary">VPN permission revoked, touch to re-enable</string>
+    <string name="vpn_status_notification_channel_name">VPN Status</string>
 </resources>

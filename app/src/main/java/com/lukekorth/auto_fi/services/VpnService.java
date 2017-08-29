@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.support.annotation.MainThread;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -24,6 +25,7 @@ import io.realm.Realm;
 public class VpnService extends android.net.VpnService implements VpnServiceInterface {
 
     public static final String DISCONNECT_VPN_INTENT_ACTION = "com.lukekorth.auto_fi.DISCONNECT_VPN";
+    public static final String VPN_STATUS_NOTIFICATION_CHANNEL = "vpn_status_notification_channel";
 
     private static final int NOTIFICATION_ID = 1;
 
@@ -113,6 +115,10 @@ public class VpnService extends android.net.VpnService implements VpnServiceInte
                 .setSmallIcon(R.drawable.ic_vpn_key)
                 .addAction(android.R.drawable.ic_menu_close_clear_cancel,
                         getString(R.string.cancel_connection), disconnectPendingIntent);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setChannelId(VPN_STATUS_NOTIFICATION_CHANNEL);
+        }
 
         startForeground(NOTIFICATION_ID, builder.build());
     }
