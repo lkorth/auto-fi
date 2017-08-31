@@ -3,29 +3,24 @@ package com.lukekorth.auto_fi;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ScrollView;
-import android.widget.TextView;
+import android.widget.ListView;
 
-import com.lukekorth.auto_fi.utilities.TextViewAppender;
+import com.lukekorth.auto_fi.adapters.LogAdapter;
+import com.lukekorth.auto_fi.utilities.ListViewAppender;
 
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 
-public class LogActivity extends AppCompatActivity implements TextWatcher {
+public class LogActivity extends AppCompatActivity {
 
-    private boolean mAutoScroll;
-    private ScrollView mScrollView;
+    private ListView mListView;
     private Logger mLogger;
-    private TextViewAppender mAppender;
+    private ListViewAppender mAppender;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -33,36 +28,17 @@ public class LogActivity extends AppCompatActivity implements TextWatcher {
         setContentView(R.layout.activity_log);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mAutoScroll = true;
-        mScrollView = findViewById(R.id.scroll_view);
+        LogAdapter arrayAdapter = new LogAdapter(this);
 
-        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        mListView = findViewById(R.id.logs);
+        mListView.setAdapter(arrayAdapter);
 
-        PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-        encoder.setContext(loggerContext);
-        encoder.setPattern("%date{HH:mm:ss} %-5level %msg%n");
-        encoder.start();
-
-        TextView textView = findViewById(R.id.logs);
-        textView.addTextChangedListener(this);
-        mAppender = new TextViewAppender(textView);
-        mAppender.setContext(loggerContext);
-        mAppender.setEncoder(encoder);
+        mAppender = new ListViewAppender(arrayAdapter);
+        mAppender.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
         mAppender.start();
 
         mLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         mLogger.addAppender(mAppender);
-    }
-
-    @Override
-    public void afterTextChanged(Editable editable) {
-        if (mAutoScroll) {
-            mScrollView.post(new Runnable() {
-                public void run() {
-                    mScrollView.fullScroll(View.FOCUS_DOWN);
-                }
-            });
-        }
     }
 
     @Override
@@ -83,7 +59,13 @@ public class LogActivity extends AppCompatActivity implements TextWatcher {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.auto_scroll) {
             item.setChecked(!item.isChecked());
-            mAutoScroll = item.isChecked();
+
+            if (item.isChecked()) {
+                mListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+            } else {
+                mListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
+            }
+
             return true;
         } else if (item.getItemId() == android.R.id.home) {
             finish();
@@ -92,10 +74,4 @@ public class LogActivity extends AppCompatActivity implements TextWatcher {
 
         return super.onOptionsItemSelected(item);
     }
-
-    @Override
-    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-
-    @Override
-    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 }

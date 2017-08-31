@@ -3,4 +3,6 @@
     <color name="colorPrimary">#03A9F4</color>
     <color name="colorPrimaryDark">#0288D1</color>
     <color name="colorAccent">#A5C63B</color>
+
+    <color name="alternating_list_background">#330288d1</color>
 </resources>
