@@ -8,13 +8,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 
-import com.lukekorth.auto_fi.BuildConfig;
 import com.lukekorth.auto_fi.R;
 import com.lukekorth.auto_fi.models.DataUsage;
 import com.lukekorth.auto_fi.network.ProxyDetection;
 import com.lukekorth.auto_fi.utilities.Logger;
-
-import junit.framework.Assert;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -313,7 +310,6 @@ class OpenVpnManagementThread implements Runnable {
                 String[] routeparts = extra.split(" ");
 
                 if (routeparts.length == 5) {
-                    if (BuildConfig.DEBUG) Assert.assertEquals("dev", routeparts[3]);
                     mOpenVpn.addRoute(routeparts[0], routeparts[1], routeparts[2], routeparts[4]);
                 } else if (routeparts.length >= 3) {
                     mOpenVpn.addRoute(routeparts[0], routeparts[1], routeparts[2], null);
