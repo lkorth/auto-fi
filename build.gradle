@@ -13,9 +13,7 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
-        maven {
-            url 'https://maven.google.com'
-        }
+        google()
         maven {
             url 'https://github.com/uPhyca/stetho-realm/raw/master/maven-repo'
         }

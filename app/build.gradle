@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 28
     buildToolsVersion "28.0.3"
 
     defaultConfig {
         applicationId "com.lukekorth.auto_fi"
         minSdkVersion 21
-        targetSdkVersion 26
+        targetSdkVersion 28
         versionCode 5
         versionName "0.4.0"
 
@@ -34,14 +34,16 @@ android.buildTypes.each { type ->
 }
 
 dependencies {
-    implementation 'com.android.support:appcompat-v7:26.0.1'
-    implementation 'com.android.support:cardview-v7:26.0.1'
-    implementation 'com.android.support:recyclerview-v7:26.0.1'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support:cardview-v7:28.0.0'
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
 
     implementation 'com.google.firebase:firebase-core:11.2.0'
     implementation 'com.google.firebase:firebase-crash:11.2.0'
 
-    implementation 'com.lukekorth:mailable_log:0.1.6'
+    implementation('com.lukekorth:mailable_log:0.1.6', {
+        exclude group: 'com.android.support', module: 'support-v4'
+    })
     implementation 'com.madgag.spongycastle:pkix:1.54.0.0'
     implementation 'com.github.paolorotolo:appintro:3.4.0'
     implementation 'fr.nicolaspomepuy:discreetapprate:2.0.4@aar'
