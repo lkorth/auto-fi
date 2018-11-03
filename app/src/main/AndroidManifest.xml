@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.lukekorth.auto_fi" >
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -16,7 +17,8 @@
         android:name=".AutoFiApplication"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="true"
-        android:fullBackupContent="@xml/backup_scheme">
+        android:fullBackupContent="@xml/backup_scheme"
+        tools:ignore="GoogleAppIndexingWarning">
 
         <activity
             android:name=".SplashActivity"
