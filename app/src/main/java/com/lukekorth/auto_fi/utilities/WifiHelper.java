@@ -132,29 +132,17 @@ public class WifiHelper {
         realm.close();
     }
 
-    @SuppressWarnings("deprecation")
     @Nullable
     public Network bindToCurrentNetwork() {
         Network network = getConnectedNetwork();
         if (network != null) {
-            if (Version.isAtLeastMarshmallow()) {
-                getConnectivityManager().bindProcessToNetwork(network);
-            } else {
-                ConnectivityManager.setProcessDefaultNetwork(network);
-            }
+            getConnectivityManager().bindProcessToNetwork(network);
         }
 
         return network;
     }
 
-    @SuppressWarnings("deprecation")
     public void unbindFromCurrentNetwork() {
-        if (Version.isAtLeastMarshmallow()) {
-            getConnectivityManager().bindProcessToNetwork(null);
-        } else {
-            try {
-                ConnectivityManager.setProcessDefaultNetwork(null);
-            } catch (IllegalStateException ignored) {}
-        }
+        getConnectivityManager().bindProcessToNetwork(null);
     }
 }
