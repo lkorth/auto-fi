@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
 import com.lukekorth.auto_fi.MainActivity;
@@ -26,6 +25,10 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        if (!"android.net.wifi.STATE_CHANGE".equals(intent.getAction())) {
+            return;
+        }
+
         WifiHelper wifiHelper = new WifiHelper(context);
         if (wifiHelper.isConnected()) {
             if (CaptivePortalPage.hasStoredPages()) {
@@ -33,7 +36,7 @@ public class WifiConnectionReceiver extends BroadcastReceiver {
             }
 
             WifiConfiguration configuration =
-                    wifiHelper.getNetworkConfiguration((WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO));
+                    wifiHelper.getNetworkConfiguration(intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO));
             if (wifiHelper.isUnsecured(configuration)) {
                 setConnectionTimestamp(configuration);
 

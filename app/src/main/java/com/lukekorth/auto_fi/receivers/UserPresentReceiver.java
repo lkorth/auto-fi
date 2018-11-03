@@ -14,6 +14,10 @@ public class UserPresentReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        if (!"android.intent.action.USER_PRESENT".equals(intent.getAction())) {
+            return;
+        }
+
         if (!Settings.autoConnectToWifi(context)) {
             return;
         }

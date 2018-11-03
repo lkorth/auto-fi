@@ -25,6 +25,10 @@ public class WifiScanReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        if (!"android.net.wifi.SCAN_RESULTS".equals(intent.getAction())) {
+            return;
+        }
+
         if (!Settings.autoConnectToWifi(context)) {
             return;
         }
