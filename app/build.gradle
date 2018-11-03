@@ -54,7 +54,7 @@ dependencies {
     implementation 'fr.nicolaspomepuy:discreetapprate:2.0.4@aar'
 
     debugImplementation 'com.facebook.stetho:stetho:1.5.0'
-    debugImplementation 'com.uphyca:stetho_realm:2.0.0'
+    debugImplementation 'com.uphyca:stetho_realm:2.1.0'
 
     androidTestImplementation 'junit:junit:4.12'
     androidTestImplementation('com.android.support.test:runner:0.5', {

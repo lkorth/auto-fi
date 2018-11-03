@@ -59,7 +59,8 @@ public class WifiNetworksAdapter extends RecyclerView.Adapter<WifiNetworksAdapte
                 .equalTo("connectedToVpn", true)
                 .or()
                 .greaterThan("blacklistedTimestamp", 0)
-                .findAllSorted(sortingField, sortOrder);
+                .sort(sortingField, sortOrder)
+                .findAll();
 
         mWifiNetworks.addChangeListener(this);
         notifyDataSetChanged();
