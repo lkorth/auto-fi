@@ -12,7 +12,7 @@ android:
     - platform-tools
     - extra-google-m2repository
 before_script:
-  - echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a
+  - echo no | android create avd --force -n test -t android-24 --abi armeabi-v7a
   - emulator -avd test -skin WXGA720 -no-audio -no-window &
   - android-wait-for-emulator
   - sleep 60
